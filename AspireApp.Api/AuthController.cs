@@ -1,9 +1,10 @@
-using AspireApp.Core.Mappers;
-using AspireApp.Entidad;
-using Microsoft.AspNetCore.Mvc;
+using AspireApp.Api.Domain.Auth;
 using AspireApp.Api.Domain.Auth.User;
 using AspireApp.Application.Contracts.Login;
 using AspireApp.Application.Contracts.RegisterUser;
+using AspireApp.Core.Mappers;
+using AspireApp.Entidad;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AspireApp.Api;
 
@@ -20,7 +21,7 @@ public class AuthController(IRegisterUserService registerUserService, ILoginUser
     {
         var result = await _loginUserService.Login(model, cancellationToken);
 
-        return Ok(new { Token = result.Value });
+        return Ok(new AuthenticationResult() { Token = result.Value });
     }
 
     [HttpPost("register")]

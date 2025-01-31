@@ -1,15 +1,9 @@
-using AspireApp.Core.Mappers;
-using AspireApp.DataAccess.Contracts;
 using AspireApp.DataAccess.Implementations;
 using AspireApp.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using AspireApp.Application.Contracts.Login;
-using AspireApp.Application.Contracts.RegisterUser;
-using AspireApp.Application.Implementations.Login;
-using AspireApp.Application.Implementations.RegisterUser;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,15 +29,9 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddScoped<IRegisterUserServiceDependencies, RegisterUserServiceDependencies>();
-builder.Services.AddScoped<IRegisterUserService, RegisterUserService>();
-
-builder.Services.AddScoped<ILoginServiceDependencies, LoginServiceDependencies>();
-builder.Services.AddScoped<ILoginUserService, LoginService>();
-
-builder.Services.AddSingleton<UsuarioMapper>();
-
-builder.Services.AddScoped<IUsuarioDA, UsuarioDA>();
+builder.Services.RegisterMappers();
+builder.Services.RegisterDataAccess();
+builder.Services.RegisterAppServices();
 
 builder.Services.AddAuthorization();
 

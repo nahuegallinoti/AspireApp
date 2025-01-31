@@ -14,17 +14,17 @@ public static class Result
     /// <summary>
     /// chains an object into the Result Structure
     /// </summary>
-    public static Result<T> Success<T>(this T value) => new Result<T>(value, HttpStatusCode.OK);
+    public static Result<T> Success<T>(this T value) => new(value, HttpStatusCode.OK);
 
     /// <summary>
     /// chains an object into the Result Structure
     /// </summary>
-    public static Result<T> Success<T>(this T value, HttpStatusCode httpStatusCode) => new Result<T>(value, httpStatusCode);
+    public static Result<T> Success<T>(this T value, HttpStatusCode httpStatusCode) => new(value, httpStatusCode);
 
     /// <summary>
     /// chains an Result.Unit into the Result Structure
     /// </summary>
-    public static Result<Unit> Success() => new Result<Unit>(Unit, HttpStatusCode.OK);
+    public static Result<Unit> Success() => new(Unit, HttpStatusCode.OK);
 
     /// <summary>
     /// Converts a synchronous Result structure into async
@@ -39,31 +39,31 @@ public static class Result
     /// <summary>
     /// Converts the type into the error flow with  HttpStatusCode.BadRequest
     /// </summary>
-    public static Result<T> Failure<T>(ImmutableArray<string> errors, HttpStatusCode httpStatusCode) => new Result<T>(errors, httpStatusCode);
+    public static Result<T> Failure<T>(ImmutableArray<string> errors, HttpStatusCode httpStatusCode) => new(errors, httpStatusCode);
 
     /// <summary>
     /// Converts the type into the error flow with  HttpStatusCode.BadRequest
     /// </summary>
-    public static Result<T> Failure<T>(string error) => new Result<T>([error], HttpStatusCode.BadRequest);
+    public static Result<T> Failure<T>(string error) => new([error], HttpStatusCode.BadRequest);
 
     /// <summary>
     /// Converts the type into the error flow with  HttpStatusCode.BadRequest
     /// </summary>
-    public static Result<Unit> Failure(ImmutableArray<string> errors) => new Result<Unit>(errors, HttpStatusCode.BadRequest);
+    public static Result<Unit> Failure(ImmutableArray<string> errors) => new(errors, HttpStatusCode.BadRequest);
 
     /// <summary>
     /// Converts the type into the error flow with  HttpStatusCode.BadRequest
     /// </summary>
-    public static Result<Unit> Failure(ImmutableArray<string> errors, HttpStatusCode httpStatusCode) => new Result<Unit>(errors, httpStatusCode);
+    public static Result<Unit> Failure(ImmutableArray<string> errors, HttpStatusCode httpStatusCode) => new(errors, httpStatusCode);
 
     /// <summary>
     /// Converts the type into the error flow with  HttpStatusCode.BadRequest
     /// </summary>
     public static Result<Unit> Failure(IEnumerable<string> errors) =>
-        new Result<Unit>(ImmutableArray.Create(errors.ToArray()), HttpStatusCode.BadRequest);
+        new(ImmutableArray.Create(errors.ToArray()), HttpStatusCode.BadRequest);
 
     /// <summary>
     /// Converts the type into the error flow with  HttpStatusCode.BadRequest
     /// </summary>
-    public static Result<Unit> Failure(string error) => new Result<Unit>(ImmutableArray.Create(error), HttpStatusCode.BadRequest);
+    public static Result<Unit> Failure(string error) => new([error], HttpStatusCode.BadRequest);
 }

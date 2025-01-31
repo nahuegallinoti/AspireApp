@@ -15,16 +15,6 @@
 <body>
     <Routes />
     <script src="_framework/blazor.web.js"></script>
-
-    <script>
-        function copiarAlPortapapeles(texto) {
-            navigator.clipboard.writeText(texto).then(function() {
-                console.log('Token copiado al portapapeles');
-            }, function(err) {
-                console.error('Error al copiar el token: ', err);
-            });
-        }
-    </script>
 </body>
 
 </html>

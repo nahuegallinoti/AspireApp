@@ -39,8 +39,7 @@ public class RegisterUserService(IRegisterUserServiceDependencies dependencies) 
             : userAccount;
     }
 
-    private Task<Result<Usuario>> VerifyUserDoesntExist(Usuario userAccount) =>
-        _registerUserDependencies.VerifyUserDoesNotExist(userAccount);
+    private Task<Result<Usuario>> VerifyUserDoesntExist(Usuario userAccount) => _registerUserDependencies.VerifyUserDoesNotExist(userAccount);
 
     private Task<Result<Usuario>> CreatePasswordHash(Usuario usuario)
     {
@@ -52,7 +51,5 @@ public class RegisterUserService(IRegisterUserServiceDependencies dependencies) 
         return Task.FromResult(usuario.Success());
     }
 
-    private Task<Result<string>> AddUserToDatabase(Usuario userAccount) =>
-        _registerUserDependencies.AddUser(userAccount)
-                     .Map(_ => userAccount.Email);
+    private Task<Result<bool>> AddUserToDatabase(Usuario userAccount) => _registerUserDependencies.AddUser(userAccount);
 }

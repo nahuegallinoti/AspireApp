@@ -13,7 +13,7 @@ public struct Result<T>
 
     public readonly ImmutableArray<string> Errors;
     public readonly HttpStatusCode HttpStatusCode;
-    public bool Success => Errors.Length == 0;
+    public bool Success => Errors.Length is 0;
 
     public Result(T value, HttpStatusCode statusCode)
     {
@@ -24,7 +24,7 @@ public struct Result<T>
 
     public Result(ImmutableArray<string> errors, HttpStatusCode statusCode)
     {
-        if (errors.Length == 0)
+        if (errors.Length is 0)
         {
             throw new InvalidOperationException("You should specify at least one error");
         }

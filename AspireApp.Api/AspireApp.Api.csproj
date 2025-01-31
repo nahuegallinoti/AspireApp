@@ -14,8 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="..\AspireApp.Api.Modelos\AspireApp.Api.Domain.csproj" />
     <ProjectReference Include="..\AspireApp.Api.Services.Contracts\AspireApp.Application.Contracts.csproj" />
-    <ProjectReference Include="..\AspireApp.Api.Services.Implementations\AspireApp.Application.Implementations.csproj" />
-    <ProjectReference Include="..\AspireApp.DataAccess\AspireApp.DataAccess.Implementations.csproj" />
     <ProjectReference Include="..\AspireApp.ServiceDefaults\AspireApp.ServiceDefaults.csproj" />
   </ItemGroup>
 

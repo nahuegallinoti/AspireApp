@@ -1,10 +1,16 @@
+using AspireApp.Application.Contracts.Login;
+using AspireApp.Application.Contracts.RegisterUser;
+using AspireApp.Application.Implementations.Login;
+using AspireApp.Application.Implementations.RegisterUser;
+using AspireApp.Core.Mappers;
+using AspireApp.DataAccess.Contracts;
+using AspireApp.DataAccess.Implementations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.ServiceDiscovery;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -41,6 +47,33 @@ public static class Extensions
 
         return builder;
     }
+
+    public static IServiceCollection RegisterAppServices(this IServiceCollection services)
+    {
+        services.AddScoped<IRegisterUserService, RegisterUserService>();
+        services.AddScoped<IRegisterUserServiceDependencies, RegisterUserServiceDependencies>();
+
+        services.AddScoped<ILoginUserService, LoginService>();
+        services.AddScoped<ILoginServiceDependencies, LoginServiceDependencies>();
+
+        return services;
+    }
+
+    public static IServiceCollection RegisterDataAccess(this IServiceCollection services)
+    {
+        services.AddScoped<IUsuarioDA, UsuarioDA>();
+
+        return services;
+    }
+
+
+    public static IServiceCollection RegisterMappers(this IServiceCollection services)
+    {
+        services.AddSingleton<UsuarioMapper>();
+
+        return services;
+    }
+
 
     public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
