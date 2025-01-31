@@ -1,0 +1,59 @@
+@page "/login"
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using AspireApp.Api.Domain.Auth
+@using AspireApp.Api.Domain.Auth.User
+@using AspireApp.Web.ApiClients
+@using AspireApp.Web.Handlers
+
+@inject NavigationManager Navigation
+@inject LoginApiClient LoginApi
+@inject JWTTokenProvider TokenProvider
+
+<h3>Iniciar Sesión</h3>
+
+<EditForm Model="@Model" OnValidSubmit="HandleLogin" FormName="loginForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Usuario:</label>
+        <InputText @bind-Value="Model.Email" />
+    </div>
+    <div>
+        <label>Contraseña:</label>
+        <InputText @bind-Value="Model.Password" type="password" />
+    </div>
+    <button type="submit">Iniciar Sesión</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p style="color:red">@errorMessage</p>
+}
+
+@code {
+    [SupplyParameterFromForm]
+    private UserLogin Model { get; set; } = new();
+
+    protected override void OnInitialized() => Model ??= new();
+
+    private string errorMessage = String.Empty;
+
+    private async Task HandleLogin()
+    {
+        errorMessage = String.Empty;
+
+        try
+        {
+            AuthenticationResult result = await LoginApi.LoginAsync(Model);
+
+            TokenProvider.SetToken(result.Token);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al iniciar sesión: {ex.Message}";
+        }
+    }
+
+}

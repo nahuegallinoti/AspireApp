@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AspireApp.Api.Modelos\AspireApp.Api.Domain.csproj" />
+    <ProjectReference Include="..\AspireApp.Api.Services.Contracts\AspireApp.Application.Contracts.csproj" />
+    <ProjectReference Include="..\AspireApp.Api.Services.Implementations\AspireApp.Application.Implementations.csproj" />
+    <ProjectReference Include="..\AspireApp.DataAccess\AspireApp.DataAccess.Implementations.csproj" />
+    <ProjectReference Include="..\AspireApp.ServiceDefaults\AspireApp.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>
