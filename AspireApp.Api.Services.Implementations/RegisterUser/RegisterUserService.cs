@@ -41,14 +41,23 @@ public class RegisterUserService(IRegisterUserServiceDependencies dependencies) 
 
     private Task<Result<Usuario>> VerifyUserDoesntExist(Usuario userAccount) => _registerUserDependencies.VerifyUserDoesNotExist(userAccount);
 
-    private Task<Result<Usuario>> CreatePasswordHash(Usuario usuario)
+    private Result<Usuario> CreatePasswordHash(Usuario usuario)
     {
-        (byte[] passwordHash, byte[] passwordSalt) = _registerUserDependencies.CreatePasswordHash(usuario.Password);
+        try
+        {
+            (byte[] passwordHash, byte[] passwordSalt) = _registerUserDependencies.CreatePasswordHash(usuario.Password);
 
-        usuario.PasswordHash = passwordHash;
-        usuario.PasswordSalt = passwordSalt;
+            usuario.PasswordHash = passwordHash;
+            usuario.PasswordSalt = passwordSalt;
 
-        return Task.FromResult(usuario.Success());
+            return usuario;
+        }
+
+        catch (Exception ex)
+        {
+            return Result.Failure<Usuario>(ex.Message);
+        }
+        
     }
 
     private Task<Result<bool>> AddUserToDatabase(Usuario userAccount) => _registerUserDependencies.AddUser(userAccount);

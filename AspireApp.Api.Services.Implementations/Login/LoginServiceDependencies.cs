@@ -1,4 +1,5 @@
-﻿using AspireApp.Api.Domain.Auth.User;
+﻿using AspireApp.Api.Domain.Auth;
+using AspireApp.Api.Domain.Auth.User;
 using AspireApp.Application.Contracts.Login;
 using AspireApp.Core.ROP;
 using AspireApp.DataAccess.Contracts;
@@ -26,27 +27,37 @@ public class LoginServiceDependencies(IConfiguration configuration, IUsuarioDA u
         return userAccount;
     }
 
-    public Task<Result<string?>> CreateToken(UserLogin userAccount)
+    public Result<AuthenticationResult> CreateToken(UserLogin userAccount)
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
-
-        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key"));
-
-        var tokenDescriptor = new SecurityTokenDescriptor
+        try
         {
-            Subject = new ClaimsIdentity(new Claim[]
-            {
-                new Claim(ClaimTypes.Name, userAccount.Email)
-            }),
-            Expires = DateTime.UtcNow.AddHours(1),
-            Issuer = _configuration["Jwt:Issuer"],
-            Audience = _configuration["Jwt:Audience"],
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        var tokenString = tokenHandler.WriteToken(token);
+            var tokenHandler = new JwtSecurityTokenHandler();
 
-        return Task.FromResult(tokenString.Success<string?>());
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key"));
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                new Claim(ClaimTypes.Name, userAccount.Email)
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"],
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            AuthenticationResult authenticationResult = new(tokenString);
+
+            return authenticationResult;
+        }
+
+        catch (Exception ex)
+        {
+            return Result.Failure<AuthenticationResult>(ex.Message);
+        }
     }
 
     private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)

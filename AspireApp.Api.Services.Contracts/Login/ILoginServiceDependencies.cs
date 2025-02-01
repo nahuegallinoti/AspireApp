@@ -7,5 +7,5 @@ namespace AspireApp.Application.Contracts.Login;
 public interface ILoginServiceDependencies : IBaseService
 {
     Task<Result<UserLogin>> VerifyUserPassword(UserLogin userAccount);
-    Task<Result<AuthenticationResult>> CreateToken(UserLogin userAccount);
+    Result<AuthenticationResult> CreateToken(UserLogin userAccount);
 }

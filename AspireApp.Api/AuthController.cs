@@ -1,4 +1,3 @@
-using AspireApp.Api.Domain.Auth;
 using AspireApp.Api.Domain.Auth.User;
 using AspireApp.Application.Contracts.Login;
 using AspireApp.Application.Contracts.RegisterUser;
@@ -21,7 +20,12 @@ public class AuthController(IRegisterUserService registerUserService, ILoginUser
     {
         var result = await _loginUserService.Login(model, cancellationToken);
 
-        return Ok(new AuthenticationResult() { Token = result.Value ?? string.Empty});
+        return result.Success
+                    ? Ok(result.Value)
+                    : Problem(
+                        detail: string.Join("; ", result.Errors),
+                        statusCode: (int)result.HttpStatusCode
+                    );
     }
 
     [HttpPost("register")]
@@ -29,11 +33,14 @@ public class AuthController(IRegisterUserService registerUserService, ILoginUser
     {
         Usuario usuario = _usuarioMapper.ToEntity(model);
 
-        await _registerUserService.AddUser(usuario, cancellationToken);
+        var result = await _registerUserService.AddUser(usuario, cancellationToken);
 
-        UserRegister modelResult = _usuarioMapper.ToModel(usuario);
-
-        return Ok(modelResult);
+        return result.Success
+            ? CreatedAtAction(nameof(Register), new { id = usuario.Id }, _usuarioMapper.ToModel(usuario))
+            : Problem(
+                detail: string.Join("; ", result.Errors),
+                statusCode: (int)result.HttpStatusCode
+            );
     }
 
 }

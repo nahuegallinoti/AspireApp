@@ -46,9 +46,16 @@
 
         try
         {
-            AuthenticationResult result = await LoginApi.LoginAsync(Model);
+            var result = await LoginApi.LoginAsync(Model);
 
-            TokenProvider.SetToken(result.Token);
+            if (result.Success)
+            {
+                TokenProvider.SetToken(result.Value.Token);
+            }
+            else
+            {
+                errorMessage = string.Join(", ", result.Errors);
+            }
         }
         catch (Exception ex)
         {

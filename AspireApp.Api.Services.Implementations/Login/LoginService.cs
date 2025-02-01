@@ -35,7 +35,7 @@ public class LoginService(ILoginServiceDependencies dependencies) : ILoginUserSe
     private Task<Result<UserLogin>> VerifyUserPassword(UserLogin userAccount) =>
         _loginDependencies.VerifyUserPassword(userAccount);
 
-    private Task<Result<AuthenticationResult>> CreateToken(UserLogin userAccount) =>
+    private Result<AuthenticationResult> CreateToken(UserLogin userAccount) =>
         _loginDependencies.CreateToken(userAccount);
 
 }

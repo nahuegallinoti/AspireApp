@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Json;
+﻿using AspireApp.Core.ROP;
+using System.Collections.Immutable;
+using System.Net.Http.Json;
 
 namespace AspireApp.Web.ApiClients;
 
@@ -6,31 +8,59 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
 {
     protected readonly HttpClient _httpClient = httpClientFactory.CreateClient(clientName);
 
-    protected Task<T?> PostAsync<T, U>(string url, U data, CancellationToken cancellationToken = default) =>
-            SendRequestAsync<T>(HttpMethod.Post, url, JsonContent.Create(data), cancellationToken);
-
-    protected Task<T?> PostAsync<T>(string url, T data, CancellationToken cancellationToken = default) =>
+    protected Task<Result<T>> PostAsync<T, U>(string url, U data, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Post, url, JsonContent.Create(data), cancellationToken);
 
-    protected Task<T?> GetAsync<T>(string url, CancellationToken cancellationToken = default) =>
+    protected Task<Result<T>> GetAsync<T>(string url, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Get, url, cancellationToken: cancellationToken);
 
-    protected Task<T?> PutAsync<T>(string url, T data, CancellationToken cancellationToken = default) =>
+    protected Task<Result<T>> PutAsync<T>(string url, T data, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Put, url, JsonContent.Create(data), cancellationToken);
 
-    protected Task<T?> DeleteAsync<T>(string url, CancellationToken cancellationToken = default) =>
+    protected Task<Result<T>> DeleteAsync<T>(string url, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Delete, url, cancellationToken: cancellationToken);
 
-    private async Task<T?> SendRequestAsync<T>(HttpMethod method, string url, HttpContent? content = null, CancellationToken cancellationToken = default)
+    private async Task<Result<T>> SendRequestAsync<T>(HttpMethod method, string url, HttpContent? content = null, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(method, url) { Content = content };
-        var response = await _httpClient.SendAsync(request, cancellationToken);
+        try
+        {
+            var request = new HttpRequestMessage(method, url) { Content = content };
+            var response = await _httpClient.SendAsync(request, cancellationToken);
 
-        if (!response.IsSuccessStatusCode)
-            throw new HttpRequestException($"Request failed with status code: {response.StatusCode}");
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = await ExtractErrorMessage(response);
+                return Result.Failure<T>(errorMessage, response.StatusCode);
+            }
 
-        return response.IsSuccessStatusCode
-            ? await response.Content.ReadFromJsonAsync<T>(cancellationToken)
-            : default;
+            var result = await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
+
+            return result is not null
+                ? Result.Success(result, response.StatusCode)
+                : Result.Failure<T>(["Respuesta vacía o nula del servidor."], response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<T>([$"Error inesperado: {ex.Message}"]);
+        }
+    }
+
+    private static async Task<ImmutableArray<string>> ExtractErrorMessage(HttpResponseMessage response)
+    {
+        try
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(content))
+                return [$"Error HTTP {response.StatusCode}"];
+
+            // Intentar parsear el error como JSON si es posible
+            var errorObject = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(content);
+            return errorObject?.Values.ToImmutableArray() ?? [content];
+        }
+
+        catch
+        {
+            return ["Ocurrió un error desconocido al procesar la respuesta del servidor."];
+        }
     }
 }
