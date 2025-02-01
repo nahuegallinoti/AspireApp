@@ -1,11 +1,14 @@
-﻿namespace AspireApp.DataAccess.Contracts.Base;
+﻿using AspireApp.Entities.Base;
 
-public interface IBaseDA<T> where T : class 
+namespace AspireApp.DataAccess.Contracts.Base;
+
+public interface IBaseDA<T, TID> where T : BaseEntity<TID>
+                                 where TID: struct
 {
     Task AddAsync(T entity);
     void Delete(T entity);
     Task<IEnumerable<T>> GetAllAsync();
-    //Task<T?> GetByIdAsync(TID id);
+    Task<T?> GetByIdAsync(TID id);
     void Update(T entity);
     Task SaveChangesAsync();
 }

@@ -1,6 +1,6 @@
 ﻿namespace AspireApp.Entities.Base;
 
-public class BaseEntity
+public class BaseEntity<T> where T : struct
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public T Id { get; set; }
 }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspireApp.DataAccess.Implementations;
 
-public class UsuarioDA(AppDbContext context) : BaseDA<Usuario>(context), IUsuarioDA
+public class UsuarioDA(AppDbContext context) : BaseDA<Usuario, Guid>(context), IUsuarioDA
 {
     private readonly AppDbContext _context = context;
 

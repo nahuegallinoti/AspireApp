@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspireApp.DataAccess.Implementations.Base;
 
-public class BaseDA<T> : IBaseDA<T> where T : BaseEntity
+public class BaseDA<T, TID> : IBaseDA<T, TID> where T : BaseEntity<TID> 
+                                              where TID: struct
 {
     private readonly AppDbContext _context;
     private readonly DbSet<T> _dbSet;
@@ -15,7 +16,7 @@ public class BaseDA<T> : IBaseDA<T> where T : BaseEntity
         _dbSet = _context.Set<T>();
     }
 
-    //public async Task<T?> GetByIdAsync(TID id) => await _dbSet.FindAsync(id);
+    public async Task<T?> GetByIdAsync(TID id) => await _dbSet.FindAsync(id);
 
     public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
 

@@ -3,7 +3,7 @@ using AspireApp.Entities;
 
 namespace AspireApp.DataAccess.Contracts;
 
-public interface IProductDA : IBaseDA<Product>
+public interface IProductDA : IBaseDA<Product, long>
 {
 
 }
