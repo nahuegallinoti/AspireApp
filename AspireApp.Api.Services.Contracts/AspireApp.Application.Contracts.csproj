@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AspireApp.Api.Modelos\AspireApp.Api.Domain.csproj" />
     <ProjectReference Include="..\AspireApp.Core.ROP\AspireApp.Core.ROP.csproj" />
+    <ProjectReference Include="..\AspireApp.DataAccess.Contracts\AspireApp.DataAccess.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

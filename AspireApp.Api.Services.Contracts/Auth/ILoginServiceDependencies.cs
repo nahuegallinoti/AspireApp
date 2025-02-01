@@ -4,7 +4,7 @@ using AspireApp.Core.ROP;
 
 namespace AspireApp.Application.Contracts.Auth;
 
-public interface ILoginServiceDependencies : IBaseService
+public interface ILoginServiceDependencies
 {
     Task<Result<UserLogin>> VerifyUserPassword(UserLogin userAccount);
     Result<AuthenticationResult> CreateToken(UserLogin userAccount);
