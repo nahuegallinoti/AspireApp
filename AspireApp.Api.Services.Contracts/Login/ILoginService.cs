@@ -1,5 +1,5 @@
 ﻿using AspireApp.Core.ROP;
-using AspireApp.Entidad;
+using AspireApp.Entities;
 
 namespace AspireApp.Application.Contracts.Login;
 

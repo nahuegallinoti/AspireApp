@@ -1,4 +1,5 @@
-﻿using AspireApp.Api.Domain.Auth.User;
+﻿using AspireApp.Api.Domain.Auth;
+using AspireApp.Api.Domain.Auth.User;
 using AspireApp.Application.Contracts.Login;
 using AspireApp.Application.Contracts.RegisterUser;
 using AspireApp.Core.ROP;
@@ -9,7 +10,7 @@ public class LoginService(ILoginServiceDependencies dependencies) : ILoginUserSe
 {
     private readonly ILoginServiceDependencies _loginDependencies = dependencies;
 
-    public Task<Result<string?>> Login(UserLogin user, CancellationToken cancellationToken = default)
+    public Task<Result<AuthenticationResult>> Login(UserLogin user, CancellationToken cancellationToken = default)
     {
         return ValidateUser(user)
         .Bind(VerifyUserPassword)
@@ -22,6 +23,7 @@ public class LoginService(ILoginServiceDependencies dependencies) : ILoginUserSe
 
         if (string.IsNullOrWhiteSpace(userAccount.Email))
             errores.Add("El email no debe estar vacio");
+
         if (string.IsNullOrWhiteSpace(userAccount.Password))
             errores.Add("El password no debe estar vacio");
 
@@ -33,7 +35,7 @@ public class LoginService(ILoginServiceDependencies dependencies) : ILoginUserSe
     private Task<Result<UserLogin>> VerifyUserPassword(UserLogin userAccount) =>
         _loginDependencies.VerifyUserPassword(userAccount);
 
-    private Task<Result<string?>> CreateToken(UserLogin userAccount) =>
+    private Task<Result<AuthenticationResult>> CreateToken(UserLogin userAccount) =>
         _loginDependencies.CreateToken(userAccount);
 
 }

@@ -9,7 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AspireApp.Api.Modelos\AspireApp.Api.Domain.csproj" />
     <ProjectReference Include="..\AspireApp.Common\AspireApp.Core.csproj" />
-    <ProjectReference Include="..\AspireApp.Entidad\AspireApp.Entidad.csproj" />
+    <ProjectReference Include="..\AspireApp.Entidad\AspireApp.Entities.csproj" />
   </ItemGroup>
 
 </Project>

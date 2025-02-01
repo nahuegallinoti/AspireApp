@@ -1,4 +1,4 @@
-﻿namespace AspireApp.Entidad.Base;
+﻿namespace AspireApp.Entities.Base;
 
 public class BaseEntity
 {

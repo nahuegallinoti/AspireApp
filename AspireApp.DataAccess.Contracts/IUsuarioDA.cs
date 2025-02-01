@@ -1,5 +1,5 @@
 ﻿using AspireApp.DataAccess.Contracts.Base;
-using AspireApp.Entidad;
+using AspireApp.Entities;
 
 namespace AspireApp.DataAccess.Contracts;
 

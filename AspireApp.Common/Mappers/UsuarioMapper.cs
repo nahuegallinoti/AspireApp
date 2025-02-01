@@ -1,5 +1,5 @@
 ﻿using AspireApp.Api.Domain.Auth.User;
-using AspireApp.Entidad;
+using AspireApp.Entities;
 
 namespace AspireApp.Core.Mappers;
 

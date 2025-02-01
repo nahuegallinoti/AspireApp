@@ -1,7 +1,7 @@
 ﻿using AspireApp.Application.Contracts.Login;
 using AspireApp.Application.Contracts.RegisterUser;
 using AspireApp.Core.ROP;
-using AspireApp.Entidad;
+using AspireApp.Entities;
 
 namespace AspireApp.Application.Implementations.RegisterUser;
 

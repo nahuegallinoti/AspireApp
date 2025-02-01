@@ -1,7 +1,7 @@
 ﻿using AspireApp.Application.Contracts.RegisterUser;
 using AspireApp.Core.ROP;
 using AspireApp.DataAccess.Contracts;
-using AspireApp.Entidad;
+using AspireApp.Entities;
 using System.Security.Cryptography;
 using System.Text;
 

@@ -1,4 +1,4 @@
-﻿using AspireApp.Entidad;
+﻿using AspireApp.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AspireApp.DataAccess.Implementations;
