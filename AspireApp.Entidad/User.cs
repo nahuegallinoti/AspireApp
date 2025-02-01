@@ -2,11 +2,11 @@
 
 namespace AspireApp.Entities;
 
-public class Usuario : BaseEntity<Guid>
+public class User : BaseEntity<Guid>
 {
     public string Email { get; set; } = string.Empty;
-    public string Nombre { get; set; } = string.Empty;
-    public string Apellido { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Surname { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 
     public byte[] PasswordHash { get; set; } = [];

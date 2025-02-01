@@ -3,8 +3,8 @@ using AspireApp.Entities;
 
 namespace AspireApp.DataAccess.Contracts;
 
-public interface IUsuarioDA : IBaseDA<Usuario, Guid>
+public interface IUsuarioDA : IBaseDA<User, Guid>
 {
-    Task<Usuario?> GetUserByEmail(string email);
+    Task<User?> GetUserByEmail(string email);
     Task<bool> UserExist(string email);
 }

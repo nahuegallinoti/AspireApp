@@ -3,11 +3,11 @@ using AspireApp.Entities;
 
 namespace AspireApp.Core.Mappers;
 
-public sealed class UsuarioMapper : BaseMapper<UserRegister, Usuario>
+public sealed class UsuarioMapper : BaseMapper<UserRegister, User>
 {
     public UsuarioMapper() { }
 
-    public override UserRegister ToModel(Usuario entity)
+    public override UserRegister ToModel(User entity)
     {
         if (entity is null) return new();
 
@@ -17,15 +17,15 @@ public sealed class UsuarioMapper : BaseMapper<UserRegister, Usuario>
         };
     }
 
-    public override Usuario ToEntity(UserRegister model)
+    public override User ToEntity(UserRegister model)
     {
         if (model is null) return new();
 
-        return new Usuario
+        return new User
         {
             Email = model.Email,
-            Nombre = model.Nombre,
-            Apellido = model.Apellido,
+            Name = model.Name,
+            Surname = model.Surname,
             Password = model.Password
         };
     }

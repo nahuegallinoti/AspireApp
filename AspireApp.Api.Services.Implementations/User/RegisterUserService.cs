@@ -19,10 +19,10 @@ public class RegisterUserService(IRegisterUserServiceDependencies dependencies) 
     {
         List<string> errores = [];
 
-        if (string.IsNullOrWhiteSpace(userAccount.Nombre))
+        if (string.IsNullOrWhiteSpace(userAccount.Name))
             errores.Add("El nombre propio no puede estar vacio");
 
-        if (string.IsNullOrWhiteSpace(userAccount.Apellido))
+        if (string.IsNullOrWhiteSpace(userAccount.Surname))
             errores.Add("El apellido propio no puede estar vacio");
 
         if (string.IsNullOrWhiteSpace(userAccount.Email))

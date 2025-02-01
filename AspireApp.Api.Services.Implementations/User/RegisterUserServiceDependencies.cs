@@ -16,7 +16,7 @@ public class RegisterUserServiceDependencies(IUsuarioDA usuarioDA, UsuarioMapper
 
     public async Task<Result<Guid>> AddUser(UserRegister userAccount)
     {
-        Usuario usuario = _usuarioMapper.ToEntity(userAccount);
+        Entities.User usuario = _usuarioMapper.ToEntity(userAccount);
 
         (byte[] passwordHash, byte[] passwordSalt) = CreatePasswordHash(userAccount.Password);
 
