@@ -1,6 +1,6 @@
 ﻿using AspireApp.Api.Domain.Auth;
 using AspireApp.Api.Domain.Auth.User;
-using AspireApp.Application.Contracts.Login;
+using AspireApp.Application.Contracts.Auth;
 using AspireApp.Core.ROP;
 using AspireApp.DataAccess.Contracts;
 using Microsoft.Extensions.Configuration;
@@ -10,7 +10,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace AspireApp.Application.Implementations.Login;
+namespace AspireApp.Application.Implementations.Auth;
 
 public class LoginServiceDependencies(IConfiguration configuration, IUsuarioDA usuarioDA) : ILoginServiceDependencies
 {

@@ -50,12 +50,11 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
         try
         {
             var content = await response.Content.ReadAsStringAsync();
+
             if (string.IsNullOrWhiteSpace(content))
                 return [$"Error HTTP {response.StatusCode}"];
 
-            // Intentar parsear el error como JSON si es posible
-            var errorObject = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(content);
-            return errorObject?.Values.ToImmutableArray() ?? [content];
+            return [content];
         }
 
         catch

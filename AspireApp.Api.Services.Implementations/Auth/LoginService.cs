@@ -1,12 +1,11 @@
 ﻿using AspireApp.Api.Domain.Auth;
 using AspireApp.Api.Domain.Auth.User;
-using AspireApp.Application.Contracts.Login;
-using AspireApp.Application.Contracts.RegisterUser;
+using AspireApp.Application.Contracts.Auth;
 using AspireApp.Core.ROP;
 
-namespace AspireApp.Application.Implementations.Login;
+namespace AspireApp.Application.Implementations.Auth;
 
-public class LoginService(ILoginServiceDependencies dependencies) : ILoginUserService
+public class LoginService(ILoginServiceDependencies dependencies) : ILoginService
 {
     private readonly ILoginServiceDependencies _loginDependencies = dependencies;
 

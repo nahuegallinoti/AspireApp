@@ -22,7 +22,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireApp.Application.Contr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireApp.Application.Implementations", "AspireApp.Api.Services.Implementations\AspireApp.Application.Implementations.csproj", "{E1FF6774-E30C-47D8-B80B-6DC886B16127}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireApp.Core", "AspireApp.Common\AspireApp.Core.csproj", "{868BBC53-0FD8-419D-A6DE-52DA437078BC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireApp.Core.Mappers", "AspireApp.Common\AspireApp.Core.Mappers.csproj", "{868BBC53-0FD8-419D-A6DE-52DA437078BC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireApp.DataAccess.Contracts", "AspireApp.DataAccess.Contracts\AspireApp.DataAccess.Contracts.csproj", "{E5753DF7-B451-479C-BA5E-03B4CA06A414}"
 EndProject
@@ -33,6 +33,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{560665BF-8A53-4C01-A009-BA15B55D817C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{3510D02C-50F1-49DE-B580-546CC1E2DA53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireApp.Core.ROP", "AspireApp.Core.ROP\AspireApp.Core.ROP.csproj", "{2C3D3D61-013A-460A-AB55-E03E277212C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,6 +90,10 @@ Global
 		{E5753DF7-B451-479C-BA5E-03B4CA06A414}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5753DF7-B451-479C-BA5E-03B4CA06A414}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5753DF7-B451-479C-BA5E-03B4CA06A414}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C3D3D61-013A-460A-AB55-E03E277212C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C3D3D61-013A-460A-AB55-E03E277212C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C3D3D61-013A-460A-AB55-E03E277212C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C3D3D61-013A-460A-AB55-E03E277212C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,5 +109,6 @@ Global
 		{E1FF6774-E30C-47D8-B80B-6DC886B16127} = {3510D02C-50F1-49DE-B580-546CC1E2DA53}
 		{868BBC53-0FD8-419D-A6DE-52DA437078BC} = {560665BF-8A53-4C01-A009-BA15B55D817C}
 		{E5753DF7-B451-479C-BA5E-03B4CA06A414} = {560665BF-8A53-4C01-A009-BA15B55D817C}
+		{2C3D3D61-013A-460A-AB55-E03E277212C1} = {560665BF-8A53-4C01-A009-BA15B55D817C}
 	EndGlobalSection
 EndGlobal

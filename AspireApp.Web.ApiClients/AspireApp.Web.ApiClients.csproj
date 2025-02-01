@@ -9,7 +9,8 @@
     <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
     <ProjectReference Include="..\AspireApp.Api.Modelos\AspireApp.Api.Domain.csproj" />
-    <ProjectReference Include="..\AspireApp.Common\AspireApp.Core.csproj" />
+    <ProjectReference Include="..\AspireApp.Common\AspireApp.Core.Mappers.csproj" />
+    <ProjectReference Include="..\AspireApp.Core.ROP\AspireApp.Core.ROP.csproj" />
   </ItemGroup>
 
 

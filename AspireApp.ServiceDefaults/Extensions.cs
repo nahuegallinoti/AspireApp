@@ -1,7 +1,7 @@
-using AspireApp.Application.Contracts.Login;
-using AspireApp.Application.Contracts.RegisterUser;
-using AspireApp.Application.Implementations.Login;
-using AspireApp.Application.Implementations.RegisterUser;
+using AspireApp.Application.Contracts.Auth;
+using AspireApp.Application.Contracts.User;
+using AspireApp.Application.Implementations.Auth;
+using AspireApp.Application.Implementations.User;
 using AspireApp.Core.Mappers;
 using AspireApp.DataAccess.Contracts;
 using AspireApp.DataAccess.Implementations;
@@ -53,7 +53,7 @@ public static class Extensions
         services.AddScoped<IRegisterUserService, RegisterUserService>();
         services.AddScoped<IRegisterUserServiceDependencies, RegisterUserServiceDependencies>();
 
-        services.AddScoped<ILoginUserService, LoginService>();
+        services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<ILoginServiceDependencies, LoginServiceDependencies>();
 
         return services;

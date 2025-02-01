@@ -2,7 +2,7 @@
 using AspireApp.Api.Domain.Auth.User;
 using AspireApp.Core.ROP;
 
-namespace AspireApp.Application.Contracts.Login;
+namespace AspireApp.Application.Contracts.Auth;
 
 public interface ILoginServiceDependencies : IBaseService
 {
