@@ -9,7 +9,7 @@ public interface IBaseService<T, TDA> where T : BaseEntity
     Task AddAsync(T entity);
     void Delete(T entity);
     Task<IEnumerable<T>> GetAllAsync();
-    Task<T?> GetByIdAsync(Guid id);
+    //Task<T?> GetByIdAsync(TID id);
     void Update(T entity);
     Task SaveChangesAsync();
 }

@@ -25,10 +25,10 @@ public class BaseService<T, TDA>(TDA baseDA) : IBaseService<T, TDA>
         return await _baseDA.GetAllAsync();
     }
 
-    public async Task<T?> GetByIdAsync(Guid id)
-    {
-        return await _baseDA.GetByIdAsync(id);
-    }
+    //public async Task<T?> GetByIdAsync(TID id)
+    //{
+    //    return await _baseDA.GetByIdAsync(id);
+    //}
 
     public async Task SaveChangesAsync()
     {
