@@ -11,8 +11,8 @@ public class RegisterUserService(IRegisterUserServiceDependencies dependencies) 
     public Task<Result<Guid>> AddUser(UserRegister usuario, CancellationToken cancellationToken = default)
     {
         return ValidateUser(usuario)
-        .Bind(user => VerifyUserDoesntExist(user, cancellationToken))
-        .Bind(AddUserToDatabase);
+        .Bind(user => _registerUserDependencies.VerifyUserDoesNotExist(user, cancellationToken))
+        .Bind(_registerUserDependencies.AddUser);
     }
 
     private static Result<UserRegister> ValidateUser(UserRegister userAccount)
@@ -35,10 +35,4 @@ public class RegisterUserService(IRegisterUserServiceDependencies dependencies) 
             ? Result.Failure<UserRegister>([.. errores])
             : userAccount;
     }
-
-    private Task<Result<UserRegister>> VerifyUserDoesntExist(UserRegister userAccount, CancellationToken cancellationToken = default) =>
-        _registerUserDependencies.VerifyUserDoesNotExist(userAccount, cancellationToken);
-
-    private Task<Result<Guid>> AddUserToDatabase(UserRegister usuario) =>
-        _registerUserDependencies.AddUser(usuario);
 }

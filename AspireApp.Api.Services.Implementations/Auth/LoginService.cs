@@ -12,8 +12,8 @@ public class LoginService(ILoginServiceDependencies dependencies) : ILoginServic
     public Task<Result<AuthenticationResult>> Login(UserLogin user, CancellationToken cancellationToken = default)
     {
         return ValidateUser(user)
-        .Bind(VerifyUserPassword)
-        .Bind(CreateToken);
+        .Bind(_loginDependencies.VerifyUserPassword)
+        .Bind(_loginDependencies.CreateToken);
     }
 
     private static Result<UserLogin> ValidateUser(UserLogin userAccount)
@@ -30,11 +30,4 @@ public class LoginService(ILoginServiceDependencies dependencies) : ILoginServic
             ? Result.Failure<UserLogin>([.. errores])
             : userAccount;
     }
-
-    private Task<Result<UserLogin>> VerifyUserPassword(UserLogin userAccount) =>
-        _loginDependencies.VerifyUserPassword(userAccount);
-
-    private Result<AuthenticationResult> CreateToken(UserLogin userAccount) =>
-        _loginDependencies.CreateToken(userAccount);
-
 }
