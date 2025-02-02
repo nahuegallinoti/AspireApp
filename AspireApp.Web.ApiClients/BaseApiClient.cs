@@ -8,19 +8,19 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
 {
     protected readonly HttpClient _httpClient = httpClientFactory.CreateClient(clientName);
 
-    protected Task<Result<T>> PostAsync<T, U>(string url, U data, CancellationToken cancellationToken = default) =>
+    public Task<Result<T>> PostAsync<T, U>(string url, U data, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Post, url, JsonContent.Create(data), cancellationToken);
 
-    protected Task<Result<T>> GetAsync<T>(string url, CancellationToken cancellationToken = default) =>
+    public Task<Result<T>> GetAsync<T>(string url, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Get, url, cancellationToken: cancellationToken);
 
-    protected Task<Result<T>> PutAsync<T>(string url, T data, CancellationToken cancellationToken = default) =>
+    public Task<Result<T>> PutAsync<T>(string url, T data, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Put, url, JsonContent.Create(data), cancellationToken);
 
-    protected Task<Result<T>> DeleteAsync<T>(string url, CancellationToken cancellationToken = default) =>
+    public Task<Result<T>> DeleteAsync<T>(string url, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Delete, url, cancellationToken: cancellationToken);
 
-    private async Task<Result<T>> SendRequestAsync<T>(HttpMethod method, string url, HttpContent? content = null, CancellationToken cancellationToken = default)
+    public async Task<Result<T>> SendRequestAsync<T>(HttpMethod method, string url, HttpContent? content = null, CancellationToken cancellationToken = default)
     {
         try
         {

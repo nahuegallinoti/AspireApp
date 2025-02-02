@@ -15,8 +15,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspireApp.Api.Services.Implementations\AspireApp.Application.Implementations.csproj" />
+    <ProjectReference Include="..\AspireApp.Api\AspireApp.Api.csproj" />
     <ProjectReference Include="..\AspireApp.DataAccess.Contracts\AspireApp.DataAccess.Contracts.csproj" />
     <ProjectReference Include="..\AspireApp.DataAccess\AspireApp.DataAccess.Implementations.csproj" />
+    <ProjectReference Include="..\AspireApp.Web.ApiClients\AspireApp.Web.ApiClients.csproj" />
   </ItemGroup>
 
   <ItemGroup>

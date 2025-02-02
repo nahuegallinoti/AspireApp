@@ -5,6 +5,6 @@ namespace AspireApp.Application.Contracts.User;
 
 public interface IRegisterUserServiceDependencies
 {
-    Task<Result<UserRegister>> VerifyUserDoesNotExist(UserRegister userAccount, CancellationToken cancellationToken = default)
+    Task<Result<UserRegister>> VerifyUserDoesNotExist(UserRegister userAccount, CancellationToken cancellationToken = default);
     Task<Result<Guid>> AddUser(UserRegister userAccount);
 }
