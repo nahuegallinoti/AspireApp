@@ -6,29 +6,34 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspireApp.Api.Tests.DataAccess;
 
-public abstract class BaseDATest<TEntity, TID> where TEntity : BaseEntity<TID>
+public abstract class BaseDATest<TEntity, TID, TDA>
+                                               where TEntity : BaseEntity<TID>
                                                where TID : struct
+                                               where TDA : BaseDA<TEntity, TID>
 {
     protected AppDbContext _context = null!;
     protected DbContextOptions<AppDbContext> _options = null!;
-    protected BaseDA<TEntity, TID> _baseDA = null!;
+    protected TDA _dataAccess = null!;
+
+    private static TEntity CreateInstance() => Activator.CreateInstance<TEntity>();
 
     [TestInitialize]
     public void Setup()
     {
         _options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Si se usa un nombre estático, usará la misma db para todos los tests
             .Options;
 
         _context = new AppDbContext(_options);
-        _baseDA = new BaseDA<TEntity, TID>(_context);
+
+        _dataAccess = (TDA)Activator.CreateInstance(typeof(TDA), _context)!;
     }
 
     [TestMethod]
     public async Task AddAsync_ShouldAddEntity()
     {
         // Arrange
-        var entity = Activator.CreateInstance<TEntity>();
+        var entity = CreateInstance();
         var propertyName = entity.GetType().GetProperty("Name");
 
         // Set entity properties
@@ -37,9 +42,9 @@ public abstract class BaseDATest<TEntity, TID> where TEntity : BaseEntity<TID>
         TID id = entity.SetId<TEntity, TID>();
 
         // Act
-        await _baseDA.AddAsync(entity);
-        await _baseDA.SaveChangesAsync();
-        var result = await _baseDA.GetByIdAsync(id);
+        await _dataAccess.AddAsync(entity);
+        await _dataAccess.SaveChangesAsync();
+        var result = await _dataAccess.GetByIdAsync(id);
 
         // Assert
         Assert.IsNotNull(result);
@@ -50,11 +55,11 @@ public abstract class BaseDATest<TEntity, TID> where TEntity : BaseEntity<TID>
     public async Task GetAllAsync_ShouldReturnEntities()
     {
         // Arrange
-        _context.Set<TEntity>().AddRange(Activator.CreateInstance<TEntity>(), Activator.CreateInstance<TEntity>());
+        _context.Set<TEntity>().AddRange(CreateInstance(), CreateInstance());
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _baseDA.GetAllAsync();
+        var result = await _dataAccess.GetAllAsync();
 
         // Assert
         Assert.IsTrue(result.Any());
@@ -66,7 +71,7 @@ public abstract class BaseDATest<TEntity, TID> where TEntity : BaseEntity<TID>
         // TODO: si no existe la propiedad name en la entidad va a fallar
 
         // Arrange
-        var entity = Activator.CreateInstance<TEntity>();
+        var entity = CreateInstance();
         var propertyName = entity.GetType().GetProperty("Name");
 
         // Set initial entity properties
@@ -74,16 +79,16 @@ public abstract class BaseDATest<TEntity, TID> where TEntity : BaseEntity<TID>
 
         TID id = entity.SetId<TEntity, TID>();
 
-        await _baseDA.AddAsync(entity);
-        await _baseDA.SaveChangesAsync();
+        await _dataAccess.AddAsync(entity);
+        await _dataAccess.SaveChangesAsync();
 
         // Act
         propertyName?.SetValue(entity, "Updated");
 
-        _baseDA.Update(entity);
-        await _baseDA.SaveChangesAsync();
+        _dataAccess.Update(entity);
+        await _dataAccess.SaveChangesAsync();
 
-        var result = await _baseDA.GetByIdAsync(id);
+        var result = await _dataAccess.GetByIdAsync(id);
 
         // Assert
         Assert.AreEqual("Updated", propertyName?.GetValue(result)?.ToString());
@@ -93,26 +98,21 @@ public abstract class BaseDATest<TEntity, TID> where TEntity : BaseEntity<TID>
     public async Task Delete_ShouldRemoveEntity()
     {
         // Arrange
-        var entity = Activator.CreateInstance<TEntity>();
+        var entity = CreateInstance();
         var propertyName = entity.GetType().GetProperty("Name");
-        var propertyId = entity.GetType().GetProperty("Id");
 
         // Set entity properties
         propertyName?.SetValue(entity, "To Delete");
 
-        if (propertyId is not null)
-        {
-            var newId = Activator.CreateInstance<TID>();
-            propertyId.SetValue(entity, newId);
-        }
+        TID id = entity.SetId<TEntity, TID>();
 
-        await _baseDA.AddAsync(entity);
-        await _baseDA.SaveChangesAsync();
+        await _dataAccess.AddAsync(entity);
+        await _dataAccess.SaveChangesAsync();
 
         // Act
-        _baseDA.Delete(entity);
-        await _baseDA.SaveChangesAsync();
-        var result = await _baseDA.GetByIdAsync(Activator.CreateInstance<TID>());
+        _dataAccess.Delete(entity);
+        await _dataAccess.SaveChangesAsync();
+        var result = await _dataAccess.GetByIdAsync(id);
 
         // Assert
         Assert.IsNull(result);

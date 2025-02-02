@@ -3,7 +3,6 @@ using AspireApp.Application.Contracts.User;
 using AspireApp.Core.Mappers;
 using AspireApp.Core.ROP;
 using AspireApp.DataAccess.Contracts;
-using AspireApp.Entities;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -29,7 +28,7 @@ public class RegisterUserServiceDependencies(IUsuarioDA usuarioDA, UsuarioMapper
         return usuario.Id;
     }
 
-    public static (byte[] passwordHash, byte[] passwordSalt) CreatePasswordHash(string password)
+    private static (byte[] passwordHash, byte[] passwordSalt) CreatePasswordHash(string password)
     {
         using var hmac = new HMACSHA512();
 
@@ -39,9 +38,9 @@ public class RegisterUserServiceDependencies(IUsuarioDA usuarioDA, UsuarioMapper
         return (passwordHash, passwordSalt);
     }
 
-    public async Task<Result<UserRegister>> VerifyUserDoesNotExist(UserRegister userAccount)
+    public async Task<Result<UserRegister>> VerifyUserDoesNotExist(UserRegister userAccount, CancellationToken cancellationToken = default)
     {
-        var exists = await _usuarioDA.UserExist(userAccount.Email);
+        var exists = await _usuarioDA.UserExist(userAccount.Email, cancellationToken);
 
         return exists ? Result.Failure<UserRegister>("El usuario ya existe") : userAccount;
     }

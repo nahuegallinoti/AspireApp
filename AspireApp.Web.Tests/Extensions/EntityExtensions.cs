@@ -4,7 +4,7 @@ namespace AspireApp.Api.Tests.Extensions;
 
 public static class EntityExtensions
 {
-    public static TID SetId<TEntity, TID>(this TEntity entity) where TEntity : BaseEntity<TID>
+    public static TID SetId<TEntity, TID>(this TEntity entity) where TEntity : class
                                                                where TID : struct
     {
         var newId = Activator.CreateInstance<TID>();

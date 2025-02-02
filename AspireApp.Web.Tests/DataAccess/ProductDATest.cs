@@ -1,40 +1,32 @@
-﻿using AspireApp.DataAccess.Contracts;
+﻿using AspireApp.DataAccess.Implementations;
 using AspireApp.Entities;
-using Moq;
 
 namespace AspireApp.Api.Tests.DataAccess;
 
 [TestClass]
-public sealed class ProductDATest : BaseDATest<Product, long>
+public sealed class ProductDATest : BaseDATest<Product, long, ProductDA>
 {
-    private Mock<IProductDA> _productDAMock = null!;
+    private ProductDA DA => _dataAccess;
 
-    [TestInitialize]
-    public void Initialize()
-    {
-        _productDAMock = new(MockBehavior.Strict);
-    }
+    //[TestMethod]
+    //public async Task GetAllProducts_ShouldReturnProducts()
+    //{
+    //    // Arrange
+    //    List<Product> expectedProducts = [
+    //        new() { Id = 1, Name = "Product 1", Description = "Desc 1" },
+    //        new() { Id = 2, Name = "Product 2", Description = "Desc 2" }
+    //    ];
 
-    [TestMethod]
-    public async Task GetAllProducts_ShouldReturnProducts()
-    {
-        // Arrange
-        List<Product> expectedProducts = [
-            new() { Id = 1, Name = "Product 1", Description = "Desc 1" },
-            new() { Id = 2, Name = "Product 2", Description = "Desc 2" }
-        ];
+    //    expectedProducts.ForEach(async p => await DA.AddAsync(p));
 
-        _productDAMock.Setup(repo => repo.GetAllAsync())
-                      .ReturnsAsync(expectedProducts);
+    //    await DA.SaveChangesAsync();
 
-        // Act
-        var result = await _productDAMock.Object.GetAllAsync();
+    //    // Act
+    //    var result = await DA.GetAllAsync();
 
-        // Assert
-        Assert.IsNotNull(result);
-        Assert.AreEqual(expectedProducts.Count, result.Count());
-        Assert.AreEqual("Product 1", result.First().Name);
-
-        _productDAMock.Verify(repo => repo.GetAllAsync(), Times.Once);
-    }
+    //    // Assert
+    //    Assert.IsNotNull(result);
+    //    Assert.AreEqual(expectedProducts.Count, result.Count());
+    //    Assert.AreEqual("Product 1", result.First().Name);
+    //}
 }

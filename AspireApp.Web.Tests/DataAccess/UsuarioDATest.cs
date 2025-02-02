@@ -1,54 +1,54 @@
-﻿using AspireApp.DataAccess.Contracts;
+﻿using AspireApp.DataAccess.Implementations;
 using AspireApp.Entities;
-using Moq;
 
 namespace AspireApp.Api.Tests.DataAccess;
 
 [TestClass]
-public sealed class UsuarioDATest : BaseDATest<User, Guid>
+public sealed class UsuarioDATest : BaseDATest<User, Guid, UsuarioDA>
 {
-    private readonly Mock<IUsuarioDA> _usuarioDAMock = new(MockBehavior.Strict);
+    private UsuarioDA DA => _dataAccess;
 
     [TestMethod]
-    public async Task UserExist_ShouldReturnTrue()
+    public async Task UserExist_ShouldReturnTrue_WhenUserExists()
     {
         // Arrange
-        string email = "nagu@gmail.com";
-
-        _usuarioDAMock.Setup(repo => repo.UserExist(email))
-                      .ReturnsAsync(true);
-
-        // Act
-        var result = await _usuarioDAMock.Object.UserExist(email);
-
-        // Assert
-        Assert.IsTrue(result);
-        _usuarioDAMock.Verify(repo => repo.UserExist(email), Times.Once);
-    }
-
-    [TestMethod]
-    public async Task GetUserByEmail_ShouldReturnUser()
-    {
-        // Arrange
-        string email = "nagu@gmail.com";
-
+        string email = "testuser@gmail.com";
         User user = new()
         {
             Id = Guid.NewGuid(),
             Email = email
         };
 
-        _usuarioDAMock.Setup(repo => repo.GetUserByEmail(email))
-                      .ReturnsAsync(user);
+        await DA.AddAsync(user);
+        await DA.SaveChangesAsync();
 
         // Act
-        var result = await _usuarioDAMock.Object.GetUserByEmail(email);
+        var result = await DA.UserExist(email, CancellationToken.None);
+
+        // Assert
+        Assert.IsTrue(result);
+    }
+
+    [TestMethod]
+    public async Task GetUserByEmail_ShouldReturnUser_WhenUserExists()
+    {
+        // Arrange
+        string email = "nagu@gmail.com";
+        User user = new()
+        {
+            Id = Guid.NewGuid(),
+            Email = email
+        };
+
+        await DA.AddAsync(user);
+        await DA.SaveChangesAsync();
+
+        // Act
+        var result = await DA.GetUserByEmail(email, CancellationToken.None);
 
         // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(user.Id, result.Id);
         Assert.AreEqual(user.Email, result.Email);
-
-        _usuarioDAMock.Verify(repo => repo.GetUserByEmail(email), Times.Once);
     }
 }

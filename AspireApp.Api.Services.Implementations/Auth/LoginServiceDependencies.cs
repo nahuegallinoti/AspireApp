@@ -60,7 +60,7 @@ public class LoginServiceDependencies(IConfiguration configuration, IUsuarioDA u
         }
     }
 
-    private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+    protected static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
     {
         using var hmac = new HMACSHA512(storedSalt);
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));

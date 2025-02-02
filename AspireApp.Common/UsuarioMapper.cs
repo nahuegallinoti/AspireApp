@@ -23,6 +23,7 @@ public sealed class UsuarioMapper : BaseMapper<UserRegister, User>
 
         return new User
         {
+            Id = model.Id,
             Email = model.Email,
             Name = model.Name,
             Surname = model.Surname,
