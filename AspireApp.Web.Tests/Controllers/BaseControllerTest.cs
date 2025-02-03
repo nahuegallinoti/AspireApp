@@ -1,4 +1,5 @@
 ﻿using AspireApp.Api.Controllers;
+using AspireApp.Api.Tests.Extensions;
 using AspireApp.Application.Contracts.Base;
 using AspireApp.Entities.Base;
 using Microsoft.AspNetCore.Mvc;
@@ -76,7 +77,7 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
         var result = await _controller.GetById(id);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+        Assert.IsInstanceOfType<NotFoundResult>(result);
     }
 
     [TestMethod]
@@ -100,15 +101,16 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
     public void Update_ShouldReturnBadRequest_WhenIdsDoNotMatch()
     {
         // Arrange
-        var id = Activator.CreateInstance<TID>();
+        var id = Activator.CreateInstance<TID>(); //Setea id default
         var entity = Activator.CreateInstance<T>();
-        entity.Id = Activator.CreateInstance<TID>();
+
+        entity.SetId<T, TID>(); //Setea id aleatorio
 
         // Act
         var result = _controller.Update(id, entity);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
+        Assert.IsInstanceOfType<BadRequestObjectResult>(result);
     }
 
     [TestMethod]
@@ -126,7 +128,7 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
         var result = await _controller.Delete(id);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(NoContentResult));
+        Assert.IsInstanceOfType<NoContentResult>(result);
     }
 
     [TestMethod]
@@ -140,6 +142,6 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
         var result = await _controller.Delete(id);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+        Assert.IsInstanceOfType<NotFoundResult>(result);
     }
 }
