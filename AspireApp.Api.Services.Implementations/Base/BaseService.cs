@@ -4,12 +4,17 @@ using AspireApp.Entities.Base;
 
 namespace AspireApp.Application.Implementations.Base;
 
-public class BaseService<T, TID, TDA>(TDA baseDA) : IBaseService<T, TID, TDA>
+public class BaseService<T, TID, TDA> : IBaseService<T, TID, TDA>
     where T : BaseEntity<TID>
     where TID : struct
     where TDA : IBaseDA<T, TID>
 {
-    private readonly TDA _baseDA = baseDA;
+    private readonly TDA _baseDA;
+
+    public BaseService(TDA baseDA)
+    {
+        _baseDA = baseDA;
+    }
 
     public async Task AddAsync(T entity) => await _baseDA.AddAsync(entity);
 

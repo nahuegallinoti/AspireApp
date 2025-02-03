@@ -8,17 +8,23 @@ using System.Text.Json;
 namespace AspireApp.Api.Tests.ApiClients;
 
 [TestClass]
-public class RegisterApiClientTest
+public class RegisterApiClientTest : BaseApiClientTest<RegisterApiClient>
 {
     private Mock<HttpMessageHandler> _mockHttpMessageHandler = null!;
     private HttpClient _httpClient = null!;
     private RegisterApiClient _apiClient = null!;
 
+    protected override RegisterApiClient CreateClient(IHttpClientFactory factory) => new(factory);
+
+
     [TestInitialize]
     public void Initialize()
     {
         _mockHttpMessageHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
-        _httpClient = new HttpClient(_mockHttpMessageHandler.Object);
+        _httpClient = new HttpClient(_mockHttpMessageHandler.Object)
+        {
+            BaseAddress = new Uri("https://fakeapi.com/")
+        };
 
         var httpClientFactoryMock = new Mock<IHttpClientFactory>();
         httpClientFactoryMock.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(_httpClient);

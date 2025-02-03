@@ -68,7 +68,7 @@ app.UseExceptionHandler();
 
 app.MapDefaultEndpoints();
 
-// Mapea controlador weather y eso automáticamente
+// Mapea controlador product y esos automáticamente
 app.MapControllers();
 
 app.Run();

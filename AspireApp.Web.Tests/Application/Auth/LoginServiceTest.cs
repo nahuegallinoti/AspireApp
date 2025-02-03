@@ -46,7 +46,6 @@ public sealed class LoginServiceTest
         var result = await _loginService.Login(user, cancellationToken);
 
         // Assert
-        Assert.IsNotNull(result);
         Assert.IsTrue(result.Success);
         Assert.AreEqual(authResult.Token, result.Value.Token);
     }

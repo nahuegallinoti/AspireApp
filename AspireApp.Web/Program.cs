@@ -28,9 +28,9 @@ builder.Services.AddHttpClient("ApiClient", client =>
 
 
 // Puede ser scoped, transient o singleton aparentemente
-builder.Services.AddScoped<WeatherApiClient>();
 builder.Services.AddScoped<LoginApiClient>();
 builder.Services.AddScoped<RegisterApiClient>();
+builder.Services.AddScoped<ProductApiClient>();
 
 var app = builder.Build();
 
