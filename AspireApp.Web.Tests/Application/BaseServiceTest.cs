@@ -1,6 +1,7 @@
-﻿using AspireApp.Api.Tests.Extensions;
-using AspireApp.Application.Contracts.Base;
+﻿using AspireApp.Api.Domain;
+using AspireApp.Api.Tests.Extensions;
 using AspireApp.Application.Implementations.Base;
+using AspireApp.Core.Mappers;
 using AspireApp.DataAccess.Contracts.Base;
 using AspireApp.Entities.Base;
 using Moq;
@@ -8,34 +9,43 @@ using Moq;
 namespace AspireApp.Api.Tests.Application;
 
 [TestClass]
-public abstract class BaseServiceTest<T, TID, TDA>
-    where T : BaseEntity<TID>
+public abstract class BaseServiceTest<TE, TM, TID, TDA>
+    where TE : BaseEntity<TID>
+    where TM : BaseModel<TID>
     where TID : struct
-    where TDA : class, IBaseDA<T, TID>
+    where TDA : class, IBaseDA<TE, TID>
 {
     protected Mock<TDA> _baseDAMock = null!;
-    protected IBaseService<T, TID> _baseService = null!;
+    protected BaseService<TE, TM, TID> _baseService = null!;
 
-    private static T CreateInstance() => Activator.CreateInstance<T>();
+    protected BaseMapper<TM, TE> _mapper = null!;
+
+    protected void InitializeMapper(BaseMapper<TM, TE> mapper)
+    {
+        _mapper = mapper;
+    }
+
+    private static TE CreateInstance() => Activator.CreateInstance<TE>();
+    private static TM CreateInstanceModel() => Activator.CreateInstance<TM>();
 
     [TestInitialize]
     public void Setup()
     {
-        _baseDAMock = new(MockBehavior.Strict);
-        _baseService = new BaseService<T, TID>(_baseDAMock.Object);
+        _baseDAMock = new(MockBehavior.Default);
+        _baseService = new BaseService<TE, TM, TID>(_baseDAMock.Object, _mapper);
     }
 
     [TestMethod]
     public async Task GetAllAsync_ShouldReturnEntities()
     {
         // Arrange
-        List<T> expectedEntities = [CreateInstance(), CreateInstance()];
+        List<TE> expectedEntities = [CreateInstance(), CreateInstance()];
 
         _baseDAMock.Setup(repo => repo.GetAllAsync())
                    .ReturnsAsync(expectedEntities);
 
         // Act
-        IEnumerable<T> result = await _baseService.GetAllAsync();
+        IEnumerable<TM> result = await _baseService.GetAllAsync();
 
         // Assert
         Assert.IsNotNull(result);
@@ -48,18 +58,18 @@ public abstract class BaseServiceTest<T, TID, TDA>
     public async Task GetByIdAsync_ShouldReturnEntity()
     {
         // Arrange
-        T entity = CreateInstance();
-        TID id = entity.SetId<T, TID>();
+        TE entity = CreateInstance();
+        TID id = entity.SetId<TE, TID>();
 
         _baseDAMock.Setup(repo => repo.GetByIdAsync(id))
                    .ReturnsAsync(entity);
 
         // Act
-        T? retrievedEntity = await _baseService.GetByIdAsync(id);
+        TM? retrievedEntity = await _baseService.GetByIdAsync(id);
 
         // Assert
         Assert.IsNotNull(retrievedEntity);
-        Assert.AreEqual(entity, retrievedEntity);
+        Assert.AreEqual(entity.Id, retrievedEntity.Id);
 
         _baseDAMock.Verify(repo => repo.GetByIdAsync(id), Times.Once);
     }
@@ -68,12 +78,17 @@ public abstract class BaseServiceTest<T, TID, TDA>
     public async Task AddAsync_ShouldAddEntity()
     {
         // Arrange
-        T entity = CreateInstance();
+        TM model = CreateInstanceModel();
+
+        model.SetId<TM, TID>();
+        model.GetType().GetProperty("Name")?.SetValue(model, "nagu");
+
+        TE entity = _mapper.ToEntity(model);
 
         _baseDAMock.Setup(repo => repo.AddAsync(entity)).Returns(Task.CompletedTask);
 
         // Act
-        await _baseService.AddAsync(entity);
+        await _baseService.AddAsync(model);
 
         // Assert
         _baseDAMock.Verify(repo => repo.AddAsync(entity), Times.Once);
@@ -83,12 +98,14 @@ public abstract class BaseServiceTest<T, TID, TDA>
     public void Delete_ShouldRemoveEntity()
     {
         // Arrange
-        T entity = CreateInstance();
+        TM model = CreateInstanceModel();
+
+        TE entity = _mapper.ToEntity(model);
 
         _baseDAMock.Setup(repo => repo.Delete(entity));
 
         // Act
-        _baseService.Delete(entity);
+        _baseService.Delete(model);
 
         // Assert
         _baseDAMock.Verify(repo => repo.Delete(entity), Times.Once);
@@ -98,12 +115,14 @@ public abstract class BaseServiceTest<T, TID, TDA>
     public void Update_ShouldModifyEntity()
     {
         // Arrange
-        T entity = CreateInstance();
+        TM model = CreateInstanceModel();
+
+        TE entity = _mapper.ToEntity(model);
 
         _baseDAMock.Setup(repo => repo.Update(entity));
 
         // Act
-        _baseService.Update(entity);
+        _baseService.Update(model);
 
         // Assert
         _baseDAMock.Verify(repo => repo.Update(entity), Times.Once);

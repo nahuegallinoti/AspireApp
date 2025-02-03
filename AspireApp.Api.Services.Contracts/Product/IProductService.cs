@@ -1,9 +1,9 @@
 ﻿using AspireApp.Application.Contracts.Base;
-using Ent = AspireApp.Entities;
+using Dto = AspireApp.Api.Domain.Models;
 
 namespace AspireApp.Application.Contracts.Product;
 
-public interface IProductService : IBaseServiceLong<Ent.Product>
+public interface IProductService : IBaseServiceLong<Dto.Product>
 {
 
 }

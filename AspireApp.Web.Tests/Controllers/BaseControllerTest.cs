@@ -1,4 +1,5 @@
 ﻿using AspireApp.Api.Controllers;
+using AspireApp.Api.Domain;
 using AspireApp.Api.Tests.Extensions;
 using AspireApp.Application.Contracts.Base;
 using AspireApp.Entities.Base;
@@ -9,7 +10,7 @@ namespace AspireApp.Api.Tests.Controllers;
 
 [TestClass]
 public abstract class BaseControllerTest<T, TID, TController, TService>
-        where T : BaseEntity<TID>
+        where T : BaseModel<TID>
         where TID : struct
         where TController : BaseController<T, TID, TService>
         where TService : class, IBaseService<T, TID>

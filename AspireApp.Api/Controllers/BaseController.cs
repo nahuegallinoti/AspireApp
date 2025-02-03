@@ -1,14 +1,14 @@
-﻿using AspireApp.Application.Contracts.Base;
-using AspireApp.Entities.Base;
+﻿using AspireApp.Api.Domain;
+using AspireApp.Application.Contracts.Base;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AspireApp.Api.Controllers;
 
-public abstract class BaseController<T, TID, TService>(TService service)
+public abstract class BaseController<TModel, TID, TService>(TService service)
     :
-    ControllerBase where T : BaseEntity<TID>
+    ControllerBase where TModel : BaseModel<TID>
                    where TID : struct
-                   where TService : IBaseService<T, TID>
+                   where TService : IBaseService<TModel, TID>
 {
 
     protected readonly TService _service = service;
@@ -28,7 +28,7 @@ public abstract class BaseController<T, TID, TService>(TService service)
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] T entity)
+    public async Task<IActionResult> Add([FromBody] TModel entity)
     {
         await _service.AddAsync(entity);
         await _service.SaveChangesAsync();
@@ -36,7 +36,7 @@ public abstract class BaseController<T, TID, TService>(TService service)
     }
 
     [HttpPut("{id}")]
-    public IActionResult Update(TID id, [FromBody] T entity)
+    public IActionResult Update(TID id, [FromBody] TModel entity)
     {
         if (!id.Equals(entity.Id))
         {
