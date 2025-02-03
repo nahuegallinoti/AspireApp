@@ -5,7 +5,7 @@ using Ent = AspireApp.Entities;
 
 namespace AspireApp.Application.Implementations.Product;
 
-public class ProductService(IProductDA productDA) : BaseService<Ent.Product, long>(productDA), IProductService
+public class ProductService(IProductDA productDA) : BaseServiceLong<Ent.Product>(productDA), IProductService
 {
     private readonly IProductDA _productDA = productDA;
 

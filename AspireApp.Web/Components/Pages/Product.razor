@@ -38,11 +38,13 @@ else
 }
 
 @code {
-    private IEnumerable<Product> products;
+    private IEnumerable<Product> products = null!;
 
     protected override async Task OnInitializedAsync()
     {
         var result = await ProductApi.GetProductsAsync();
         var products = result.Value;
+
+        StateHasChanged();
     }
 }

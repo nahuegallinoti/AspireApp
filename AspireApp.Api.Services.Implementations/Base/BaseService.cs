@@ -4,6 +4,14 @@ using AspireApp.Entities.Base;
 
 namespace AspireApp.Application.Implementations.Base;
 
+public abstract class BaseServiceLong<T>(IBaseDA<T, long> baseDA) : BaseService<T, long>(baseDA) where T : BaseEntity<long>
+{
+}
+
+public abstract class BaseServiceGuid<T>(IBaseDA<T, Guid> baseDA) : BaseService<T, Guid>(baseDA) where T : BaseEntity<Guid>
+{
+}
+
 public class BaseService<T, TID>(IBaseDA<T, TID> baseDA) : IBaseService<T, TID>
     where T : BaseEntity<TID>
     where TID : struct

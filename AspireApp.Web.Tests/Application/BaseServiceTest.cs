@@ -14,7 +14,7 @@ public abstract class BaseServiceTest<T, TID, TDA>
     where TDA : class, IBaseDA<T, TID>
 {
     protected Mock<TDA> _baseDAMock = null!;
-    protected IBaseService<T, TID, TDA> _baseService = null!;
+    protected IBaseService<T, TID> _baseService = null!;
 
     private static T CreateInstance() => Activator.CreateInstance<T>();
 
@@ -22,7 +22,7 @@ public abstract class BaseServiceTest<T, TID, TDA>
     public void Setup()
     {
         _baseDAMock = new(MockBehavior.Strict);
-        _baseService = new BaseService<T, TID, TDA>(_baseDAMock.Object);
+        _baseService = new BaseService<T, TID>(_baseDAMock.Object);
     }
 
     [TestMethod]

@@ -2,6 +2,14 @@
 
 namespace AspireApp.Application.Contracts.Base;
 
+public interface IBaseServiceLong<T> : IBaseService<T, long> where T : BaseEntity<long>
+{
+}
+
+public interface IBaseServiceGuid<T> : IBaseService<T, Guid> where T : BaseEntity<Guid>
+{
+}
+
 public interface IBaseService<T, TID> where T : BaseEntity<TID>
                                       where TID : struct
 {
