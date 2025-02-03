@@ -71,7 +71,7 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
     {
         // Arrange
         var id = Activator.CreateInstance<TID>();
-        _serviceMock.Setup(service => service.GetByIdAsync(id)).ReturnsAsync((T)null);
+        _serviceMock.Setup(service => service.GetByIdAsync(id)).ReturnsAsync(null as T);
 
         // Act
         var result = await _controller.GetById(id);
@@ -136,7 +136,7 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
     {
         // Arrange
         var id = Activator.CreateInstance<TID>();
-        _serviceMock.Setup(service => service.GetByIdAsync(id)).ReturnsAsync((T)null);
+        _serviceMock.Setup(service => service.GetByIdAsync(id)).ReturnsAsync(null as T);
 
         // Act
         var result = await _controller.Delete(id);

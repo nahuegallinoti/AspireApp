@@ -8,5 +8,5 @@ namespace AspireApp.Api.Controllers;
 [Route("api/[controller]")]
 public class ProductController(IProductService productService) : BaseController<Product, long, IProductService>(productService)
 {
-    protected readonly IProductService _productService;
+
 }

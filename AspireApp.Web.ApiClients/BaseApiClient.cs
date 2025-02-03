@@ -20,7 +20,7 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
     public Task<Result<T>> DeleteAsync<T>(string url, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Delete, url, cancellationToken: cancellationToken);
 
-    public async Task<Result<T>> SendRequestAsync<T>(HttpMethod method, string url, HttpContent? content = null, CancellationToken cancellationToken = default)
+    private async Task<Result<T>> SendRequestAsync<T>(HttpMethod method, string url, HttpContent? content = null, CancellationToken cancellationToken = default)
     {
         try
         {
