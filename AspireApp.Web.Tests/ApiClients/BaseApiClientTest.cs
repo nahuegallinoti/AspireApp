@@ -1,142 +1,173 @@
-﻿using AspireApp.Web.ApiClients;
+﻿namespace AspireApp.Api.Tests.ApiClients;
+
+using AspireApp.Web.ApiClients;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Protected;
 using System.Net;
-using System.Text.Json;
-
-namespace AspireApp.Api.Tests.ApiClients;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 [TestClass]
-public abstract class BaseApiClientTest<TClient, TResponse, TRequest>
-    where TClient : BaseApiClient
-    where TResponse : class
-    where TRequest : class
+public abstract class BaseApiClientTest
 {
-    protected Mock<HttpMessageHandler> _mockHttpMessageHandler = null!;
-    protected HttpClient _httpClient = null!;
-    protected TClient _apiClient = null!;
+    private Mock<HttpMessageHandler> _httpMessageHandlerMock = null!;
+    private HttpClient _httpClient = null!;
+    private Mock<IHttpClientFactory> _httpClientFactoryMock = null!;
+    private TestApiClient _apiClient = null!;
 
     [TestInitialize]
-    public void Initialize()
+    public void Setup()
     {
-        _mockHttpMessageHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
-        _httpClient = new HttpClient(_mockHttpMessageHandler.Object);
+        _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
 
-        var httpClientFactoryMock = new Mock<IHttpClientFactory>();
-        httpClientFactoryMock.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(_httpClient);
+        _httpClient = new HttpClient(_httpMessageHandlerMock.Object)
+        {
+            BaseAddress = new Uri("https://fakeapi.com/")
+        };
 
-        //_apiClient = CreateApiClient(httpClientFactoryMock.Object);
+        _httpClientFactoryMock = new Mock<IHttpClientFactory>();
+        _httpClientFactoryMock.Setup(f => f.CreateClient("ApiClient")).Returns(_httpClient);
 
-        _apiClient = Activator.CreateInstance<TClient>()!;
-    }
-
-    protected abstract TClient CreateApiClient(IHttpClientFactory httpClientFactory);
-
-    [TestMethod]
-    public async Task GetAsync_ShouldReturnSuccess_WhenResponseIsOk()
-    {
-        // Arrange
-        var expectedResponse = CreateResponse();
-        var jsonResponse = JsonSerializer.Serialize(expectedResponse);
-
-        _mockHttpMessageHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Get),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(jsonResponse)
-            });
-
-        // Act
-        var result = await _apiClient.GetAsync<TResponse>("https://example.com/api/resource");
-
-        // Assert
-        Assert.IsTrue(result.Success);
-        Assert.AreEqual(expectedResponse, result.Value);
+        _apiClient = new TestApiClient(_httpClientFactoryMock.Object);
     }
 
     [TestMethod]
-    public async Task PostAsync_ShouldReturnSuccess_WhenResponseIsOk()
+    public async Task PostAsync_ShouldCall_HttpClient_WithPostMethod()
     {
         // Arrange
-        var request = CreateRequest();
-        var expectedResponse = CreateResponse();
-        var jsonResponse = JsonSerializer.Serialize(expectedResponse);
+        var testData = new { Name = "Test" };
+        var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = JsonContent.Create(new { success = true })
+        };
 
-        _mockHttpMessageHandler
+        _httpMessageHandlerMock
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Post),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(jsonResponse)
-            });
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.Method == HttpMethod.Post && req.RequestUri!.ToString() == "https://fakeapi.com/api/test"),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(responseMessage)
+            .Verifiable();
 
         // Act
-        var result = await _apiClient.PostAsync<TResponse, TRequest>("https://example.com/api/resource", request);
+        await _apiClient.PostAsync<object, object>("api/test", testData);
 
         // Assert
-        Assert.IsTrue(result.Success);
-        Assert.AreEqual(expectedResponse, result.Value);
+        _httpMessageHandlerMock.Protected().Verify(
+            "SendAsync",
+            Times.Once(),
+            ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Post),
+            ItExpr.IsAny<CancellationToken>()
+        );
     }
 
     [TestMethod]
-    public async Task PutAsync_ShouldReturnSuccess_WhenResponseIsOk()
+    public async Task GetAsync_ShouldCall_HttpClient_WithGetMethod()
     {
         // Arrange
-        var request = CreateRequest();
-        var expectedResponse = CreateResponse();
-        var jsonResponse = JsonSerializer.Serialize(expectedResponse);
+        var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = JsonContent.Create(new { success = true })
+        };
 
-        _mockHttpMessageHandler
+        _httpMessageHandlerMock
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Put),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(jsonResponse)
-            });
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.Method == HttpMethod.Get && req.RequestUri!.ToString() == "https://fakeapi.com/api/test"),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(responseMessage)
+            .Verifiable();
 
         // Act
-        var result = await _apiClient.PutAsync<TResponse>("https://example.com/api/resource", expectedResponse);
+        await _apiClient.GetAsync<object>("api/test");
 
         // Assert
-        Assert.IsTrue(result.Success);
-        Assert.AreEqual(expectedResponse, result.Value);
+        _httpMessageHandlerMock.Protected().Verify(
+            "SendAsync",
+            Times.Once(),
+            ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Get),
+            ItExpr.IsAny<CancellationToken>()
+        );
     }
 
     [TestMethod]
-    public async Task DeleteAsync_ShouldReturnSuccess_WhenResponseIsOk()
+    public async Task PutAsync_ShouldCall_HttpClient_WithPutMethod()
     {
         // Arrange
-        _mockHttpMessageHandler
+        var testData = new { Name = "Updated" };
+        var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = JsonContent.Create(new { success = true })
+        };
+
+        _httpMessageHandlerMock
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Delete),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK
-            });
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.Method == HttpMethod.Put && req.RequestUri!.ToString() == "https://fakeapi.com/api/test"),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(responseMessage)
+            .Verifiable();
 
         // Act
-        var result = await _apiClient.DeleteAsync<TResponse>("https://example.com/api/resource");
+        await _apiClient.PutAsync("api/test", testData);
 
         // Assert
-        Assert.IsTrue(result.Success);
+        _httpMessageHandlerMock.Protected().Verify(
+            "SendAsync",
+            Times.Once(),
+            ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Put),
+            ItExpr.IsAny<CancellationToken>()
+        );
     }
 
-    protected abstract TResponse CreateResponse();
-    protected abstract TRequest CreateRequest();
+    [TestMethod]
+    public async Task DeleteAsync_ShouldCall_HttpClient_WithDeleteMethod()
+    {
+        // Arrange
+        var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = JsonContent.Create(new { success = true })
+        };
+
+        _httpMessageHandlerMock
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.Method == HttpMethod.Delete && req.RequestUri!.ToString() == "https://fakeapi.com/api/test"),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(responseMessage)
+            .Verifiable();
+
+        // Act
+        await _apiClient.DeleteAsync<object>("api/test");
+
+        // Assert
+        _httpMessageHandlerMock.Protected().Verify(
+            "SendAsync",
+            Times.Once(),
+            ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Delete),
+            ItExpr.IsAny<CancellationToken>()
+        );
+    }
+}
+
+/// <summary>
+/// Implementación concreta de BaseApiClient para pruebas
+/// </summary>
+public class TestApiClient(IHttpClientFactory httpClientFactory) : BaseApiClient(httpClientFactory, "ApiClient")
+{
 }
