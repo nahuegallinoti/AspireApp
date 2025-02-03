@@ -4,21 +4,67 @@ using System.Net.Http.Json;
 
 namespace AspireApp.Web.ApiClients;
 
+/// <summary>
+/// Base API client for handling HTTP requests.
+/// </summary>
 public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string clientName)
 {
     protected readonly HttpClient _httpClient = httpClientFactory.CreateClient(clientName);
 
+    /// <summary>
+    /// Sends a POST request to the specified URL with the given data.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="U"></typeparam>
+    /// <param name="url"></param>
+    /// <param name="data"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public Task<Result<T>> PostAsync<T, U>(string url, U data, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Post, url, JsonContent.Create(data), cancellationToken);
 
+    /// <summary>
+    /// Sends a GET request to the specified URL.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="url"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public Task<Result<T>> GetAsync<T>(string url, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Get, url, cancellationToken: cancellationToken);
+
+    /// <summary>
+    /// Sends a PUT request to the specified URL with the given data.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="url"></param>
+    /// <param name="data"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
 
     public Task<Result<T>> PutAsync<T>(string url, T data, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Put, url, JsonContent.Create(data), cancellationToken);
 
+    /// <summary>
+    /// Sends a DELETE request to the specified URL.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="url"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+
     public Task<Result<T>> DeleteAsync<T>(string url, CancellationToken cancellationToken = default) =>
         SendRequestAsync<T>(HttpMethod.Delete, url, cancellationToken: cancellationToken);
+
+    /// <summary>
+    /// Sends a request to the specified URL with the given method and content.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="method"></param>
+    /// <param name="url"></param>
+    /// <param name="content"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
 
     private async Task<Result<T>> SendRequestAsync<T>(HttpMethod method, string url, HttpContent? content = null, CancellationToken cancellationToken = default)
     {
@@ -44,6 +90,12 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
             return Result.Failure<T>([$"Error inesperado: {ex.Message}"]);
         }
     }
+
+    /// <summary>
+    /// Extracts the error message from the HTTP response.
+    /// </summary>
+    /// <param name="response"></param>
+    /// <returns></returns>
 
     private static async Task<ImmutableArray<string>> ExtractErrorMessage(HttpResponseMessage response)
     {

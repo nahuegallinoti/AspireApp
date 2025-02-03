@@ -6,21 +6,12 @@ using AspireApp.Entities.Base;
 
 namespace AspireApp.Application.Implementations.Base;
 
-public abstract class BaseServiceLong<TEntity, TModel>(IBaseDA<TEntity, long> baseDA, BaseMapper<TModel, TEntity> mapper)
-    :
-    BaseService<TEntity, TModel, long>(baseDA, mapper) where TEntity : BaseEntity<long>
-                                                       where TModel : BaseModel<long>
-{
-}
-
-public abstract class BaseServiceGuid<TEntity, TModel>(IBaseDA<TEntity, Guid> baseDA, BaseMapper<TModel, TEntity> mapper)
-    :
-    BaseService<TEntity, TModel, Guid>(baseDA, mapper) where TEntity : BaseEntity<Guid>
-                                                       where TModel : BaseModel<Guid>
-{
-}
-
-
+/// <summary>
+/// Implementation of the base service providing common CRUD functionalities.
+/// </summary>
+/// <typeparam name="TEntity">The database entity type.</typeparam>
+/// <typeparam name="TModel">The domain model type.</typeparam>
+/// <typeparam name="TID">The identifier type.</typeparam>
 public class BaseService<TEntity, TModel, TID>(IBaseDA<TEntity, TID> baseDA, BaseMapper<TModel, TEntity> mapper)
     : IBaseService<TModel, TID>
                                 where TEntity : BaseEntity<TID>
@@ -32,42 +23,38 @@ public class BaseService<TEntity, TModel, TID>(IBaseDA<TEntity, TID> baseDA, Bas
 
     public async Task SaveChangesAsync() => await _baseDA.SaveChangesAsync();
 
-
+    /// <inheritdoc />
     public async Task AddAsync(TModel model)
     {
         TEntity entity = _mapper.ToEntity(model);
-
         await _baseDA.AddAsync(entity);
     }
 
+    /// <inheritdoc />
     public void Delete(TModel model)
     {
         TEntity? entity = _mapper.ToEntity(model);
-
         _baseDA.Delete(entity);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TModel>> GetAllAsync()
     {
         IEnumerable<TEntity> entities = await _baseDA.GetAllAsync();
-
         return _mapper.ToModelList(entities);
     }
 
+    /// <inheritdoc />
     public async Task<TModel?> GetByIdAsync(TID id)
     {
         TEntity? entity = await _baseDA.GetByIdAsync(id);
-
-        if (entity is null)
-            return null;
-
-        return _mapper.ToModel(entity);
+        return entity is not null ? _mapper.ToModel(entity) : null;
     }
 
+    /// <inheritdoc />
     public void Update(TModel model)
     {
         TEntity entity = _mapper.ToEntity(model);
-
         _baseDA.Update(entity);
     }
 }

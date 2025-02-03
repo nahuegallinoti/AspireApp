@@ -75,6 +75,7 @@ public static class Extensions
     public static IServiceCollection RegisterMappers(this IServiceCollection services)
     {
         services.AddSingleton<UsuarioMapper>();
+        services.AddSingleton<ProductMapper>();
 
         return services;
     }

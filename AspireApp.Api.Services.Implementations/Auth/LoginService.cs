@@ -1,7 +1,10 @@
 ﻿using AspireApp.Api.Domain.Auth;
 using AspireApp.Api.Domain.Auth.User;
 using AspireApp.Application.Contracts.Auth;
+using AspireApp.Application.Implementations.Extensions;
 using AspireApp.Core.ROP;
+using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
 
 namespace AspireApp.Application.Implementations.Auth;
 
@@ -18,16 +21,8 @@ public class LoginService(ILoginServiceDependencies dependencies) : ILoginServic
 
     private static Result<UserLogin> ValidateUser(UserLogin userAccount)
     {
-        List<string> errores = [];
+        var result = userAccount.Validate();
 
-        if (string.IsNullOrWhiteSpace(userAccount.Email))
-            errores.Add("El email no debe estar vacio");
-
-        if (string.IsNullOrWhiteSpace(userAccount.Password))
-            errores.Add("El password no debe estar vacio");
-
-        return errores.Count is not 0
-            ? Result.Failure<UserLogin>([.. errores])
-            : userAccount;
+        return result;
     }
 }

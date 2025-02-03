@@ -4,15 +4,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AspireApp.Api.Controllers;
 
+/// <summary>
+/// Base controller providing common CRUD operations for API endpoints.
+/// </summary>
+/// <typeparam name="TModel">The model type.</typeparam>
+/// <typeparam name="TID">The type of the model identifier.</typeparam>
+/// <typeparam name="TService">The service type handling the operations.</typeparam>
 public abstract class BaseController<TModel, TID, TService>(TService service)
-    :
-    ControllerBase where TModel : BaseModel<TID>
-                   where TID : struct
-                   where TService : IBaseService<TModel, TID>
+    : ControllerBase where TModel : BaseModel<TID>
+                    where TID : struct
+                    where TService : IBaseService<TModel, TID>
 {
-
     protected readonly TService _service = service;
 
+    /// <summary>
+    /// Retrieves all models.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -20,43 +27,60 @@ public abstract class BaseController<TModel, TID, TService>(TService service)
         return Ok(result);
     }
 
+    /// <summary>
+    /// Retrieves an model by its ID.
+    /// </summary>
+    /// <param name="id">The modelidentifier.</param>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(TID id)
     {
-        var entity = await _service.GetByIdAsync(id);
-        return entity is not null ? Ok(entity) : NotFound();
+        var model= await _service.GetByIdAsync(id);
+        return model is not null ? Ok(model) : NotFound();
     }
 
+    /// <summary>
+    /// Adds a new model.
+    /// </summary>
+    /// <param name="model">The modelto add.</param>
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] TModel entity)
+    public async Task<IActionResult> Add([FromBody] TModel model)
     {
-        await _service.AddAsync(entity);
+        await _service.AddAsync(model);
         await _service.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetById), new { id = entity.Id }, entity);
+        return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
     }
 
+    /// <summary>
+    /// Updates an existing model.
+    /// </summary>
+    /// <param name="id">The model identifier.</param>
+    /// <param name="model">The updated modeldata.</param>
     [HttpPut("{id}")]
-    public IActionResult Update(TID id, [FromBody] TModel entity)
+    public IActionResult Update(TID id, [FromBody] TModel model)
     {
-        if (!id.Equals(entity.Id))
+        if (!id.Equals(model.Id))
         {
             return BadRequest("ID mismatch");
         }
 
-        _service.Update(entity);
+        _service.Update(model);
         return NoContent();
     }
 
+    /// <summary>
+    /// Deletes an model by its ID.
+    /// </summary>
+    /// <param name="id">The model identifier.</param>
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(TID id)
     {
-        var entity = await _service.GetByIdAsync(id);
-        if (entity is null)
+        var model= await _service.GetByIdAsync(id);
+        if (model is null)
         {
             return NotFound();
         }
 
-        _service.Delete(entity);
+        _service.Delete(model);
         await _service.SaveChangesAsync();
         return NoContent();
     }
