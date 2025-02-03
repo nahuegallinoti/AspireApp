@@ -1,21 +1,17 @@
 ﻿using AspireApp.Application.Contracts.Base;
-using AspireApp.DataAccess.Contracts.Base;
 using AspireApp.Entities.Base;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AspireApp.Api.Controllers;
 
-public abstract class BaseController<T, TID, TService> : ControllerBase
-    where T : BaseEntity<TID>
-    where TID : struct
-    where TService : IBaseService<T, TID, IBaseDA<T, TID>>
+public abstract class BaseController<T, TID, TService>(TService service)
+    :
+    ControllerBase where T : BaseEntity<TID>
+                   where TID : struct
+                   where TService : IBaseService<T, TID>
 {
-    protected readonly TService _service;
 
-    protected BaseController(TService service)
-    {
-        _service = service;
-    }
+    protected readonly TService _service = service;
 
     [HttpGet]
     public async Task<IActionResult> GetAll()

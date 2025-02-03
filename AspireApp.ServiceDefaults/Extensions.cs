@@ -1,6 +1,8 @@
 using AspireApp.Application.Contracts.Auth;
+using AspireApp.Application.Contracts.Product;
 using AspireApp.Application.Contracts.User;
 using AspireApp.Application.Implementations.Auth;
+using AspireApp.Application.Implementations.Product;
 using AspireApp.Application.Implementations.User;
 using AspireApp.Core.Mappers;
 using AspireApp.DataAccess.Contracts;
@@ -56,12 +58,15 @@ public static class Extensions
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<ILoginServiceDependencies, LoginServiceDependencies>();
 
+        services.AddScoped<IProductService, ProductService>();
+
         return services;
     }
 
     public static IServiceCollection RegisterDataAccess(this IServiceCollection services)
     {
         services.AddScoped<IUsuarioDA, UsuarioDA>();
+        services.AddScoped<IProductDA, ProductDA>();
 
         return services;
     }

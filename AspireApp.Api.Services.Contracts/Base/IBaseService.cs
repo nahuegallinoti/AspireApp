@@ -1,11 +1,9 @@
-﻿using AspireApp.DataAccess.Contracts.Base;
-using AspireApp.Entities.Base;
+﻿using AspireApp.Entities.Base;
 
 namespace AspireApp.Application.Contracts.Base;
 
-public interface IBaseService<T, TID, TDA> where T : BaseEntity<TID>
-                                           where TID : struct
-                                           where TDA : IBaseDA<T, TID>
+public interface IBaseService<T, TID> where T : BaseEntity<TID>
+                                      where TID : struct
 {
     Task AddAsync(T entity);
     void Delete(T entity);
