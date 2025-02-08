@@ -58,7 +58,7 @@ public class LoginServiceDependenciesTest
         _configurationMock.Setup(x => x["Jwt:Audience"]).Returns("audience");
 
         // Act
-        var result = await _loginServiceDependencies.VerifyUserPassword(userLogin);
+        var result = await _loginServiceDependencies.VerifyUserPassword(userLogin, CancellationToken.None);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -78,7 +78,7 @@ public class LoginServiceDependenciesTest
         _usuarioDAMock.Setup(x => x.GetUserByEmail(userLogin.Email, CancellationToken.None)).ReturnsAsync((Ent.User?)null);
 
         // Act
-        var result = await _loginServiceDependencies.VerifyUserPassword(userLogin);
+        var result = await _loginServiceDependencies.VerifyUserPassword(userLogin, CancellationToken.None);
 
         // Assert
         Assert.IsFalse(result.Success);

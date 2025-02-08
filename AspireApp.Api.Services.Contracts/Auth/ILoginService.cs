@@ -5,5 +5,5 @@ using AspireApp.Core.ROP;
 namespace AspireApp.Application.Contracts.Auth;
 public interface ILoginService
 {
-    Task<Result<AuthenticationResult>> Login(UserLogin user, CancellationToken cancellationToken = default);
+    Task<Result<AuthenticationResult>> Login(UserLogin user, CancellationToken cancellationToken);
 }

@@ -10,10 +10,10 @@ public class LoginService(ILoginServiceDependencies dependencies) : ILoginServic
 {
     private readonly ILoginServiceDependencies _loginDependencies = dependencies;
 
-    public Task<Result<AuthenticationResult>> Login(UserLogin user, CancellationToken cancellationToken = default)
+    public Task<Result<AuthenticationResult>> Login(UserLogin user, CancellationToken cancellationToken)
     {
         return ValidateUser(user)
-        .Bind(_loginDependencies.VerifyUserPassword)
+        .Bind(userResult => _loginDependencies.VerifyUserPassword(userResult, cancellationToken))
         .Bind(_loginDependencies.CreateToken);
     }
 

@@ -42,8 +42,8 @@ public abstract class BaseDATest<TEntity, TID, TDA>
         TID id = entity.SetId<TEntity, TID>();
 
         // Act
-        await _dataAccess.AddAsync(entity);
-        await _dataAccess.SaveChangesAsync();
+        await _dataAccess.AddAsync(entity, CancellationToken.None);
+        await _dataAccess.SaveChangesAsync(CancellationToken.None);
         var result = await _dataAccess.GetByIdAsync(id);
 
         // Assert
@@ -56,10 +56,10 @@ public abstract class BaseDATest<TEntity, TID, TDA>
     {
         // Arrange
         _context.Set<TEntity>().AddRange(CreateInstance(), CreateInstance());
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(CancellationToken.None);
 
         // Act
-        var result = await _dataAccess.GetAllAsync();
+        var result = await _dataAccess.GetAllAsync(CancellationToken.None);
 
         // Assert
         Assert.IsTrue(result.Any());
@@ -79,14 +79,14 @@ public abstract class BaseDATest<TEntity, TID, TDA>
 
         TID id = entity.SetId<TEntity, TID>();
 
-        await _dataAccess.AddAsync(entity);
-        await _dataAccess.SaveChangesAsync();
+        await _dataAccess.AddAsync(entity, CancellationToken.None);
+        await _dataAccess.SaveChangesAsync(CancellationToken.None);
 
         // Act
         propertyName?.SetValue(entity, "Updated");
 
         _dataAccess.Update(entity);
-        await _dataAccess.SaveChangesAsync();
+        await _dataAccess.SaveChangesAsync(CancellationToken.None);
 
         var result = await _dataAccess.GetByIdAsync(id);
 
@@ -106,12 +106,12 @@ public abstract class BaseDATest<TEntity, TID, TDA>
 
         TID id = entity.SetId<TEntity, TID>();
 
-        await _dataAccess.AddAsync(entity);
-        await _dataAccess.SaveChangesAsync();
+        await _dataAccess.AddAsync(entity, CancellationToken.None);
+        await _dataAccess.SaveChangesAsync(CancellationToken.None);
 
         // Act
         _dataAccess.Delete(entity);
-        await _dataAccess.SaveChangesAsync();
+        await _dataAccess.SaveChangesAsync(CancellationToken.None);
         var result = await _dataAccess.GetByIdAsync(id);
 
         // Assert

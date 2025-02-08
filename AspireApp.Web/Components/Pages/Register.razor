@@ -42,11 +42,17 @@
 
     private async Task HandleRegister()
     {
+        CancellationTokenSource cts = new();
+
         errorMessage = String.Empty;
 
         try
         {
-            var response = await RegisterApi.RegisterAsync(Model);
+            var response = await RegisterApi.RegisterAsync(Model, cts.Token);
+        }
+        catch (OperationCanceledException ex)
+        {
+            errorMessage = $"La operación fue cancelada: {ex.Message}";
         }
         catch (Exception ex)
         {

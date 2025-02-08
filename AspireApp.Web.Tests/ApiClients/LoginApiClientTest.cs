@@ -41,6 +41,8 @@ public class LoginApiClientTest : BaseApiClientTest<LoginApiClient>
         var authResult = new AuthenticationResult { Token = "fake-token" };
         var jsonResponse = JsonSerializer.Serialize(authResult);
 
+        CancellationTokenSource tokenSource = new();
+
         _mockHttpMessageHandler
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
@@ -54,7 +56,7 @@ public class LoginApiClientTest : BaseApiClientTest<LoginApiClient>
             });
 
         // Act
-        var result = await _apiClient.LoginAsync(loginRequest);
+        var result = await _apiClient.LoginAsync(loginRequest, tokenSource.Token);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -66,6 +68,8 @@ public class LoginApiClientTest : BaseApiClientTest<LoginApiClient>
     {
         // Arrange
         var loginRequest = new UserLogin { Email = "user@example.com", Password = "wrongpassword" };
+
+        CancellationTokenSource tokenSource = new();
 
         _mockHttpMessageHandler
             .Protected()
@@ -79,7 +83,7 @@ public class LoginApiClientTest : BaseApiClientTest<LoginApiClient>
             });
 
         // Act
-        var result = await _apiClient.LoginAsync(loginRequest);
+        var result = await _apiClient.LoginAsync(loginRequest, tokenSource.Token);
 
         // Assert
         Assert.IsFalse(result.Success);

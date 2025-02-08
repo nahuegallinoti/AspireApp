@@ -19,7 +19,7 @@ public class RegisterUserServiceDependenciesTest
     [TestInitialize]
     public void Initialize()
     {
-        _usuarioDA = new(MockBehavior.Strict);
+        _usuarioDA = new(MockBehavior.Default);
         _usuarioMapper = new();
         _registerUserServiceDependencies = new RegisterUserServiceDependencies(_usuarioDA.Object, _usuarioMapper);
     }
@@ -38,16 +38,17 @@ public class RegisterUserServiceDependenciesTest
 
         var id = user.SetId<UserRegister, Guid>();
 
-        _usuarioDA.Setup(x => x.AddAsync(It.IsAny<Ent.User>())).Returns(Task.CompletedTask);
-        _usuarioDA.Setup(x => x.SaveChangesAsync()).Returns(Task.CompletedTask);
+        _usuarioDA.Setup(x => x.AddAsync(It.IsAny<Ent.User>(), CancellationToken.None)).Returns(Task.CompletedTask);
+
+        _usuarioDA.Setup(x => x.SaveChangesAsync(CancellationToken.None)).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _registerUserServiceDependencies.AddUser(user);
+        var result = await _registerUserServiceDependencies.AddUser(user, CancellationToken.None);
 
         // Assert
         Assert.IsTrue(result.Success, "El usuario debería haberse registrado correctamente.");
-        _usuarioDA.Verify(x => x.AddAsync(It.Is<Ent.User>(u => u.Email == user.Email && u.PasswordHash != null)), Times.Once);
-        _usuarioDA.Verify(x => x.SaveChangesAsync(), Times.Once);
+        _usuarioDA.Verify(x => x.AddAsync(It.Is<Ent.User>(u => u.Email == user.Email && u.PasswordHash != null), CancellationToken.None), Times.Once);
+        _usuarioDA.Verify(x => x.SaveChangesAsync(CancellationToken.None), Times.Once);
     }
 
     [TestMethod]
@@ -62,14 +63,16 @@ public class RegisterUserServiceDependenciesTest
             Password = "Nagu"
         };
 
-        _usuarioDA.Setup(x => x.UserExist(user.Email, default)).ReturnsAsync(true);
+        CancellationTokenSource cts = new();
+
+        _usuarioDA.Setup(x => x.UserExist(user.Email, cts.Token)).ReturnsAsync(true);
 
         // Act
-        var result = await _registerUserServiceDependencies.VerifyUserDoesNotExist(user);
+        var result = await _registerUserServiceDependencies.VerifyUserDoesNotExist(user, cts.Token);
 
         // Assert
         Assert.IsFalse(result.Success, "El usuario debería existir.");
-        _usuarioDA.Verify(result => result.UserExist(user.Email, default), Times.Once);
+        _usuarioDA.Verify(result => result.UserExist(user.Email, cts.Token), Times.Once);
     }
 
 
@@ -85,13 +88,15 @@ public class RegisterUserServiceDependenciesTest
             Password = "Nagu"
         };
 
-        _usuarioDA.Setup(x => x.UserExist(user.Email, default)).ReturnsAsync(false);
+        CancellationTokenSource cts = new();
+
+        _usuarioDA.Setup(x => x.UserExist(user.Email, cts.Token)).ReturnsAsync(false);
 
         // Act
-        var result = await _registerUserServiceDependencies.VerifyUserDoesNotExist(user);
+        var result = await _registerUserServiceDependencies.VerifyUserDoesNotExist(user, cts.Token);
 
         // Assert
         Assert.IsTrue(result.Success, "El usuario ya existe.");
-        _usuarioDA.Verify(result => result.UserExist(user.Email, default), Times.Once);
+        _usuarioDA.Verify(result => result.UserExist(user.Email, cts.Token), Times.Once);
     }
 }

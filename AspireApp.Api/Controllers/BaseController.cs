@@ -21,9 +21,9 @@ public abstract class BaseController<TModel, TID, TService>(TService service)
     /// Retrieves all models.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken ct = default)
     {
-        var result = await _service.GetAllAsync();
+        var result = await _service.GetAllAsync(ct);
         return Ok(result);
     }
 
@@ -34,7 +34,7 @@ public abstract class BaseController<TModel, TID, TService>(TService service)
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(TID id)
     {
-        var model= await _service.GetByIdAsync(id);
+        var model = await _service.GetByIdAsync(id);
         return model is not null ? Ok(model) : NotFound();
     }
 
@@ -43,10 +43,10 @@ public abstract class BaseController<TModel, TID, TService>(TService service)
     /// </summary>
     /// <param name="model">The modelto add.</param>
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] TModel model)
+    public async Task<IActionResult> Add([FromBody] TModel model, CancellationToken ct = default)
     {
-        await _service.AddAsync(model);
-        await _service.SaveChangesAsync();
+        await _service.AddAsync(model, ct);
+        await _service.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
     }
 
@@ -72,16 +72,16 @@ public abstract class BaseController<TModel, TID, TService>(TService service)
     /// </summary>
     /// <param name="id">The model identifier.</param>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(TID id)
+    public async Task<IActionResult> Delete(TID id, CancellationToken ct = default)
     {
-        var model= await _service.GetByIdAsync(id);
+        var model = await _service.GetByIdAsync(id);
         if (model is null)
         {
             return NotFound();
         }
 
         _service.Delete(model);
-        await _service.SaveChangesAsync();
+        await _service.SaveChangesAsync(ct);
         return NoContent();
     }
 }

@@ -25,10 +25,10 @@ public class BaseDA<T, TID> : IBaseDA<T, TID> where T : BaseEntity<TID>
     public async Task<T?> GetByIdAsync(TID id) => await _dbSet.FindAsync(id);
 
     /// <inheritdoc />
-    public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
+    public async Task<IEnumerable<T>> GetAllAsync(CancellationToken ct) => await _dbSet.ToListAsync(ct);
 
     /// <inheritdoc />
-    public async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
+    public async Task AddAsync(T entity, CancellationToken ct) => await _dbSet.AddAsync(entity, ct);
 
     /// <inheritdoc />
     public void Update(T entity) => _dbSet.Update(entity);
@@ -37,5 +37,5 @@ public class BaseDA<T, TID> : IBaseDA<T, TID> where T : BaseEntity<TID>
     public void Delete(T entity) => _dbSet.Remove(entity);
 
     /// <inheritdoc />
-    public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
+    public async Task SaveChangesAsync(CancellationToken ct) => await _context.SaveChangesAsync(ct);
 }

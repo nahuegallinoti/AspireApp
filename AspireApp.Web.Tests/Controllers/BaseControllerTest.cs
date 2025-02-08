@@ -36,7 +36,7 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
                 Activator.CreateInstance<T>(),
                 Activator.CreateInstance<T>()
             };
-        _serviceMock.Setup(service => service.GetAllAsync()).ReturnsAsync(entities);
+        _serviceMock.Setup(service => service.GetAllAsync(CancellationToken.None)).ReturnsAsync(entities);
 
         var result = await _controller.GetAll();
 
@@ -86,8 +86,8 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
     {
         // Arrange
         var entity = Activator.CreateInstance<T>();
-        _serviceMock.Setup(service => service.AddAsync(entity)).Returns(Task.CompletedTask);
-        _serviceMock.Setup(service => service.SaveChangesAsync()).Returns(Task.CompletedTask);
+        _serviceMock.Setup(service => service.AddAsync(entity, CancellationToken.None)).Returns(Task.CompletedTask);
+        _serviceMock.Setup(service => service.SaveChangesAsync(CancellationToken.None)).Returns(Task.CompletedTask);
 
         // Act
         var result = await _controller.Add(entity);
@@ -123,7 +123,7 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
         entity.Id = id!;
         _serviceMock.Setup(service => service.GetByIdAsync(id)).ReturnsAsync(entity);
         _serviceMock.Setup(service => service.Delete(entity));
-        _serviceMock.Setup(service => service.SaveChangesAsync()).Returns(Task.CompletedTask);
+        _serviceMock.Setup(service => service.SaveChangesAsync(CancellationToken.None)).Returns(Task.CompletedTask);
 
         // Act
         var result = await _controller.Delete(id);

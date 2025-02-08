@@ -5,6 +5,6 @@ namespace AspireApp.Web.ApiClients;
 
 public class RegisterApiClient(IHttpClientFactory httpClientFactory) : BaseApiClient(httpClientFactory, "ApiClient")
 {
-    public async Task<Result<Guid>> RegisterAsync(UserRegister userRegister, CancellationToken cancellationToken = default) =>
+    public async Task<Result<Guid>> RegisterAsync(UserRegister userRegister, CancellationToken cancellationToken) =>
         await PostAsync<Guid, UserRegister>("api/auth/register", userRegister, cancellationToken);
 }

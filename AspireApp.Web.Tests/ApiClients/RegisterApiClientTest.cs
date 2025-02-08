@@ -40,6 +40,8 @@ public class RegisterApiClientTest : BaseApiClientTest<RegisterApiClient>
         var userId = Guid.NewGuid();
         var jsonResponse = JsonSerializer.Serialize(userId);
 
+        CancellationTokenSource tokenSource = new();
+
         _mockHttpMessageHandler
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
@@ -53,7 +55,7 @@ public class RegisterApiClientTest : BaseApiClientTest<RegisterApiClient>
             });
 
         // Act
-        var result = await _apiClient.RegisterAsync(userRegister);
+        var result = await _apiClient.RegisterAsync(userRegister, tokenSource.Token);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -65,6 +67,8 @@ public class RegisterApiClientTest : BaseApiClientTest<RegisterApiClient>
     {
         // Arrange
         var userRegister = new UserRegister { Email = "existinguser@example.com", Password = "password" };
+
+        CancellationTokenSource tokenSource = new();
 
         _mockHttpMessageHandler
             .Protected()
@@ -78,7 +82,7 @@ public class RegisterApiClientTest : BaseApiClientTest<RegisterApiClient>
             });
 
         // Act
-        var result = await _apiClient.RegisterAsync(userRegister);
+        var result = await _apiClient.RegisterAsync(userRegister, tokenSource.Token);
 
         // Assert
         Assert.IsFalse(result.Success);

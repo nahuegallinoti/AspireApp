@@ -36,7 +36,7 @@ public sealed class LoginServiceTest
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Simulamos que el usuario existe y la contraseña es válida.
-        _loginServiceDependencies.Setup(x => x.VerifyUserPassword(user)).ReturnsAsync(user.Success());
+        _loginServiceDependencies.Setup(x => x.VerifyUserPassword(user, cancellationToken)).ReturnsAsync(user.Success());
 
         // Simulamos que la creación del token es exitosa.
         AuthenticationResult authResult = new("fake-jwt-token");
@@ -64,7 +64,7 @@ public sealed class LoginServiceTest
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Simulamos que el usuario no existe.
-        _loginServiceDependencies.Setup(x => x.VerifyUserPassword(userLogin)).ReturnsAsync(Result.Failure<UserLogin>("Usuario no encontrado"));
+        _loginServiceDependencies.Setup(x => x.VerifyUserPassword(userLogin, cancellationToken)).ReturnsAsync(Result.Failure<UserLogin>("Usuario no encontrado"));
 
         // Act
         var result = await _loginService.Login(userLogin, cancellationToken);

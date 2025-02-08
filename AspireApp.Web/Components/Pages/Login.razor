@@ -47,11 +47,13 @@
 
     private async Task HandleLogin()
     {
+        CancellationTokenSource cts = new();
+
         errorMessage = string.Empty;
 
         try
         {
-            var result = await LoginApi.LoginAsync(Model);
+            var result = await LoginApi.LoginAsync(Model, cts.Token);
 
             if (result.Success)
             {
@@ -63,6 +65,10 @@
                     ? string.Join(";", result.Errors).TrimEnd(';')
                     : "Error desconocido";
             }
+        }
+        catch (OperationCanceledException ex)
+        {
+            errorMessage = $"La operación fue cancelada: {ex.Message}";
         }
         catch (Exception ex)
         {

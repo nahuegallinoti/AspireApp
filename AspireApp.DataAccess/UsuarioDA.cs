@@ -9,9 +9,9 @@ public class UsuarioDA(AppDbContext context) : BaseDA<User, Guid>(context), IUsu
 {
     private readonly AppDbContext _context = context;
 
-    public async Task<bool> UserExist(string email, CancellationToken cancellationToken = default) =>
+    public async Task<bool> UserExist(string email, CancellationToken cancellationToken) =>
         await _context.Users.AnyAsync(u => u.Email == email, cancellationToken);
 
-    public async Task<User?> GetUserByEmail(string email, CancellationToken cancellationToken = default) =>
-        await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+    public async Task<User?> GetUserByEmail(string email, CancellationToken cancellationToken) =>
+        await _context.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken: cancellationToken);
 }

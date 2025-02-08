@@ -13,7 +13,7 @@ public class RegisterUserServiceDependencies(IUsuarioDA usuarioDA, UsuarioMapper
     private readonly IUsuarioDA _usuarioDA = usuarioDA;
     private readonly UsuarioMapper _usuarioMapper = usuarioMapper;
 
-    public async Task<Result<Guid>> AddUser(UserRegister userAccount)
+    public async Task<Result<Guid>> AddUser(UserRegister userAccount, CancellationToken cancellationToken)
     {
         Entities.User usuario = _usuarioMapper.ToEntity(userAccount);
 
@@ -22,8 +22,8 @@ public class RegisterUserServiceDependencies(IUsuarioDA usuarioDA, UsuarioMapper
         usuario.PasswordHash = passwordHash;
         usuario.PasswordSalt = passwordSalt;
 
-        await _usuarioDA.AddAsync(usuario);
-        await _usuarioDA.SaveChangesAsync();
+        await _usuarioDA.AddAsync(usuario, cancellationToken);
+        await _usuarioDA.SaveChangesAsync(cancellationToken);
 
         return usuario.Id;
     }
@@ -38,7 +38,7 @@ public class RegisterUserServiceDependencies(IUsuarioDA usuarioDA, UsuarioMapper
         return (passwordHash, passwordSalt);
     }
 
-    public async Task<Result<UserRegister>> VerifyUserDoesNotExist(UserRegister userAccount, CancellationToken cancellationToken = default)
+    public async Task<Result<UserRegister>> VerifyUserDoesNotExist(UserRegister userAccount, CancellationToken cancellationToken)
     {
         var exists = await _usuarioDA.UserExist(userAccount.Email, cancellationToken);
 

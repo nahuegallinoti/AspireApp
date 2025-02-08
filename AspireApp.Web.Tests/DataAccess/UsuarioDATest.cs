@@ -19,8 +19,8 @@ public sealed class UsuarioDATest : BaseDATest<User, Guid, UsuarioDA>
             Email = email
         };
 
-        await DA.AddAsync(user);
-        await DA.SaveChangesAsync();
+        await DA.AddAsync(user, CancellationToken.None);
+        await DA.SaveChangesAsync(CancellationToken.None);
 
         // Act
         var result = await DA.UserExist(email, CancellationToken.None);
@@ -40,8 +40,8 @@ public sealed class UsuarioDATest : BaseDATest<User, Guid, UsuarioDA>
             Email = email
         };
 
-        await DA.AddAsync(user);
-        await DA.SaveChangesAsync();
+        await DA.AddAsync(user, CancellationToken.None);
+        await DA.SaveChangesAsync(CancellationToken.None);
 
         // Act
         var result = await DA.GetUserByEmail(email, CancellationToken.None);

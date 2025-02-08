@@ -41,17 +41,17 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
         // Arrange
         List<TE> expectedEntities = [CreateInstanceEntity(), CreateInstanceEntity()];
 
-        _baseDAMock.Setup(repo => repo.GetAllAsync())
+        _baseDAMock.Setup(repo => repo.GetAllAsync(CancellationToken.None))
                    .ReturnsAsync(expectedEntities);
 
         // Act
-        IEnumerable<TM> result = await _baseService.GetAllAsync();
+        IEnumerable<TM> result = await _baseService.GetAllAsync(CancellationToken.None);
 
         // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(expectedEntities.Count, result.Count());
 
-        _baseDAMock.Verify(repo => repo.GetAllAsync(), Times.Once);
+        _baseDAMock.Verify(repo => repo.GetAllAsync(CancellationToken.None), Times.Once);
     }
 
     [TestMethod]
@@ -84,13 +84,13 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
         model.GetType().GetProperty("Name")?.SetValue(model, "nagu");
 
         // Se usa It.IsAny<TE> para que el mock acepte cualquier instancia de TEntity
-        _baseDAMock.Setup(repo => repo.AddAsync(It.IsAny<TE>())).Returns(Task.CompletedTask);
+        _baseDAMock.Setup(repo => repo.AddAsync(It.IsAny<TE>(), CancellationToken.None)).Returns(Task.CompletedTask);
 
         // Act
-        await _baseService.AddAsync(model);
+        await _baseService.AddAsync(model, CancellationToken.None);
 
         // Assert
-        _baseDAMock.Verify(repo => repo.AddAsync(It.IsAny<TE>()), Times.Once);
+        _baseDAMock.Verify(repo => repo.AddAsync(It.IsAny<TE>(), CancellationToken.None), Times.Once);
     }
 
     [TestMethod]
@@ -127,12 +127,12 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
     public async Task SaveChangesAsync_ShouldCommitChanges()
     {
         // Arrange
-        _baseDAMock.Setup(repo => repo.SaveChangesAsync()).Returns(Task.CompletedTask);
+        _baseDAMock.Setup(repo => repo.SaveChangesAsync(CancellationToken.None)).Returns(Task.CompletedTask);
 
         // Act
-        await _baseService.SaveChangesAsync();
+        await _baseService.SaveChangesAsync(CancellationToken.None);
 
         // Assert
-        _baseDAMock.Verify(repo => repo.SaveChangesAsync(), Times.Once);
+        _baseDAMock.Verify(repo => repo.SaveChangesAsync(CancellationToken.None), Times.Once);
     }
 }

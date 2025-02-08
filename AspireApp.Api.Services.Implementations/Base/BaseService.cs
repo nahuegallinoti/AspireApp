@@ -21,13 +21,13 @@ public class BaseService<TEntity, TModel, TID>(IBaseDA<TEntity, TID> baseDA, Bas
     private readonly IBaseDA<TEntity, TID> _baseDA = baseDA;
     private readonly BaseMapper<TModel, TEntity> _mapper = mapper;
 
-    public async Task SaveChangesAsync() => await _baseDA.SaveChangesAsync();
+    public async Task SaveChangesAsync(CancellationToken ct) => await _baseDA.SaveChangesAsync(ct);
 
     /// <inheritdoc />
-    public async Task AddAsync(TModel model)
+    public async Task AddAsync(TModel model, CancellationToken ct)
     {
         TEntity entity = _mapper.ToEntity(model);
-        await _baseDA.AddAsync(entity);
+        await _baseDA.AddAsync(entity, ct);
     }
 
     /// <inheritdoc />
@@ -38,9 +38,9 @@ public class BaseService<TEntity, TModel, TID>(IBaseDA<TEntity, TID> baseDA, Bas
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<TModel>> GetAllAsync()
+    public async Task<IEnumerable<TModel>> GetAllAsync(CancellationToken ct)
     {
-        IEnumerable<TEntity> entities = await _baseDA.GetAllAsync();
+        IEnumerable<TEntity> entities = await _baseDA.GetAllAsync(ct);
         return _mapper.ToModelList(entities);
     }
 

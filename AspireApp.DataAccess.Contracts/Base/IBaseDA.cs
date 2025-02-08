@@ -15,7 +15,7 @@ public interface IBaseDA<T, TID> where T : BaseEntity<TID>
     /// </summary>
     /// <param name="entity"></param>
     /// <returns></returns>
-    Task AddAsync(T entity);
+    Task AddAsync(T entity, CancellationToken ct);
 
     /// <summary>
     /// Delete an entity from the database.
@@ -27,7 +27,7 @@ public interface IBaseDA<T, TID> where T : BaseEntity<TID>
     /// Get all entities from the database.
     /// </summary>
     /// <returns></returns>
-    Task<IEnumerable<T>> GetAllAsync();
+    Task<IEnumerable<T>> GetAllAsync(CancellationToken ct);
 
     /// <summary>
     /// Get an entity by its identifier.
@@ -46,5 +46,5 @@ public interface IBaseDA<T, TID> where T : BaseEntity<TID>
     /// Save changes to the database.
     /// </summary>
     /// <returns></returns>
-    Task SaveChangesAsync();
+    Task SaveChangesAsync(CancellationToken ct);
 }

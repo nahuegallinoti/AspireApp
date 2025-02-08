@@ -13,7 +13,7 @@ public class RegisterUserService(IRegisterUserServiceDependencies dependencies) 
     {
         return ValidateUser(usuario)
         .Bind(user => _registerUserDependencies.VerifyUserDoesNotExist(user, cancellationToken))
-        .Bind(_registerUserDependencies.AddUser);
+        .Bind(user => _registerUserDependencies.AddUser(user, cancellationToken));
     }
 
     private static Result<UserRegister> ValidateUser(UserRegister userAccount)

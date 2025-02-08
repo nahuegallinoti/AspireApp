@@ -5,6 +5,6 @@ namespace AspireApp.DataAccess.Contracts;
 
 public interface IUsuarioDA : IBaseDA<User, Guid>
 {
-    Task<bool> UserExist(string email, CancellationToken cancellationToken = default);
-    Task<User?> GetUserByEmail(string email, CancellationToken cancellationToken = default);
+    Task<bool> UserExist(string email, CancellationToken cancellationToken);
+    Task<User?> GetUserByEmail(string email, CancellationToken cancellationToken);
 }

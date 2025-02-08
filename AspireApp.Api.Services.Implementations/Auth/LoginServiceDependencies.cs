@@ -17,9 +17,9 @@ public class LoginServiceDependencies(IConfiguration configuration, IUsuarioDA u
     private readonly IConfiguration _configuration = configuration;
     private readonly IUsuarioDA _usuarioDA = usuarioDA;
 
-    public async Task<Result<UserLogin>> VerifyUserPassword(UserLogin userAccount)
+    public async Task<Result<UserLogin>> VerifyUserPassword(UserLogin userAccount, CancellationToken ct)
     {
-        var usuario = await _usuarioDA.GetUserByEmail(userAccount.Email);
+        var usuario = await _usuarioDA.GetUserByEmail(userAccount.Email, ct);
 
         if (usuario is null || !VerifyPasswordHash(userAccount.Password, usuario.PasswordHash, usuario.PasswordSalt))
             return Result.Failure<UserLogin>("El usuario es inválido");
