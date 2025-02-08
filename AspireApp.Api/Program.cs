@@ -34,7 +34,22 @@ builder.Services.RegisterMappers();
 builder.Services.RegisterDataAccess();
 builder.Services.RegisterAppServices();
 
-builder.Services.AddMemoryCache();
+
+// CACHE
+
+//builder.Services.AddMemoryCache(); // Memory cache. No es necesario si uso hybrid
+
+// Redis cache
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379";
+});
+
+// Hybrid cache - utilizará redis si está configurado, si no in memory
+#pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+builder.Services.AddHybridCache();
+#pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<RabbitMqService>(); // Registrar servicio de RabbitMQ

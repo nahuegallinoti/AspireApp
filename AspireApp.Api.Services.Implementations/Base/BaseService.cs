@@ -3,11 +3,11 @@ using AspireApp.Application.Contracts.Base;
 using AspireApp.Core.Mappers;
 using AspireApp.DataAccess.Contracts.Base;
 using AspireApp.Entities.Base;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace AspireApp.Application.Implementations.Base;
 
-public class BaseService<TEntity, TModel, TID>(IBaseDA<TEntity, TID> baseDA, BaseMapper<TModel, TEntity> mapper, IMemoryCache cache)
+public class BaseService<TEntity, TModel, TID>(IBaseDA<TEntity, TID> baseDA, BaseMapper<TModel, TEntity> mapper, HybridCache hybridCache)
     : IBaseService<TModel, TID>
                                 where TEntity : BaseEntity<TID>
                                 where TModel : BaseModel<TID>
@@ -15,7 +15,7 @@ public class BaseService<TEntity, TModel, TID>(IBaseDA<TEntity, TID> baseDA, Bas
 {
     private readonly IBaseDA<TEntity, TID> _baseDA = baseDA;
     private readonly BaseMapper<TModel, TEntity> _mapper = mapper;
-    private readonly IMemoryCache _cache = cache;
+    private readonly HybridCache _hybridCache = hybridCache;
 
     public async Task SaveChangesAsync(CancellationToken ct) => await _baseDA.SaveChangesAsync(ct);
 
@@ -43,20 +43,19 @@ public class BaseService<TEntity, TModel, TID>(IBaseDA<TEntity, TID> baseDA, Bas
     /// <inheritdoc />
     public async Task<TModel?> GetByIdAsync(TID id)
     {
-        var cacheKey = $"{typeof(TModel).Name}:{id}";
+        string modelName = typeof(TModel).Name;
 
-        TEntity? entity = await _cache.GetOrCreateAsync(cacheKey, async async => await _baseDA.GetByIdAsync(id));
+        string cacheKey = $"{modelName}:{id}";
 
-        return entity is not null ? _mapper.ToModel(entity) : null;
+        TEntity? entity = await _hybridCache.GetOrCreateAsync(cacheKey,
+                 async _ => await _baseDA.GetByIdAsync(id),
+                 tags: [modelName]);
+
+        if (entity is null)
+            return null;
+
+        return _mapper.ToModel(entity);
     }
-
-    public async Task<TModel?> GetByIdAsyncFromDb(TID id)
-    {
-        TEntity? entity = await _baseDA.GetByIdAsync(id);
-        return entity is not null ? _mapper.ToModel(entity) : null;
-    }
-
-
 
     /// <inheritdoc />
     public void Update(TModel model)
