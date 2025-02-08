@@ -18,11 +18,11 @@
     <ValidationSummary />
 
     <div>
-        <label>Usuario:</label>
+        <label>Email:</label>
         <InputText @bind-Value="Model.Email" />
     </div>
     <div>
-        <label>Contraseña:</label>
+        <label>Password:</label>
         <InputText @bind-Value="Model.Password" type="password" />
     </div>
     <button type="submit">Iniciar Sesión</button>
@@ -30,10 +30,10 @@
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
-    <div class="alert alert-danger mt-3">
+    <div class="alert alert-danger mt-3 flex-column">
         @foreach (var error in errorMessage.Split("; "))
         {
-            <p>@error</p>
+            <div>@error</div>
         }
     </div>
 }
@@ -61,7 +61,8 @@
             }
             else
             {
-                errorMessage = string.Join(Environment.NewLine, result.Errors);
+                errorMessage = string.Join(";", result.Errors);
+                errorMessage.TrimEnd(';');
             }
         }
         catch (Exception ex)

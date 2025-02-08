@@ -1,5 +1,6 @@
 ﻿using AspireApp.Api.Domain.Auth;
 using AspireApp.Api.Domain.Auth.User;
+using AspireApp.Api.Tests.Helpers;
 using AspireApp.Application.Contracts.Auth;
 using AspireApp.Application.Contracts.User;
 using AspireApp.Application.Implementations.Auth;
@@ -73,22 +74,48 @@ public sealed class LoginServiceTest
     }
 
     [TestMethod]
-    public async Task Login_ShouldReturnFailure_WhenValidationFails()
+    public async Task Login_ShouldReturnFailure_WhenEmailIsEmpty()
     {
         // Arrange
         var userLogin = new UserLogin
         {
-            Email = "",  // Email vacío para fallar la validación
+            Email = "",
             Password = "Nagu"
         };
 
         CancellationToken cancellationToken = CancellationToken.None;
 
-        // Act
+        // Obtener el mensaje de error para la propiedad "Email" usando reflexión
+        var expectedErrorMessage = ValidationHelper.GetErrorMessage(userLogin, nameof(userLogin.Email));
+
+        // Act: Ejecutamos el Login (sin cambios, solo para testear el comportamiento)
         var result = await _loginService.Login(userLogin, cancellationToken);
 
-        // Assert
+        // Assert: Verificamos el resultado de validación
         Assert.IsFalse(result.Success);
-        Assert.AreEqual("El email no debe estar vacio", result.Errors.FirstOrDefault());
+        Assert.AreEqual(expectedErrorMessage, result.Errors.FirstOrDefault());
+    }
+
+    [TestMethod]
+    public async Task Login_ShouldReturnFailure_WhenPasswordIsEmpty()
+    {
+        // Arrange
+        var userLogin = new UserLogin
+        {
+            Email = "nagu@gmail.com",
+            Password = ""
+        };
+
+        CancellationToken cancellationToken = CancellationToken.None;
+
+        // Obtener el mensaje de error para la propiedad "Password" usando reflexión
+        var expectedErrorMessage = ValidationHelper.GetErrorMessage(userLogin, nameof(userLogin.Password));
+
+        // Act: Ejecutamos el Login (sin cambios, solo para testear el comportamiento)
+        var result = await _loginService.Login(userLogin, cancellationToken);
+
+        // Assert: Verificamos el resultado de validación
+        Assert.IsFalse(result.Success);
+        Assert.AreEqual(expectedErrorMessage, result.Errors.FirstOrDefault());
     }
 }

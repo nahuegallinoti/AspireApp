@@ -11,6 +11,7 @@ public sealed class ProductServiceTest : BaseServiceTest<Ent.Product, Dto.Produc
     [TestInitialize]
     public void SetupProductService()
     {
+        // Se hace esto porque Setup no puede recibir parámetros
         InitializeMapper(new ProductMapper());
         base.Setup();
     }

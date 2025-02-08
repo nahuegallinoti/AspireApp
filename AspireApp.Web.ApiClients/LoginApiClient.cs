@@ -6,14 +6,7 @@ namespace AspireApp.Web.ApiClients;
 
 public class LoginApiClient(IHttpClientFactory httpClientFactory) : BaseApiClient(httpClientFactory, "ApiClient")
 {
-    public async Task<Result<AuthenticationResult>> LoginAsync(UserLogin user, CancellationToken cancellationToken = default)
-    {
-        UserLogin loginRequest = new()
-        {
-            Email = user.Email,
-            Password = user.Password
-        };
+    public async Task<Result<AuthenticationResult>> LoginAsync(UserLogin user, CancellationToken cancellationToken = default) =>
+        await PostAsync<AuthenticationResult, UserLogin>("api/auth/login", user, cancellationToken);
 
-        return await PostAsync<AuthenticationResult, UserLogin>("api/auth/login", loginRequest, cancellationToken);
-    }
 }

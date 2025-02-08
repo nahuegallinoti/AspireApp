@@ -28,7 +28,6 @@ public static class Result_Bind
         }
     }
 
-
     /// <summary>
     /// Allows to chain two async methods, the output of the first is the input of the second.
     /// </summary>
@@ -52,7 +51,6 @@ public static class Result_Bind
             throw;
         }
     }
-
 
     /// <summary>
     /// Allows to chain an async method to a non async method, the output of the first is the input of the second.

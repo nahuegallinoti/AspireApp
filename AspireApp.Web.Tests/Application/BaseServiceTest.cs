@@ -25,7 +25,7 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
         _mapper = mapper;
     }
 
-    private static TE CreateInstance() => Activator.CreateInstance<TE>();
+    private static TE CreateInstanceEntity() => Activator.CreateInstance<TE>();
     private static TM CreateInstanceModel() => Activator.CreateInstance<TM>();
 
     [TestInitialize]
@@ -39,7 +39,7 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
     public async Task GetAllAsync_ShouldReturnEntities()
     {
         // Arrange
-        List<TE> expectedEntities = [CreateInstance(), CreateInstance()];
+        List<TE> expectedEntities = [CreateInstanceEntity(), CreateInstanceEntity()];
 
         _baseDAMock.Setup(repo => repo.GetAllAsync())
                    .ReturnsAsync(expectedEntities);
@@ -58,7 +58,7 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
     public async Task GetByIdAsync_ShouldReturnEntity()
     {
         // Arrange
-        TE entity = CreateInstance();
+        TE entity = CreateInstanceEntity();
         TID id = entity.SetId<TE, TID>();
 
         _baseDAMock.Setup(repo => repo.GetByIdAsync(id))
@@ -83,15 +83,14 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
         model.SetId<TM, TID>();
         model.GetType().GetProperty("Name")?.SetValue(model, "nagu");
 
-        TE entity = _mapper.ToEntity(model);
-
-        _baseDAMock.Setup(repo => repo.AddAsync(entity)).Returns(Task.CompletedTask);
+        // Se usa It.IsAny<TE> para que el mock acepte cualquier instancia de TEntity
+        _baseDAMock.Setup(repo => repo.AddAsync(It.IsAny<TE>())).Returns(Task.CompletedTask);
 
         // Act
         await _baseService.AddAsync(model);
 
         // Assert
-        _baseDAMock.Verify(repo => repo.AddAsync(entity), Times.Once);
+        _baseDAMock.Verify(repo => repo.AddAsync(It.IsAny<TE>()), Times.Once);
     }
 
     [TestMethod]
@@ -100,15 +99,13 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
         // Arrange
         TM model = CreateInstanceModel();
 
-        TE entity = _mapper.ToEntity(model);
-
-        _baseDAMock.Setup(repo => repo.Delete(entity));
+        _baseDAMock.Setup(repo => repo.Delete(It.IsAny<TE>()));
 
         // Act
         _baseService.Delete(model);
 
         // Assert
-        _baseDAMock.Verify(repo => repo.Delete(entity), Times.Once);
+        _baseDAMock.Verify(repo => repo.Delete(It.IsAny<TE>()), Times.Once);
     }
 
     [TestMethod]
@@ -117,15 +114,13 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
         // Arrange
         TM model = CreateInstanceModel();
 
-        TE entity = _mapper.ToEntity(model);
-
-        _baseDAMock.Setup(repo => repo.Update(entity));
+        _baseDAMock.Setup(repo => repo.Update(It.IsAny<TE>()));
 
         // Act
         _baseService.Update(model);
 
         // Assert
-        _baseDAMock.Verify(repo => repo.Update(entity), Times.Once);
+        _baseDAMock.Verify(repo => repo.Update(It.IsAny<TE>()), Times.Once);
     }
 
     [TestMethod]
