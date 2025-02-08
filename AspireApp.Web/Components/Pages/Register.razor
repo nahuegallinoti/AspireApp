@@ -38,8 +38,6 @@
     [SupplyParameterFromForm]
     public UserRegister Model { get; set; } = new();
 
-    protected override void OnInitialized() => Model ??= new();
-
     private string errorMessage = String.Empty;
 
     private async Task HandleRegister()

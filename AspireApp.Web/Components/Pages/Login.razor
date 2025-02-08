@@ -43,8 +43,6 @@
     [SupplyParameterFromForm]
     private UserLogin Model { get; set; } = new();
 
-    protected override void OnInitialized() => Model ??= new();
-
     private string errorMessage = string.Empty;
 
     private async Task HandleLogin()
@@ -61,8 +59,9 @@
             }
             else
             {
-                errorMessage = string.Join(";", result.Errors);
-                errorMessage.TrimEnd(';');
+                errorMessage = result.Errors.Any()
+                    ? string.Join(";", result.Errors).TrimEnd(';')
+                    : "Error desconocido";
             }
         }
         catch (Exception ex)
