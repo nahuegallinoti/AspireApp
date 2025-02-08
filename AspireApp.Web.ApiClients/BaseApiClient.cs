@@ -38,7 +38,7 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
     /// <summary>
     /// Envía una solicitud HTTP con el método, URL y contenido especificados.
     /// </summary>
-    private async Task<Result<T>> SendRequestAsync<T>(HttpMethod method,string url,HttpContent? content = null,CancellationToken cancellationToken = default)
+    private async Task<Result<T>> SendRequestAsync<T>(HttpMethod method, string url, HttpContent? content = null, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -58,11 +58,22 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
                 return Result.Failure<T>(errorMessages, response.StatusCode);
             }
 
-            var resultObj = await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
+            try
+            {
+                var resultObj = await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
 
-            return resultObj is not null
-                ? Result.Success(resultObj, response.StatusCode)
-                : Result.Failure<T>(["Respuesta vacía o nula del servidor."], response.StatusCode);
+                return resultObj is not null
+                    ? Result.Success(resultObj, response.StatusCode)
+                    : Result.Failure<T>(["Respuesta vacía o nula del servidor."], response.StatusCode);
+            }
+            catch (JsonException)
+            {
+                var rawContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                return String.IsNullOrWhiteSpace(rawContent)
+                    ? Result.Failure<T>(["Respuesta vacía o nula del servidor."], response.StatusCode)
+                    : Result.Success((T)(object)rawContent, response.StatusCode);
+            }
         }
 
         catch (HttpRequestException ex)

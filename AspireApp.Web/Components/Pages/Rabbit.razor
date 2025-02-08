@@ -1,0 +1,59 @@
+﻿@page "/rabbit"
+@using AspireApp.Api.Domain.Rabbit
+@using AspireApp.Web.Services
+
+@inject RabbitMqSenderService RabbitMqSender
+
+<h3>Enviar Mensaje a RabbitMQ</h3>
+
+<EditForm Model="@Model" OnValidSubmit="SendMessage" FormName="messageForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Message:</label>
+        <InputText @bind-Value="Model.Message" type="text" />
+    </div>
+
+    <button type="submit">Enviar</button>
+
+</EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3 flex-column">
+        @foreach (var error in errorMessage.Split("; "))
+        {
+            <div>@error</div>
+        }
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(responseMessage))
+{
+    <p>@responseMessage</p>
+}
+
+@code {
+    [SupplyParameterFromForm]
+    public RabbitMessage Model { get; set; } = new();
+
+    private string responseMessage = "";
+    private string errorMessage = "";
+
+    private async Task SendMessage()
+    {
+        var result = await RabbitMqSender.SendMessageAsync(Model);
+
+        if (result.Success)
+        {
+            responseMessage = $"Mensaje {result.Value} enviado";
+        }
+        else
+        {
+            errorMessage = result.Errors.FormatErrorMessages();
+        }
+
+    }
+
+}

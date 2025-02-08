@@ -1,3 +1,4 @@
+using AspireApp.Api.Services;
 using AspireApp.DataAccess.Implementations;
 using AspireApp.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -34,6 +35,8 @@ builder.Services.RegisterDataAccess();
 builder.Services.RegisterAppServices();
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddSingleton<RabbitMqService>(); // Registrar servicio de RabbitMQ
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();

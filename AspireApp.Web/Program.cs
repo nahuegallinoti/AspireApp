@@ -2,6 +2,7 @@ using AspireApp.ServiceDefaults;
 using AspireApp.Web.ApiClients;
 using AspireApp.Web.Components;
 using AspireApp.Web.Handlers;
+using AspireApp.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,8 @@ builder.Services.AddHttpClient("ApiClient", client =>
 builder.Services.AddScoped<LoginApiClient>();
 builder.Services.AddScoped<RegisterApiClient>();
 builder.Services.AddScoped<ProductApiClient>();
+builder.Services.AddScoped<RabbitMqApiClient>();
+builder.Services.AddScoped<RabbitMqSenderService>();
 
 var app = builder.Build();
 
