@@ -14,8 +14,10 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
-// Debe ser singleton. Si es transient o scoped no lleva el token en la solicitud.
+// Debe ser scoped o transient. Los delegating handler no pueden ser singleton porque ocurre un error al cabo de un rato.
 builder.Services.AddScoped<JWTTokenHandler>();
+
+// Debe ser singleton. Si es transient o scoped no lleva el token en la solicitud.
 builder.Services.AddSingleton<JWTTokenProvider>();
 
 builder.Services.AddHttpClient("ApiClient", client =>
