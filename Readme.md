@@ -1,64 +1,85 @@
-AspireApp
-AspireApp is a .NET 9 Blazor application designed with a focus on clean architecture, modularity, and scalability. This README provides an overview of the project's structure, the patterns used, and the key components.
-Project Structure
-The project is divided into several layers and components, each with a specific responsibility:
-�	AspireApp.Api: Contains the API controllers and service configurations.
-�	AspireApp.Application: Contains the application logic and service implementations.
-�	AspireApp.Core: Contains core utilities, helpers, and common logic.
-�	AspireApp.DataAccess: Contains data access implementations and repository patterns.
-�	AspireApp.Entities: Contains the entity models.
-�	AspireApp.Web.Tests: Contains unit tests for the application.
-Key Components and Patterns
+# AspireApp
 
-1. Authentication and Authorization
-JWT authentication is configured to secure the API endpoints.
+AspireApp es una aplicación Blazor basada en .NET 9, diseñada con un enfoque en arquitectura limpia, modularidad y escalabilidad. Este documento proporciona una visión general de la estructura del proyecto, los patrones utilizados y sus componentes clave.
 
+## 📂 Estructura del Proyecto
+
+El proyecto está dividido en varias capas y componentes, cada uno con una responsabilidad específica:
+
+- **`AspireApp.Api`**: Contiene los controladores API y la configuración de servicios.
+- **`AspireApp.Application`**: Lógica de la aplicación e implementación de servicios.
+- **`AspireApp.Core`**: Utilidades, helpers y lógica común.
+- **`AspireApp.DataAccess`**: Implementaciones de acceso a datos y patrones de repositorio.
+- **`AspireApp.Entities`**: Modelos de entidades.
+- **`AspireApp.Web.Tests`**: Pruebas unitarias de la aplicación.
+
+## 🔑 Componentes Clave y Patrones
+
+### 1️⃣ Autenticación y Autorización
+
+Se utiliza autenticación JWT para proteger los endpoints de la API:
+
+```csharp
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer();
+```
 
+### 2️⃣ Caching
 
-2. Caching
-The project uses a hybrid caching strategy with Redis and in-memory caching.
+El proyecto implementa una estrategia de caché híbrida con Redis y almacenamiento en memoria:
 
+```csharp
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = "localhost:6379";
 });
 
 builder.Services.AddHybridCache();
+```
 
-3. Entity Framework Core
-Entity Framework Core is used for data access. The AppDbContext is configured to use an in-memory database for testing purposes.
+### 3️⃣ Entity Framework Core
 
+Se utiliza Entity Framework Core para el acceso a datos. Para pruebas, se configura una base de datos en memoria:
+
+```csharp
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseInMemoryDatabase("AspireAppDb"));
+```
 
-4. Unit Testing
-The project includes comprehensive unit tests using MSTest and Moq for mocking dependencies.
- 
-5. Base Service Pattern
-A base service pattern is used to encapsulate common CRUD operations.
+### 4️⃣ Pruebas Unitarias
 
-6. Result-Oriented Programming (ROP)
-The project uses Result-Oriented Programming (ROP) to handle operation results in a consistent and expressive manner.
+El proyecto incluye pruebas unitarias con **MSTest** y **Moq** para simular dependencias y garantizar la calidad del código.
 
-7. RabbitMQ
-RabbitMQ is used for message brokering to facilitate communication between different parts of the system.
+### 5️⃣ Patrón Base Service
 
-builder.Services.AddSingleton<RabbitMqService>(); // Register RabbitMQ service
+Se implementa un patrón de servicio base para encapsular operaciones CRUD comunes.
 
+### 6️⃣ Programación Orientada a Resultados (ROP)
 
-Getting Started
-To run the project, follow these steps:
-1.	Clone the repository.
-2.	Open the solution in Visual Studio 2022.
-3.	Restore the NuGet packages.
-4.	Build the solution.
-5.	Run the project.
+Se adopta **Result-Oriented Programming (ROP)** para manejar los resultados de las operaciones de manera consistente y expresiva.
 
-Conclusion
-AspireApp is a well-structured Blazor application that leverages modern .NET features and best practices. The use of dependency injection, JWT authentication, caching, unit testing, Result-Oriented Programming, and RabbitMQ ensures a robust and maintainable codebase.
+### 7️⃣ RabbitMQ
+
+Se integra **RabbitMQ** como servicio de mensajería para facilitar la comunicación entre diferentes partes del sistema:
+
+```csharp
+builder.Services.AddSingleton<RabbitMqService>(); // Registro del servicio RabbitMQ
+```
+
+## 🚀 Cómo Ejecutar el Proyecto
+
+Sigue estos pasos para ejecutar la aplicación:
+
+1. Clona el repositorio.
+2. Abre la solución en **Visual Studio 2022**.
+3. Restaura los paquetes NuGet.
+4. Compila la solución.
+5. Ejecuta el proyecto.
+
+## 🏁 Conclusión
+
+AspireApp es una aplicación Blazor bien estructurada que aprovecha las características modernas de .NET y sigue las mejores prácticas. La combinación de **inyección de dependencias, autenticación JWT, caching, pruebas unitarias, ROP y RabbitMQ** garantiza un código robusto, escalable y fácil de mantener.
