@@ -34,6 +34,7 @@ builder.Services.RegisterMappers();
 builder.Services.RegisterDataAccess();
 builder.Services.RegisterAppServices();
 
+builder.Services.AddMemoryCache();
 builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<RabbitMqService>(); // Registrar servicio de RabbitMQ
