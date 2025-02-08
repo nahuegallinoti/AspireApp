@@ -3,8 +3,6 @@ using AspireApp.Api.Domain.Auth.User;
 using AspireApp.Application.Contracts.Auth;
 using AspireApp.Application.Implementations.Extensions;
 using AspireApp.Core.ROP;
-using System.Collections.Immutable;
-using System.ComponentModel.DataAnnotations;
 
 namespace AspireApp.Application.Implementations.Auth;
 

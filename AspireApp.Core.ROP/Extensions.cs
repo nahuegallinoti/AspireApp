@@ -59,8 +59,7 @@ public static class Result
     /// <summary>
     /// Converts the type into the error flow with  HttpStatusCode.BadRequest
     /// </summary>
-    public static Result<Unit> Failure(IEnumerable<string> errors) =>
-        new(ImmutableArray.Create(errors.ToArray()), HttpStatusCode.BadRequest);
+    public static Result<Unit> Failure(IEnumerable<string> errors) =>new(ImmutableArray.Create(errors.ToArray()), HttpStatusCode.BadRequest);
 
     /// <summary>
     /// Converts the type into the error flow with  HttpStatusCode.BadRequest

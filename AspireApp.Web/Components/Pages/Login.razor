@@ -5,6 +5,7 @@
 @using AspireApp.Api.Domain.Auth.User
 @using AspireApp.Web.ApiClients
 @using AspireApp.Web.Handlers
+@using System.Net
 
 @inject NavigationManager Navigation
 @inject LoginApiClient LoginApi
@@ -29,20 +30,26 @@
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
-    <p style="color:red">@errorMessage</p>
+    <div class="alert alert-danger mt-3">
+        @foreach (var error in errorMessage.Split("; "))
+        {
+            <p>@error</p>
+        }
+    </div>
 }
 
 @code {
+
     [SupplyParameterFromForm]
     private UserLogin Model { get; set; } = new();
 
     protected override void OnInitialized() => Model ??= new();
 
-    private string errorMessage = String.Empty;
+    private string errorMessage = string.Empty;
 
     private async Task HandleLogin()
     {
-        errorMessage = String.Empty;
+        errorMessage = string.Empty;
 
         try
         {
@@ -54,13 +61,12 @@
             }
             else
             {
-                errorMessage = string.Join(", ", result.Errors);
+                errorMessage = string.Join(Environment.NewLine, result.Errors);
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error al iniciar sesión: {ex.Message}";
+            errorMessage = $"Error inesperado: {ex.Message}";
         }
     }
-
 }
