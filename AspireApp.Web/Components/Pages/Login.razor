@@ -1,17 +1,8 @@
 @page "/login"
-@using System.Net.Http.Headers
-@using System.Text.Json
-@using AspireApp.Api.Domain.Auth
-@using AspireApp.Api.Domain.Auth.User
-@using AspireApp.Web.ApiClients
-@using AspireApp.Web.Handlers
-@using System.Net
 
-@inject NavigationManager Navigation
-@inject LoginApiClient LoginApi
-@inject JWTTokenProvider TokenProvider
+<PageTitle>Login</PageTitle>
 
-<h3>Iniciar Sesión</h3>
+<h3>Login</h3>
 
 <EditForm Model="@Model" OnValidSubmit="HandleLogin" FormName="loginForm">
     <DataAnnotationsValidator />
@@ -36,43 +27,4 @@
             <div>@error</div>
         }
     </div>
-}
-
-@code {
-
-    [SupplyParameterFromForm]
-    private UserLogin Model { get; set; } = new();
-
-    private string errorMessage = string.Empty;
-
-    private async Task HandleLogin()
-    {
-        CancellationTokenSource cts = new();
-
-        errorMessage = string.Empty;
-
-        try
-        {
-            var result = await LoginApi.LoginAsync(Model, cts.Token);
-
-            if (result.Success)
-            {
-                TokenProvider.SetToken(result.Value.Token);
-            }
-            else
-            {
-                errorMessage = result.Errors.Any()
-                    ? string.Join(";", result.Errors).TrimEnd(';')
-                    : "Error desconocido";
-            }
-        }
-        catch (OperationCanceledException ex)
-        {
-            errorMessage = $"La operación fue cancelada: {ex.Message}";
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Error inesperado: {ex.Message}";
-        }
-    }
 }

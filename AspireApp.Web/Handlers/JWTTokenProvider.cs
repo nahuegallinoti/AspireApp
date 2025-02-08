@@ -6,4 +6,5 @@ public class JWTTokenProvider
 
     public string? GetToken() => _token;
     public void SetToken(string token) => _token = token;
+    public void ClearToken() => _token = null;
 }

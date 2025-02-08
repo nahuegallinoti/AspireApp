@@ -1,50 +1,56 @@
 ﻿@page "/product"
-@using AspireApp.Api.Domain.Models
-@using AspireApp.Web.ApiClients
-@using Microsoft.AspNetCore.Authorization
-
-@* @attribute [Authorize] *@
-
-<h3>Página Protegida</h3>
-
-<p>Esta página solo es accesible para usuarios autenticados.</p>
-
-@inject ProductApiClient ProductApi
+@* @rendermode InteractiveServer *@
 
 <PageTitle>Products</PageTitle>
 
-<h1>Products</h1>
+<h3>Products</h3>
 
-<p>This component demonstrates showing data loaded from a backend API service.</p>
-
-@if (products is null)
+@if (!string.IsNullOrEmpty(errorMessage))
 {
-    <p><em>Loading...</em></p>
+    <div class="alert alert-danger">@errorMessage</div>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th aria-label="Temperature in Celsius">Temp. (C)</th>
-                <th aria-label="Temperature in Farenheit">Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-}
+    <EditForm Model="@Model" OnValidSubmit="HandleRegister" FormName="productForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-@code {
-    private IEnumerable<Product> products = null!;
+        <div>
+            <label for="name">Name:</label>
+            <InputText id="name" @bind-Value="Model.Name" />
+        </div>
 
-    protected override async Task OnInitializedAsync()
+        <div class="mt-3">
+            <label for="description">Description:</label>
+            <InputText id="description" @bind-Value="Model.Description" />
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Registrar</button>
+    </EditForm>
+
+    if (!products.Any())
     {
-        var result = await ProductApi.GetProductsAsync();
-        var products = result.Value;
+        <p>No products found.</p>
+    }
 
-        StateHasChanged();
+    else
+    {
+        <table class="table mt-3">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in products)
+                {
+                    <tr>
+                        <td>@product.Name</td>
+                        <td>@product.Description</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     }
 }

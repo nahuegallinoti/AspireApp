@@ -1,10 +1,8 @@
 ﻿@page "/register"
-@using AspireApp.Api.Domain.Auth.User
-@using AspireApp.Web.ApiClients
 
-@inject RegisterApiClient RegisterApi
+<PageTitle>Register</PageTitle>
 
-<h3>Registrar</h3>
+<h3>Register</h3>
 
 <EditForm Model="@Model" OnValidSubmit="HandleRegister" FormName="registerForm">
     <DataAnnotationsValidator />
@@ -32,31 +30,4 @@
 @if (!string.IsNullOrEmpty(errorMessage))
 {
     <p style="color:red">@errorMessage</p>
-}
-
-@code {
-    [SupplyParameterFromForm]
-    public UserRegister Model { get; set; } = new();
-
-    private string errorMessage = String.Empty;
-
-    private async Task HandleRegister()
-    {
-        CancellationTokenSource cts = new();
-
-        errorMessage = String.Empty;
-
-        try
-        {
-            var response = await RegisterApi.RegisterAsync(Model, cts.Token);
-        }
-        catch (OperationCanceledException ex)
-        {
-            errorMessage = $"La operación fue cancelada: {ex.Message}";
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Error al registrar: {ex.Message}";
-        }
-    }
 }

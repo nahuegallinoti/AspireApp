@@ -38,11 +38,7 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
     /// <summary>
     /// Envía una solicitud HTTP con el método, URL y contenido especificados.
     /// </summary>
-    private async Task<Result<T>> SendRequestAsync<T>(
-        HttpMethod method,
-        string url,
-        HttpContent? content = null,
-        CancellationToken cancellationToken = default)
+    private async Task<Result<T>> SendRequestAsync<T>(HttpMethod method,string url,HttpContent? content = null,CancellationToken cancellationToken = default)
     {
         try
         {
@@ -51,7 +47,7 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorMessages = response.StatusCode switch
+                ImmutableArray<string> errorMessages = response.StatusCode switch
                 {
                     HttpStatusCode.BadRequest => await ExtractErrorMessage(response),
                     HttpStatusCode.Unauthorized => ["Credenciales inválidas"],
@@ -71,11 +67,11 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
 
         catch (HttpRequestException ex)
         {
-            var errorMessages = ex.StatusCode switch
+            ImmutableArray<string> errorMessages = ex.StatusCode switch
             {
                 HttpStatusCode.BadRequest => ["Error de solicitud incorrecta"],
                 HttpStatusCode.NotFound => ["Recurso no encontrado"],
-                _ => ImmutableArray.Create($"Error de conexión: {ex.Message}")
+                _ => [$"Error de conexión: {ex.Message}"]
             };
 
             return Result.Failure<T>(errorMessages, ex.StatusCode ?? HttpStatusCode.BadRequest);
@@ -100,10 +96,8 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
 
             try
             {
-                var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(
-                    content,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                );
+                var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
                 if (!string.IsNullOrEmpty(problemDetails?.Detail))
                     return [problemDetails.Detail];
             }

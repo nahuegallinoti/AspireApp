@@ -15,9 +15,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddOutputCache();
 
 // Debe ser singleton. Si es transient o scoped no lleva el token en la solicitud.
-builder.Services.AddSingleton<JWTTokenHandler>();
+builder.Services.AddScoped<JWTTokenHandler>();
 builder.Services.AddSingleton<JWTTokenProvider>();
-
 
 builder.Services.AddHttpClient("ApiClient", client =>
 {
