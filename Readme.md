@@ -11,6 +11,8 @@ El proyecto está dividido en varias capas y componentes, cada uno con una respo
 - **`AspireApp.Core`**: Utilidades, helpers y lógica común.
 - **`AspireApp.DataAccess`**: Implementaciones de acceso a datos y patrones de repositorio.
 - **`AspireApp.Entities`**: Modelos de entidades.
+- **`AspireApp.Web`**: Aplicación Web Blazor Server.
+- **`AspireApp.Web.ApiClients`**: Api Clients utilizados para hacer consultas a la api.
 - **`AspireApp.Web.Tests`**: Pruebas unitarias de la aplicación.
 
 ## 🔑 Componentes Clave y Patrones
