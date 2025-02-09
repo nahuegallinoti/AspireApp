@@ -4,6 +4,8 @@ using AspireApp.Application.Implementations.Base;
 using AspireApp.Core.Mappers;
 using AspireApp.DataAccess.Contracts.Base;
 using AspireApp.Entities.Base;
+using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 
 namespace AspireApp.Api.Tests.Application;
@@ -20,6 +22,8 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
 
     protected BaseMapper<TM, TE> _mapper = null!;
 
+    private Mock<HybridCache> _cache = null!;
+
     protected void InitializeMapper(BaseMapper<TM, TE> mapper)
     {
         _mapper = mapper;
@@ -32,7 +36,8 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
     public void Setup()
     {
         _baseDAMock = new(MockBehavior.Default);
-        _baseService = new BaseService<TE, TM, TID>(_baseDAMock.Object, _mapper);
+        _cache = new(MockBehavior.Default);
+        _baseService = new BaseService<TE, TM, TID>(_baseDAMock.Object, _mapper, _cache.Object);
     }
 
     [TestMethod]
@@ -54,15 +59,27 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
         _baseDAMock.Verify(repo => repo.GetAllAsync(CancellationToken.None), Times.Once);
     }
 
+    // TODO: Terminar
+
     [TestMethod]
-    public async Task GetByIdAsync_ShouldReturnEntity()
+    public async Task GetByIdAsync_ShouldReturnEntity_FromCache()
     {
         // Arrange
         TE entity = CreateInstanceEntity();
         TID id = entity.SetId<TE, TID>();
 
-        _baseDAMock.Setup(repo => repo.GetByIdAsync(id))
-                   .ReturnsAsync(entity);
+        string modelName = typeof(TM).Name;
+        string cacheKey = $"{modelName}:{id}";
+
+        // Configurar el mock del caché para que devuelva la entidad cuando se le consulte
+        _cache.Setup(expression: c => c.GetOrCreateAsync(
+            cacheKey,
+            It.IsAny<string>(),
+            It.IsAny<Func<string, CancellationToken, ValueTask<TE>>>(),
+            null,
+            It.IsAny<IEnumerable<string>?>(),
+            It.IsAny<CancellationToken>())
+        ).ReturnsAsync(entity);
 
         // Act
         TM? retrievedEntity = await _baseService.GetByIdAsync(id);
@@ -71,7 +88,17 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
         Assert.IsNotNull(retrievedEntity);
         Assert.AreEqual(entity.Id, retrievedEntity.Id);
 
-        _baseDAMock.Verify(repo => repo.GetByIdAsync(id), Times.Once);
+        // Verificar que NO se haya llamado al repositorio ya que el valor proviene de la caché
+        _baseDAMock.Verify(repo => repo.GetByIdAsync(id), Times.Never);
+
+        // Verificar que la caché fue consultada correctamente
+        _cache.Verify(c => c.GetOrCreateAsync(
+            cacheKey,
+            It.IsAny<string>(),
+            It.IsAny<Func<string, CancellationToken, ValueTask<TE>>>(),
+            null,
+            It.IsAny<IEnumerable<string>?>(),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [TestMethod]
