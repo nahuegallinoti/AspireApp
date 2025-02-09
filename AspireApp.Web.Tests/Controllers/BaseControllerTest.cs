@@ -2,7 +2,6 @@
 using AspireApp.Api.Domain;
 using AspireApp.Api.Tests.Extensions;
 using AspireApp.Application.Contracts.Base;
-using AspireApp.Entities.Base;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
@@ -52,9 +51,9 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
     {
         // Arrange
         var id = Activator.CreateInstance<TID>();
-        var entity = Activator.CreateInstance<T>();
-        entity.Id = id!;
-        _serviceMock.Setup(service => service.GetByIdAsync(id)).ReturnsAsync(entity);
+        var model = Activator.CreateInstance<T>();
+        model.Id = id!;
+        _serviceMock.Setup(service => service.GetByIdAsync(id)).ReturnsAsync(model);
 
         // Act
         var result = await _controller.GetById(id);
@@ -85,15 +84,17 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
     public async Task Add_ShouldReturnCreatedAtAction_WhenEntityIsAdded()
     {
         // Arrange
-        var entity = Activator.CreateInstance<T>();
-        _serviceMock.Setup(service => service.AddAsync(entity, CancellationToken.None)).Returns(Task.CompletedTask);
+        var model = Activator.CreateInstance<T>();
+
+        _serviceMock.Setup(service => service.AddAsync(model, CancellationToken.None)).ReturnsAsync(model);
         _serviceMock.Setup(service => service.SaveChangesAsync(CancellationToken.None)).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _controller.Add(entity);
+        var result = await _controller.Add(model);
 
         // Assert
         var createdResult = result as CreatedAtActionResult;
+
         Assert.IsNotNull(createdResult);
         Assert.AreEqual(201, createdResult.StatusCode);
     }
@@ -103,12 +104,12 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
     {
         // Arrange
         var id = Activator.CreateInstance<TID>(); //Setea id default
-        var entity = Activator.CreateInstance<T>();
+        var model = Activator.CreateInstance<T>();
 
-        entity.SetId<T, TID>(); //Setea id aleatorio
+        model.SetId<T, TID>(); //Setea id aleatorio
 
         // Act
-        var result = _controller.Update(id, entity);
+        var result = _controller.Update(id, model);
 
         // Assert
         Assert.IsInstanceOfType<BadRequestObjectResult>(result);
@@ -119,10 +120,10 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
     {
         // Arrange
         var id = Activator.CreateInstance<TID>();
-        var entity = Activator.CreateInstance<T>();
-        entity.Id = id!;
-        _serviceMock.Setup(service => service.GetByIdAsync(id)).ReturnsAsync(entity);
-        _serviceMock.Setup(service => service.Delete(entity));
+        var model = Activator.CreateInstance<T>();
+        model.Id = id!;
+        _serviceMock.Setup(service => service.GetByIdAsync(id)).ReturnsAsync(model);
+        _serviceMock.Setup(service => service.Delete(model));
         _serviceMock.Setup(service => service.SaveChangesAsync(CancellationToken.None)).Returns(Task.CompletedTask);
 
         // Act

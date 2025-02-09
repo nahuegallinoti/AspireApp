@@ -1,6 +1,7 @@
 ﻿using AspireApp.Api.Domain;
 using AspireApp.Application.Contracts.Base;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace AspireApp.Api.Controllers;
 
@@ -41,12 +42,13 @@ public abstract class BaseController<TModel, TID, TService>(TService service)
     /// <summary>
     /// Adds a new model.
     /// </summary>
-    /// <param name="model">The modelto add.</param>
+    /// <param name="model">The model to add.</param>
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] TModel model, CancellationToken ct = default)
     {
         await _service.AddAsync(model, ct);
-        await _service.SaveChangesAsync(ct);
+
+        //Incluye en los headers el Location con la URL para obtener el recurso recién creado
         return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
     }
 

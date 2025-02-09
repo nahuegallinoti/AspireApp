@@ -20,10 +20,16 @@ public class BaseService<TEntity, TModel, TID>(IBaseDA<TEntity, TID> baseDA, Bas
     public async Task SaveChangesAsync(CancellationToken ct) => await _baseDA.SaveChangesAsync(ct);
 
     /// <inheritdoc />
-    public async Task AddAsync(TModel model, CancellationToken ct)
+    public async Task<TModel> AddAsync(TModel model, CancellationToken ct)
     {
         TEntity entity = _mapper.ToEntity(model);
+
         await _baseDA.AddAsync(entity, ct);
+        await _baseDA.SaveChangesAsync(ct);
+
+        model.Id = entity.Id;
+
+        return model;
     }
 
     /// <inheritdoc />

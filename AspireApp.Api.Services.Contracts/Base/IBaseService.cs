@@ -15,7 +15,7 @@ namespace AspireApp.Application.Contracts.Base
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        Task AddAsync(T entity, CancellationToken ct);
+        Task<T> AddAsync(T entity, CancellationToken ct);
 
         /// <summary>
         /// Deletes an entity.

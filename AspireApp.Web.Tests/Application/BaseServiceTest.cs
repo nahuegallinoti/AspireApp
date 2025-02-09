@@ -5,7 +5,6 @@ using AspireApp.Core.Mappers;
 using AspireApp.DataAccess.Contracts.Base;
 using AspireApp.Entities.Base;
 using Microsoft.Extensions.Caching.Hybrid;
-using Microsoft.Extensions.Caching.Memory;
 using Moq;
 
 namespace AspireApp.Api.Tests.Application;
@@ -65,39 +64,37 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
     public async Task GetByIdAsync_ShouldReturnEntity_FromCache()
     {
         // Arrange
-        TE entity = CreateInstanceEntity();
-        TID id = entity.SetId<TE, TID>();
+        var entity = CreateInstanceEntity();
+        var id = entity.SetId<TE, TID>();
 
-        string modelName = typeof(TM).Name;
-        string cacheKey = $"{modelName}:{id}";
+        var modelName = typeof(TM).Name;
+        var cacheKey = $"{modelName}:{id}";
 
-        // Configurar el mock del caché para que devuelva la entidad cuando se le consulte
-        _cache.Setup(expression: c => c.GetOrCreateAsync(
+        // Mock the cache to return the entity directly
+        _cache.Setup(c => c.GetOrCreateAsync(
             cacheKey,
-            It.IsAny<string>(),
-            It.IsAny<Func<string, CancellationToken, ValueTask<TE>>>(),
-            null,
-            It.IsAny<IEnumerable<string>?>(),
-            It.IsAny<CancellationToken>())
-        ).ReturnsAsync(entity);
+            It.IsAny<Func<CancellationToken, ValueTask<TE>>>(),
+            It.IsAny<HybridCacheEntryOptions>(),
+            It.IsAny<IEnumerable<string>>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(entity);
 
         // Act
-        TM? retrievedEntity = await _baseService.GetByIdAsync(id);
+        var retrievedEntity = await _baseService.GetByIdAsync(id);
 
         // Assert
         Assert.IsNotNull(retrievedEntity);
         Assert.AreEqual(entity.Id, retrievedEntity.Id);
 
-        // Verificar que NO se haya llamado al repositorio ya que el valor proviene de la caché
+        // Verify that the repository was not called
         _baseDAMock.Verify(repo => repo.GetByIdAsync(id), Times.Never);
 
-        // Verificar que la caché fue consultada correctamente
+        // Verify that the cache was called correctly
         _cache.Verify(c => c.GetOrCreateAsync(
             cacheKey,
-            It.IsAny<string>(),
-            It.IsAny<Func<string, CancellationToken, ValueTask<TE>>>(),
-            null,
-            It.IsAny<IEnumerable<string>?>(),
+            It.IsAny<Func<CancellationToken, ValueTask<TE>>>(),
+            It.IsAny<HybridCacheEntryOptions>(),
+            It.IsAny<IEnumerable<string>>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
