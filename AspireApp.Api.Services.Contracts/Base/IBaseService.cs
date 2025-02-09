@@ -1,4 +1,4 @@
-﻿using AspireApp.Api.Domain;
+﻿using AspireApp.Api.Models;
 
 namespace AspireApp.Application.Contracts.Base
 {

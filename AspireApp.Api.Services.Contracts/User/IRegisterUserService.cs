@@ -1,4 +1,4 @@
-﻿using AspireApp.Api.Domain.Auth.User;
+﻿using AspireApp.Api.Models.Auth.User;
 using AspireApp.Core.ROP;
 
 namespace AspireApp.Application.Contracts.User;

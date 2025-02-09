@@ -1,4 +1,4 @@
-﻿using AspireApp.Api.Domain.Rabbit;
+﻿using AspireApp.Api.Models.Rabbit;
 using AspireApp.Application.Implementations.Extensions;
 using AspireApp.Core.ROP;
 using RabbitMQ.Client;

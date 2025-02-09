@@ -1,4 +1,4 @@
-﻿using AspireApp.Api.Domain;
+﻿using AspireApp.Api.Models;
 using AspireApp.Application.Contracts.Base;
 using Microsoft.AspNetCore.Mvc;
 using System;

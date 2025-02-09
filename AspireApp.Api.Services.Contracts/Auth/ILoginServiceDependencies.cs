@@ -1,5 +1,5 @@
-﻿using AspireApp.Api.Domain.Auth;
-using AspireApp.Api.Domain.Auth.User;
+﻿using AspireApp.Api.Models.Auth;
+using AspireApp.Api.Models.Auth.User;
 using AspireApp.Core.ROP;
 
 namespace AspireApp.Application.Contracts.Auth;

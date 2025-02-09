@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AspireApp.Api.Domain.Auth.User;
+namespace AspireApp.Api.Models.Auth.User;
 
 public abstract class UserBase : BaseModel<Guid>
 {

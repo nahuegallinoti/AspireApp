@@ -1,4 +1,4 @@
-﻿using AspireApp.Api.Domain.Models;
+﻿using AspireApp.Api.Models.App;
 using Ent = AspireApp.Entities;
 
 namespace AspireApp.Core.Mappers;

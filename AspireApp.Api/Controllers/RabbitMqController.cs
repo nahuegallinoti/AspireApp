@@ -1,4 +1,4 @@
-﻿using AspireApp.Api.Domain.Rabbit;
+﻿using AspireApp.Api.Models.Rabbit;
 using AspireApp.Api.Services;
 using AspireApp.Application.Implementations.Extensions;
 using Microsoft.AspNetCore.Mvc;

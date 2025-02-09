@@ -1,14 +1,14 @@
-﻿using AspireApp.Application.Contracts.Product;
+﻿using AspireApp.Api.Models.App;
+using AspireApp.Application.Contracts.Product;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Dto = AspireApp.Api.Domain.Models;
 
 namespace AspireApp.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ProductController(IProductService productService) : BaseController<Dto.Product, long, IProductService>(productService)
+public class ProductController(IProductService productService) : BaseController<Product, long, IProductService>(productService)
 {
 
 }

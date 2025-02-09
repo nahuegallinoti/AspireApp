@@ -1,4 +1,4 @@
-﻿using AspireApp.Api.Domain;
+﻿using AspireApp.Api.Models;
 using AspireApp.Application.Contracts.Base;
 using AspireApp.Core.Mappers;
 using AspireApp.DataAccess.Contracts.Base;

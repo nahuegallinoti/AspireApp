@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="MSTest" Version="3.7.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AspireApp.Api.Services.Implementations\AspireApp.Application.Implementations.csproj" />
+    <ProjectReference Include="..\AspireApp.Api\AspireApp.Api.csproj" />
+    <ProjectReference Include="..\AspireApp.Client.ApiClients\AspireApp.Client.ApiClients.csproj" />
+    <ProjectReference Include="..\AspireApp.DataAccess.Contracts\AspireApp.DataAccess.Contracts.csproj" />
+    <ProjectReference Include="..\AspireApp.DataAccess\AspireApp.DataAccess.Implementations.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+</Project>
