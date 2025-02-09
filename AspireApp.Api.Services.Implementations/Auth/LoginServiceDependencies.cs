@@ -4,6 +4,7 @@ using AspireApp.Application.Contracts.Auth;
 using AspireApp.Core.ROP;
 using AspireApp.DataAccess.Contracts;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,10 +13,11 @@ using System.Text;
 
 namespace AspireApp.Application.Implementations.Auth;
 
-public class LoginServiceDependencies(IConfiguration configuration, IUsuarioDA usuarioDA) : ILoginServiceDependencies
+public class LoginServiceDependencies(IConfiguration configuration, IUsuarioDA usuarioDA, ILogger<ILoginServiceDependencies> logger) : ILoginServiceDependencies
 {
     private readonly IConfiguration _configuration = configuration;
     private readonly IUsuarioDA _usuarioDA = usuarioDA;
+    private readonly ILogger<ILoginServiceDependencies> _logger = logger;
 
     public async Task<Result<UserLogin>> VerifyUserPassword(UserLogin userAccount, CancellationToken ct)
     {
@@ -56,6 +58,7 @@ public class LoginServiceDependencies(IConfiguration configuration, IUsuarioDA u
 
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error occurred while create token");
             return Result.Failure<AuthenticationResult>(ex.Message);
         }
     }

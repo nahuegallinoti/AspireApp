@@ -3,6 +3,7 @@ using AspireApp.Application.Contracts.Auth;
 using AspireApp.Application.Implementations.Auth;
 using AspireApp.DataAccess.Contracts;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System.Security.Cryptography;
 using System.Text;
@@ -16,13 +17,16 @@ public class LoginServiceDependenciesTest
     private Mock<IUsuarioDA> _usuarioDAMock = null!;
     private Mock<IConfiguration> _configurationMock = null!;
     private ILoginServiceDependencies _loginServiceDependencies = null!;
+    private Mock<ILogger<ILoginServiceDependencies>> _loggerMock = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _usuarioDAMock = new Mock<IUsuarioDA>();
         _configurationMock = new Mock<IConfiguration>();
-        _loginServiceDependencies = new LoginServiceDependencies(_configurationMock.Object, _usuarioDAMock.Object);
+        _loggerMock = new Mock<ILogger<ILoginServiceDependencies>>();
+
+        _loginServiceDependencies = new LoginServiceDependencies(_configurationMock.Object, _usuarioDAMock.Object, _loggerMock.Object);
     }
 
     [TestMethod]

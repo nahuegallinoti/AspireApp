@@ -1,4 +1,6 @@
 using AspireApp.Api.Services;
+using AspireApp.Application.Contracts.Auth;
+using AspireApp.Application.Implementations.Auth;
 using AspireApp.DataAccess.Implementations;
 using AspireApp.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -34,6 +36,11 @@ builder.Services.RegisterMappers();
 builder.Services.RegisterDataAccess();
 builder.Services.RegisterAppServices();
 
+builder.Services.AddLogging(options =>
+{
+    options.AddConsole();  // Loguear a la consola
+    // Agregar otras opciones de logging (ej. archivos, bases de datos, etc.)
+});
 
 // CACHE
 

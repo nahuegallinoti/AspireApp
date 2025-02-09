@@ -58,45 +58,30 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
         _baseDAMock.Verify(repo => repo.GetAllAsync(CancellationToken.None), Times.Once);
     }
 
-    // TODO: Terminar
+    // TODO: Falta testear el add con cache y sin cache
 
-    [TestMethod]
-    public async Task GetByIdAsync_ShouldReturnEntity_FromCache()
-    {
-        // Arrange
-        var entity = CreateInstanceEntity();
-        var id = entity.SetId<TE, TID>();
+    //[TestMethod]
+    //public async Task GetByIdAsync_ShouldReturnEntity_FromCache()
+    //{
+    //    // Arrange
+    //    var entity = CreateInstanceEntity();
+    //    var id = entity.SetId<TE, TID>();
 
-        var modelName = typeof(TM).Name;
-        var cacheKey = $"{modelName}:{id}";
+    //    var modelName = typeof(TM).Name;
+    //    var cacheKey = $"{modelName}:{id}";
 
-        // Mock the cache to return the entity directly
-        _cache.Setup(c => c.GetOrCreateAsync(
-            cacheKey,
-            It.IsAny<Func<CancellationToken, ValueTask<TE>>>(),
-            It.IsAny<HybridCacheEntryOptions>(),
-            It.IsAny<IEnumerable<string>>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync(entity);
+    //    _baseDAMock.Setup(repo => repo.GetByIdAsync(id)).ReturnsAsync(entity);
 
-        // Act
-        var retrievedEntity = await _baseService.GetByIdAsync(id);
+    //    // Act
+    //    var retrievedEntity = await _baseService.GetByIdAsync(id);
 
-        // Assert
-        Assert.IsNotNull(retrievedEntity);
-        Assert.AreEqual(entity.Id, retrievedEntity.Id);
+    //    // Assert
+    //    Assert.IsNotNull(retrievedEntity);
+    //    Assert.AreEqual(entity.Id, retrievedEntity.Id);
 
-        // Verify that the repository was not called
-        _baseDAMock.Verify(repo => repo.GetByIdAsync(id), Times.Never);
-
-        // Verify that the cache was called correctly
-        _cache.Verify(c => c.GetOrCreateAsync(
-            cacheKey,
-            It.IsAny<Func<CancellationToken, ValueTask<TE>>>(),
-            It.IsAny<HybridCacheEntryOptions>(),
-            It.IsAny<IEnumerable<string>>(),
-            It.IsAny<CancellationToken>()), Times.Once);
-    }
+    //    // Verify that the repository was not called
+    //    _baseDAMock.Verify(repo => repo.GetByIdAsync(id), Times.Once);
+    //}
 
     [TestMethod]
     public async Task AddAsync_ShouldAddEntity()

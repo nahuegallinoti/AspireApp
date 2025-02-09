@@ -6,10 +6,11 @@ using System.Text.Json;
 
 namespace AspireApp.Web.ApiClients;
 
+public record ProblemDetails(int Status, string? Detail, string? Type, string? Title, string? Instance);
+
 public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string clientName)
 {
     protected readonly HttpClient _httpClient = httpClientFactory.CreateClient(clientName);
-    public record ProblemDetails(int Status, string? Detail, string? Type, string? Title, string? Instance);
 
     /// <summary>
     /// Envía una solicitud POST a la URL especificada con los datos indicados.

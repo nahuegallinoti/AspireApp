@@ -28,6 +28,11 @@ builder.Services.AddHttpClient("ApiClient", client =>
 })
 .AddHttpMessageHandler<JWTTokenHandler>();
 
+builder.Services.AddLogging(options =>
+{
+    options.AddConsole();  // Loguear a la consola
+    // Agregar otras opciones de logging (ej. archivos, bases de datos, etc.)
+});
 
 // Puede ser scoped, transient o singleton aparentemente
 builder.Services.AddScoped<LoginApiClient>();

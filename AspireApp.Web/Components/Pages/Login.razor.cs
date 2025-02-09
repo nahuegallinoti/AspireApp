@@ -8,6 +8,9 @@ namespace AspireApp.Web.Components.Pages;
 public partial class Login : ComponentBase
 {
     [Inject]
+    public ILogger<Login> Logger { get; set; } = null!;
+
+    [Inject]
     public LoginApiClient LoginApi { get; set; } = null!;
 
     [Inject]
@@ -45,6 +48,7 @@ public partial class Login : ComponentBase
         catch (Exception ex)
         {
             errorMessage = $"Error inesperado: {ex.Message}";
+            Logger.LogError(ex, errorMessage);
         }
     }
 }

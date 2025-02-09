@@ -1,8 +1,4 @@
 ﻿@page "/rabbit"
-@using AspireApp.Api.Domain.Rabbit
-@using AspireApp.Web.Services
-
-@inject RabbitMqSenderService RabbitMqSender
 
 <h3>Enviar Mensaje a RabbitMQ</h3>
 
@@ -32,28 +28,4 @@
 @if (!string.IsNullOrEmpty(responseMessage))
 {
     <p>@responseMessage</p>
-}
-
-@code {
-    [SupplyParameterFromForm]
-    public RabbitMessage Model { get; set; } = new();
-
-    private string responseMessage = "";
-    private string errorMessage = "";
-
-    private async Task SendMessage()
-    {
-        var result = await RabbitMqSender.SendMessageAsync(Model);
-
-        if (result.Success)
-        {
-            responseMessage = $"Mensaje {result.Value} enviado";
-        }
-        else
-        {
-            errorMessage = result.Errors.FormatErrorMessages();
-        }
-
-    }
-
 }

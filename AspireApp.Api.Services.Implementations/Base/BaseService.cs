@@ -55,6 +55,7 @@ public class BaseService<TEntity, TModel, TID>(IBaseDA<TEntity, TID> baseDA, Bas
 
         TEntity? entity = await _hybridCache.GetOrCreateAsync(cacheKey,
                  async _ => await _baseDA.GetByIdAsync(id),
+                 options: new() { Expiration = TimeSpan.FromMinutes(5) }, // TODO: Aca se setea la duracion en la cache
                  tags: [modelName]);
 
         if (entity is null)

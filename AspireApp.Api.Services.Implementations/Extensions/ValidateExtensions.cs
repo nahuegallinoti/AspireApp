@@ -8,9 +8,9 @@ public static class ValidateExtensions
 {
     public static Result<T> Validate<T>(this T model) where T : class
     {
-        var validationContext = new ValidationContext(model);
+        ValidationContext validationContext = new(model);
 
-        var validationResults = new List<ValidationResult>();
+        List<ValidationResult> validationResults = [];
 
         if (!Validator.TryValidateObject(model, validationContext, validationResults, true))
         {
