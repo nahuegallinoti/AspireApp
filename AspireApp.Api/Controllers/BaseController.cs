@@ -44,7 +44,7 @@ public abstract class BaseController<TModel, TID, TService>(TService service)
     /// </summary>
     /// <param name="model">The model to add.</param>
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] TModel model, CancellationToken ct = default)
+    public virtual async Task<IActionResult> Add([FromBody] TModel model, CancellationToken ct = default)
     {
         await _service.AddAsync(model, ct);
 

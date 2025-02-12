@@ -1,6 +1,4 @@
-using AspireApp.Api.Services;
-using AspireApp.Application.Contracts.Auth;
-using AspireApp.Application.Implementations.Auth;
+using AspireApp.Application.Contracts.Rabbit;
 using AspireApp.DataAccess.Implementations;
 using AspireApp.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -35,6 +33,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.RegisterMappers();
 builder.Services.RegisterDataAccess();
 builder.Services.RegisterAppServices();
+builder.Services.RegisterRabbitService();
 
 builder.Services.AddLogging(options =>
 {
@@ -58,8 +57,6 @@ builder.Services.AddHybridCache();
 #pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
 builder.Services.AddAuthorization();
-
-builder.Services.AddSingleton<RabbitMqService>(); // Registrar servicio de RabbitMQ
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
