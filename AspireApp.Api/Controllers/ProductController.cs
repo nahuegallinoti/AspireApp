@@ -20,6 +20,6 @@ public class ProductController(IProductService productService, IRabbitMqService 
         await _productService.AddAsync(model, ct);
         await _rabbit.SendMessage(new() { Message = model.Name }, $"cola-{model.Name}");
 
-        return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
+        return CreatedAtAction(nameof(Add), new { id = model.Id }, model);
     }
 }
