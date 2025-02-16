@@ -101,11 +101,12 @@ public class RabbitMqService : IRabbitMqService
 
             var body = Encoding.UTF8.GetBytes(message.Message);
 
-            // Crear directamente un objeto BasicProperties (v7 no tiene CreateBasicProperties)
+            // Crear directamente un objeto BasicProperties
             var properties = new BasicProperties
             {
                 ContentType = "text/plain",
-                DeliveryMode = DeliveryModes.Persistent
+                DeliveryMode = DeliveryModes.Persistent,
+                UserId = "ElNagu"
             };
 
             // Publicar el mensaje usando la clave de enrutamiento configurada
