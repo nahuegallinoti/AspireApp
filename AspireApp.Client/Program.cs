@@ -38,6 +38,7 @@ builder.Services.AddLogging(options =>
 builder.Services.AddScoped<LoginApiClient>();
 builder.Services.AddScoped<RegisterApiClient>();
 builder.Services.AddScoped<ProductApiClient>();
+builder.Services.AddScoped<ShowApiClient>();
 builder.Services.AddScoped<RabbitMqApiClient>();
 builder.Services.AddScoped<RabbitMqSenderService>();
 

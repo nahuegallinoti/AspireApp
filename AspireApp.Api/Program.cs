@@ -43,7 +43,8 @@ builder.Services.AddLogging(options =>
 
 // CACHE
 
-//builder.Services.AddMemoryCache(); // Memory cache. No es necesario si uso hybrid
+// Memory cache. No es necesario si uso hybrid
+//builder.Services.AddMemoryCache(); 
 
 // Redis cache
 builder.Services.AddStackExchangeRedisCache(options =>
@@ -51,10 +52,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = "localhost:6379";
 });
 
-// Hybrid cache - utilizará redis si está configurado, si no in memory
-#pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+// Hybrid cache - buscará primero en in memory (cache level 1), si no en redis (cache level 2) si está configurado
 builder.Services.AddHybridCache();
-#pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
 builder.Services.AddAuthorization();
 

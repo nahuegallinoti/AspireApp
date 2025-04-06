@@ -10,6 +10,6 @@ namespace AspireApp.Application.Implementations.Product;
 
 public class ProductService(IProductDA productDA, ProductMapper mapper, HybridCache hybridCache) : BaseService<Ent.Product, Dto.Product, long>(productDA, mapper, hybridCache), IProductService
 {
-    private readonly IProductDA _productDA = productDA;
+    //private readonly IProductDA _productDA = productDA;
 
 }

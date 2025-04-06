@@ -5,7 +5,7 @@ using Dto = AspireApp.Api.Models.App;
 namespace AspireApp.Tests.Client.Controllers;
 
 [TestClass]
-public class ProductControllerTest : BaseControllerTest<Dto.Product, long, ProductController, IProductService>
+public class ProductControllerTest : BaseControllerTest<Dto.Product, long, ProductController, IShowService>
 {
     protected override ProductController CreateController()
     {

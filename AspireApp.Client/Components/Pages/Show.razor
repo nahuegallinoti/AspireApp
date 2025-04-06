@@ -1,0 +1,55 @@
+﻿@page "/show"
+
+<PageTitle>Shows</PageTitle>
+
+<h3>Shows</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+else
+{
+    <EditForm Model="@Model" OnValidSubmit="HandleRegister" FormName="showForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div>
+            <label for="name">Name:</label>
+            <InputText id="name" @bind-Value="Model.Name" />
+        </div>
+
+        <div class="mt-3">
+            <label for="description">Description:</label>
+            <InputText id="description" @bind-Value="Model.Description" />
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Registrar</button>
+    </EditForm>
+
+    if (!shows.Any())
+    {
+        <p>No shows found.</p>
+    }
+
+    else
+    {
+        <table class="table mt-3">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var show in shows)
+                {
+                    <tr>
+                        <td>@show.Name</td>
+                        <td>@show.Description</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}

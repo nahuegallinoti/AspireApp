@@ -106,7 +106,7 @@ public class RabbitMqService : IRabbitMqService
             {
                 ContentType = "text/plain",
                 DeliveryMode = DeliveryModes.Persistent,
-                UserId = "ElNagu"
+                UserId = "guest"
             };
 
             // Publicar el mensaje usando la clave de enrutamiento configurada

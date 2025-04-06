@@ -1,10 +1,12 @@
 using AspireApp.Application.Contracts.Auth;
 using AspireApp.Application.Contracts.Product;
 using AspireApp.Application.Contracts.Rabbit;
+using AspireApp.Application.Contracts.Show;
 using AspireApp.Application.Contracts.User;
 using AspireApp.Application.Implementations.Auth;
 using AspireApp.Application.Implementations.Product;
 using AspireApp.Application.Implementations.Rabbit;
+using AspireApp.Application.Implementations.Show;
 using AspireApp.Application.Implementations.User;
 using AspireApp.Core.Mappers;
 using AspireApp.DataAccess.Contracts;
@@ -62,6 +64,8 @@ public static class Extensions
 
         services.AddScoped<IProductService, ProductService>();
 
+        services.AddScoped<IShowService, ShowService>();
+
         return services;
     }
 
@@ -69,6 +73,7 @@ public static class Extensions
     {
         services.AddScoped<IUsuarioDA, UsuarioDA>();
         services.AddScoped<IProductDA, ProductDA>();
+        services.AddScoped<IShowDA, ShowDA>();
 
         return services;
     }
@@ -85,6 +90,7 @@ public static class Extensions
     {
         services.AddSingleton<UsuarioMapper>();
         services.AddSingleton<ProductMapper>();
+        services.AddSingleton<ShowMapper>();
 
         return services;
     }
