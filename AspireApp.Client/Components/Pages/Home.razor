@@ -1,5 +1,20 @@
 ﻿@page "/"
+@inject IJSRuntime JS
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
 <h3>Home</h3>
+
+<h3>Ejemplo de TypeScript con Blazor</h3>
+<button class="btn btn-primary" @onclick="MostrarAlerta">Mostrar alerta</button>
+
+
+@code {
+
+    private async Task MostrarAlerta()
+    {
+        await JS.InvokeVoidAsync("showAlert", "¡Hola desde Blazor y TypeScript!");
+    }
+
+}

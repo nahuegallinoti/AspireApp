@@ -64,4 +64,5 @@ public partial class Product : ComponentBase
             errorMessage = $"Error al registrar: {ex.Message}";
         }
     }
+
 }

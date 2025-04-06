@@ -7,9 +7,20 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.1">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\AspireApp.Api.Modelos\AspireApp.Api.Models.csproj" />
 		<ProjectReference Include="..\AspireApp.Client.ApiClients\AspireApp.Client.ApiClients.csproj" />
 		<ProjectReference Include="..\AspireApp.ServiceDefaults\AspireApp.ServiceDefaults.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Typescript\" />
 	</ItemGroup>
 
 </Project>

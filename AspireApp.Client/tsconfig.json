@@ -1,0 +1,18 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "strict": true,
+    "target": "ES6",
+    "module": "es6",
+    "sourceMap": true,
+    "outDir": "wwwroot/js"
+  },
+  "include": [
+    "Typescript/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "wwwroot"
+  ]
+}
