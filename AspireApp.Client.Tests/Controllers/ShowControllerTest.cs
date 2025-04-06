@@ -1,27 +1,27 @@
 ﻿using AspireApp.Api.Controllers;
-using AspireApp.Application.Contracts.Product;
 using AspireApp.Application.Contracts.Rabbit;
+using AspireApp.Application.Contracts.Show;
 using Moq;
 using Dto = AspireApp.Api.Models.App;
 
 namespace AspireApp.Tests.Client.Controllers;
 
 [TestClass]
-public class ProductControllerTest : BaseControllerTest<Dto.Product, long, ProductController, IProductService>
+public class ShowControllerTest : BaseControllerTest<Dto.Show, long, ShowController, IShowService>
 {
     private Mock<IRabbitMqService> _rabbitMock = null!;
 
     [TestInitialize]
     public void Init()
     {
-        _serviceMock = new Mock<IProductService>();
+        _serviceMock = new Mock<IShowService>();
         _rabbitMock = new Mock<IRabbitMqService>();
         _controller = CreateController();
     }
 
-    protected override ProductController CreateController()
+    protected override ShowController CreateController()
     {
-        return new ProductController(_serviceMock.Object, _rabbitMock.Object);
+        return new ShowController(_serviceMock.Object, _rabbitMock.Object);
     }
 
 }

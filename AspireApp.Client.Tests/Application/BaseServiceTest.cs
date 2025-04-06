@@ -72,6 +72,14 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
 
     //    _baseDAMock.Setup(repo => repo.GetByIdAsync(id)).ReturnsAsync(entity);
 
+    //    _cache.Setup(cache => cache.GetOrCreateAsync(
+    //        It.IsAny<string>(),
+    //        It.IsAny<Func<CancellationToken, ValueTask<TE>>>(),
+    //        It.IsAny<HybridCacheEntryOptions?>(),
+    //        It.IsAny<IEnumerable<string>?>(),
+    //        It.IsAny<CancellationToken>()))
+    //    .ReturnsAsync(entity);
+
     //    // Act
     //    var retrievedEntity = await _baseService.GetByIdAsync(id);
 

@@ -17,13 +17,6 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
     protected Mock<TService> _serviceMock = null!;
     protected TController _controller = null!;
 
-    // Constructor que permite mockear el servicio y crear el controlador
-    public BaseControllerTest()
-    {
-        _serviceMock = new Mock<TService>(MockBehavior.Default);
-        _controller = CreateController();
-    }
-
     protected abstract TController CreateController();
 
     // Test para obtener todos los elementos
@@ -39,11 +32,11 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
 
         var result = await _controller.GetAll();
 
+        Assert.IsInstanceOfType<OkObjectResult>(result);
+
         var okResult = result as OkObjectResult;
-        Assert.IsNotNull(okResult);
-        var returnValue = okResult?.Value as List<T>;
-        Assert.IsNotNull(returnValue);
-        Assert.AreEqual(entities.Count, returnValue.Count);
+
+        Assert.AreEqual(entities, okResult?.Value);
     }
 
     [TestMethod]
@@ -59,11 +52,10 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
         var result = await _controller.GetById(id);
 
         // Assert
-        var okResult = result as OkObjectResult;
-        Assert.IsNotNull(okResult);
-        var returnValue = okResult?.Value as T;
-        Assert.IsNotNull(returnValue);
-        Assert.AreEqual(id, returnValue?.Id);
+        Assert.IsInstanceOfType<OkObjectResult>(result);
+        var value = (result as OkObjectResult)?.Value as T;
+        Assert.IsNotNull(value);
+        Assert.AreEqual(id, value?.Id);
     }
 
     [TestMethod]
@@ -93,10 +85,12 @@ public abstract class BaseControllerTest<T, TID, TController, TService>
         var result = await _controller.Add(model);
 
         // Assert
-        var createdResult = result as CreatedAtActionResult;
+        Assert.IsInstanceOfType<CreatedAtActionResult>(result);
 
-        Assert.IsNotNull(createdResult);
-        Assert.AreEqual(201, createdResult.StatusCode);
+        var created = result as CreatedAtActionResult;
+
+        Assert.AreEqual(201, created?.StatusCode);
+        Assert.AreEqual(model, created?.Value);
     }
 
     [TestMethod]
