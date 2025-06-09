@@ -19,7 +19,7 @@ public class RabbitMqService : IRabbitMqService
     private const string ExchangeName = "AspireWach";
 
     // Registro de topologías ya configuradas por routingKey
-    private readonly ConcurrentDictionary<string, bool> _topologyConfigured = new();
+    private readonly ConcurrentDictionary<string, bool> _topologiesConfigured = new();
 
     public RabbitMqService(ILogger<RabbitMqService> logger, IConfiguration configuration)
     {
@@ -48,45 +48,6 @@ public class RabbitMqService : IRabbitMqService
 
     private static Result<RabbitMessage> ValidateMessage(RabbitMessage message)
         => message.Validate();
-
-    // Asegura que para la routingKey se declare el exchange, cola y binding, solo la primera vez.
-    private async Task EnsureTopologyAsync(string routingKey)
-    {
-        // Si ya se configuró, salimos.
-        if (_topologyConfigured.ContainsKey(routingKey))
-            return;
-
-        // Usamos una conexión y canal temporales para configurar la topología
-        await using var connection = await _factory.CreateConnectionAsync();
-        await using var channel = await connection.CreateChannelAsync();
-
-        // Declarar el exchange (Direct, duradero, sin auto-delete)
-        await channel.ExchangeDeclareAsync(
-            exchange: ExchangeName,
-            type: ExchangeType.Direct,
-            durable: true,
-            autoDelete: false,
-            arguments: null);
-
-        // Declarar la cola con nombre igual a routingKey (duradera, no exclusiva, sin auto-delete)
-        await channel.QueueDeclareAsync(
-            queue: routingKey,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
-
-        // Realizar el binding entre la cola y el exchange, usando una clave de enrutamiento (por ejemplo, agregando un sufijo)
-        await channel.QueueBindAsync(
-            queue: routingKey,
-            exchange: ExchangeName,
-            routingKey: $"{routingKey}_rk",
-            arguments: null);
-
-        // Marcar la routingKey como configurada
-        _topologyConfigured.TryAdd(routingKey, true);
-        _logger.LogInformation($"Topología configurada para la routingKey: {routingKey}");
-    }
 
     private async Task<Result<string>> PublishMessage(RabbitMessage message, string routingKey)
     {
@@ -126,6 +87,46 @@ public class RabbitMqService : IRabbitMqService
             _logger.LogError(ex, $"Errores formateados: {errors}");
             return Result.Failure<string>("Ocurrió un error interno. Intente más tarde :)");
         }
+    }
+
+
+    // Asegura que para la routingKey se declare el exchange, cola y binding, solo la primera vez.
+    private async Task EnsureTopologyAsync(string routingKey)
+    {
+        // Si ya se configuró, salimos.
+        if (_topologiesConfigured.ContainsKey(routingKey))
+            return;
+
+        // Usamos una conexión y canal temporales para configurar la topología
+        await using var connection = await _factory.CreateConnectionAsync();
+        await using var channel = await connection.CreateChannelAsync();
+
+        // Declarar el exchange (Direct, duradero, sin auto-delete)
+        await channel.ExchangeDeclareAsync(
+            exchange: ExchangeName,
+            type: ExchangeType.Direct,
+            durable: true,
+            autoDelete: false,
+            arguments: null);
+
+        // Declarar la cola con nombre igual a routingKey (duradera, no exclusiva, sin auto-delete)
+        await channel.QueueDeclareAsync(
+            queue: routingKey,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null);
+
+        // Realizar el binding entre la cola y el exchange, usando una clave de enrutamiento
+        await channel.QueueBindAsync(
+            queue: routingKey,
+            exchange: ExchangeName,
+            routingKey: $"{routingKey}_rk",
+            arguments: null);
+
+        // Marcar la routingKey como configurada
+        _topologiesConfigured.TryAdd(routingKey, true);
+        _logger.LogInformation($"Topología configurada para la routingKey: {routingKey}");
     }
 
     private static ImmutableArray<string> GetErrorMessages(Exception ex)
