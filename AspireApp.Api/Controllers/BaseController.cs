@@ -2,7 +2,6 @@
 using AspireApp.Api.Models.Rabbit;
 using AspireApp.Application.Contracts.Base;
 using AspireApp.Application.Contracts.EventBus;
-using Confluent.Kafka;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AspireApp.Api.Controllers;
@@ -15,8 +14,8 @@ namespace AspireApp.Api.Controllers;
 /// <typeparam name="TService">The service type handling the operations.</typeparam>
 public abstract class BaseController<TModel, TID, TService>(TService service, IMessageBus messageBus)
     : ControllerBase where TModel : BaseModel<TID>
-                    where TID : struct
-                    where TService : IBaseService<TModel, TID>
+                     where TID : struct
+                     where TService : IBaseService<TModel, TID>
 {
     protected readonly TService _service = service;
     private readonly IMessageBus _messageBus = messageBus;
