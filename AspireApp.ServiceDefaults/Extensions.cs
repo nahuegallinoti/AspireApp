@@ -1,11 +1,10 @@
 using AspireApp.Application.Contracts.Auth;
+using AspireApp.Application.Contracts.EventBus;
 using AspireApp.Application.Contracts.Product;
-using AspireApp.Application.Contracts.Rabbit;
 using AspireApp.Application.Contracts.Show;
 using AspireApp.Application.Contracts.User;
 using AspireApp.Application.Implementations.Auth;
 using AspireApp.Application.Implementations.Product;
-using AspireApp.Application.Implementations.Rabbit;
 using AspireApp.Application.Implementations.Show;
 using AspireApp.Application.Implementations.User;
 using AspireApp.Core.Mappers;
@@ -80,7 +79,8 @@ public static class Extensions
 
     public static IServiceCollection RegisterRabbitService(this IServiceCollection services)
     {
-        services.AddScoped<IRabbitMqService, RabbitMqService>();
+        services.AddScoped<IMessageBus, KafkaMessageBus>();
+        //services.AddScoped<IMessageBus, RabbitMQMessageBus>();
 
         return services;
     }

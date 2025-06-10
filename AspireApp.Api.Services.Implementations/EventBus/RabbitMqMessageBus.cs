@@ -1,5 +1,5 @@
 ﻿using AspireApp.Api.Models.Rabbit;
-using AspireApp.Application.Contracts.Rabbit;
+using AspireApp.Application.Contracts.EventBus;
 using AspireApp.Application.Implementations.Extensions;
 using AspireApp.Core.ROP;
 using Microsoft.Extensions.Configuration;
@@ -8,20 +8,21 @@ using RabbitMQ.Client;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Text;
+using System.Text.Json;
 
-namespace AspireApp.Application.Implementations.Rabbit;
+namespace AspireApp.Application.Implementations.EventBus;
 
-public class RabbitMqService : IRabbitMqService
+public class RabbitMQMessageBus : IMessageBus
 {
     private readonly ConnectionFactory _factory;
-    private readonly ILogger<RabbitMqService> _logger;
+    private readonly ILogger<RabbitMQMessageBus> _logger;
     private readonly IConfiguration _configuration;
     private const string ExchangeName = "AspireWach";
 
     // Registro de topologías ya configuradas por routingKey
     private readonly ConcurrentDictionary<string, bool> _topologiesConfigured = new();
 
-    public RabbitMqService(ILogger<RabbitMqService> logger, IConfiguration configuration)
+    public RabbitMQMessageBus(ILogger<RabbitMQMessageBus> logger, IConfiguration configuration)
     {
         _configuration = configuration;
         var rabbitMqSettings = _configuration.GetSection("RabbitMqSettings");
@@ -39,6 +40,15 @@ public class RabbitMqService : IRabbitMqService
 
         _logger = logger;
     }
+
+    public async Task<Result<string>> PublishAsync<TMessage>(TMessage message, string topic) where TMessage : class
+    {
+        var json = JsonSerializer.Serialize(message);
+        var rabbitMessage = new RabbitMessage { Message = json };
+
+        return await SendMessage(rabbitMessage, topic);
+    }
+
 
     public Task<Result<string>> SendMessage(RabbitMessage message, string routingKey)
     {
@@ -140,4 +150,5 @@ public class RabbitMqService : IRabbitMqService
         }
         return ImmutableArray.Create(messages.ToArray());
     }
+
 }

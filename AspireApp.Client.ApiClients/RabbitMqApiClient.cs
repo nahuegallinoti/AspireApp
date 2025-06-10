@@ -7,7 +7,7 @@ public class RabbitMqApiClient(IHttpClientFactory httpClientFactory) : BaseApiCl
 {
     public async Task<Result<string>> SendMessageAsync(RabbitMessage message, CancellationToken ct)
     {
-        var result = await PostAsync<string, RabbitMessage>("api/rabbitmq/send", message, ct);
+        var result = await PostAsync<string, RabbitMessage>("api/messagebus/send", message, ct);
         return result;
     }
 }

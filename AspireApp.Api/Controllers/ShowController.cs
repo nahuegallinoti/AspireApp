@@ -1,5 +1,5 @@
 ﻿using AspireApp.Api.Models.App;
-using AspireApp.Application.Contracts.Rabbit;
+using AspireApp.Application.Contracts.EventBus;
 using AspireApp.Application.Contracts.Show;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +9,9 @@ namespace AspireApp.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ShowController(IShowService showService, IRabbitMqService rabbitMqService)
+public class ShowController(IShowService showService, IMessageBus messageBus)
     :
-    BaseController<Show, long, IShowService>(showService, rabbitMqService)
+    BaseController<Show, long, IShowService>(showService, messageBus)
 {
     //private readonly IRabbitMqService _rabbit = rabbitMqService;
     //private readonly IProductService _productService = productService;

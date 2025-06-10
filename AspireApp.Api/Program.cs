@@ -1,4 +1,3 @@
-using AspireApp.Application.Contracts.Rabbit;
 using AspireApp.DataAccess.Implementations;
 using AspireApp.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

@@ -1,6 +1,8 @@
 ﻿using AspireApp.Api.Models;
+using AspireApp.Api.Models.Rabbit;
 using AspireApp.Application.Contracts.Base;
-using AspireApp.Application.Contracts.Rabbit;
+using AspireApp.Application.Contracts.EventBus;
+using Confluent.Kafka;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AspireApp.Api.Controllers;
@@ -11,13 +13,13 @@ namespace AspireApp.Api.Controllers;
 /// <typeparam name="TModel">The model type.</typeparam>
 /// <typeparam name="TID">The type of the model identifier.</typeparam>
 /// <typeparam name="TService">The service type handling the operations.</typeparam>
-public abstract class BaseController<TModel, TID, TService>(TService service, IRabbitMqService rabbit)
+public abstract class BaseController<TModel, TID, TService>(TService service, IMessageBus messageBus)
     : ControllerBase where TModel : BaseModel<TID>
                     where TID : struct
                     where TService : IBaseService<TModel, TID>
 {
     protected readonly TService _service = service;
-    private readonly IRabbitMqService _rabbit = rabbit;
+    private readonly IMessageBus _messageBus = messageBus;
 
     /// <summary>
     /// Retrieves all models.
@@ -49,7 +51,7 @@ public abstract class BaseController<TModel, TID, TService>(TService service, IR
     {
         await _service.AddAsync(model, ct);
 
-        await _rabbit.SendMessage(new() { Message = $"Creado el pibe {model.Id}" }, $"{model.GetType().Name}");
+        await _messageBus.PublishAsync(new RabbitMessage() { Message = $"Creado el pibe {model.Id}" }, topic: $"{model.GetType().Name}");
 
         //Incluye en los headers el Location con la URL para obtener el recurso recién creado
         return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
