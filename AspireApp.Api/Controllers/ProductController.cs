@@ -9,9 +9,9 @@ namespace AspireApp.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ProductController(IProductService productService, IMessageBus messageBus)
+public class ProductController(IProductService productService, IMessageBus messageBus, ILogger<ProductController> logger)
     :
-    BaseController<Product, long, IProductService>(productService, messageBus)
+    BaseController<Product, long, IProductService>(productService, messageBus, logger)
 {
     //private readonly IRabbitMqService _rabbit = rabbitMqService;
     //private readonly IProductService _productService = productService;

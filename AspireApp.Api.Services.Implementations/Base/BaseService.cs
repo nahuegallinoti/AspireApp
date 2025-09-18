@@ -1,6 +1,7 @@
 ﻿using AspireApp.Api.Models;
 using AspireApp.Application.Contracts.Base;
 using AspireApp.Core.Mappers;
+using AspireApp.Core.ROP;
 using AspireApp.DataAccess.Contracts.Base;
 using AspireApp.Entities.Base;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -20,16 +21,18 @@ public class BaseService<TEntity, TModel, TID>(IBaseDA<TEntity, TID> baseDA, Bas
     public async Task SaveChangesAsync(CancellationToken ct) => await _baseDA.SaveChangesAsync(ct);
 
     /// <inheritdoc />
-    public async Task<TModel> AddAsync(TModel model, CancellationToken ct)
+    public async Task<Result<TModel>> AddAsync(TModel model, CancellationToken ct)
     {
         TEntity entity = _mapper.ToEntity(model);
 
-        await _baseDA.AddAsync(entity, ct);
-        await _baseDA.SaveChangesAsync(ct);
+        return await _baseDA.AddAsync(entity, ct)
+                      .Bind(async _ =>
+                      {
+                          await _baseDA.SaveChangesAsync(ct);
+                          model.Id = entity.Id;
 
-        model.Id = entity.Id;
-
-        return model;
+                          return Result.Success(model);
+                      });
     }
 
     /// <inheritdoc />

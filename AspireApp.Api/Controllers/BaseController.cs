@@ -12,13 +12,14 @@ namespace AspireApp.Api.Controllers;
 /// <typeparam name="TModel">The model type.</typeparam>
 /// <typeparam name="TID">The type of the model identifier.</typeparam>
 /// <typeparam name="TService">The service type handling the operations.</typeparam>
-public abstract class BaseController<TModel, TID, TService>(TService service, IMessageBus messageBus)
+public abstract class BaseController<TModel, TID, TService>(TService service, IMessageBus messageBus, ILogger logger)
     : ControllerBase where TModel : BaseModel<TID>
                      where TID : struct
                      where TService : IBaseService<TModel, TID>
 {
     protected readonly TService _service = service;
     private readonly IMessageBus _messageBus = messageBus;
+    private readonly ILogger _logger = logger;
 
     /// <summary>
     /// Retrieves all models.
@@ -48,12 +49,18 @@ public abstract class BaseController<TModel, TID, TService>(TService service, IM
     [HttpPost]
     public virtual async Task<IActionResult> Add([FromBody] TModel model, CancellationToken ct = default)
     {
-        await _service.AddAsync(model, ct);
+        var result = await _service.AddAsync(model, ct);
 
-        await _messageBus.PublishAsync(new RabbitMessage() { Message = $"Creado el pibe {model.Id}" }, topic: $"{model.GetType().Name}");
+        if (!result.Success)
+            return BadRequest(result.Errors);
 
-        //Incluye en los headers el Location con la URL para obtener el recurso recién creado
-        return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
+        await _messageBus.PublishAsync(
+            message: new RabbitMessage { Message = $"Creado el pibe {result.Value.Id}" },
+            topic: $"{result.Value.GetType().Name}"
+        );
+
+        // Incluye en los headers el Location con la URL para obtener el recurso recién creado
+        return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
     }
 
     /// <summary>

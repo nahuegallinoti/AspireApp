@@ -1,4 +1,5 @@
-﻿using AspireApp.Entities.Base;
+﻿using AspireApp.Core.ROP;
+using AspireApp.Entities.Base;
 
 namespace AspireApp.DataAccess.Contracts.Base;
 
@@ -15,7 +16,7 @@ public interface IBaseDA<T, TID> where T : BaseEntity<TID>
     /// </summary>
     /// <param name="entity"></param>
     /// <returns></returns>
-    Task AddAsync(T entity, CancellationToken ct);
+    Task<Result<T>> AddAsync(T entity, CancellationToken ct);
 
     /// <summary>
     /// Delete an entity from the database.

@@ -1,4 +1,5 @@
-﻿using AspireApp.DataAccess.Contracts.Base;
+﻿using AspireApp.Core.ROP;
+using AspireApp.DataAccess.Contracts.Base;
 using AspireApp.Entities.Base;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,7 +29,18 @@ public class BaseDA<T, TID> : IBaseDA<T, TID> where T : BaseEntity<TID>
     public async Task<IEnumerable<T>> GetAllAsync(CancellationToken ct) => await _dbSet.ToListAsync(ct);
 
     /// <inheritdoc />
-    public async Task AddAsync(T entity, CancellationToken ct) => await _dbSet.AddAsync(entity, ct);
+    public async Task<Result<T>> AddAsync(T entity, CancellationToken ct)
+    {
+        try
+        {
+            await _dbSet.AddAsync(entity, ct);
+            return Result.Success(entity);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<T>(["Error al agregar entidad: " + ex.Message]);
+        }
+    }
 
     /// <inheritdoc />
     public void Update(T entity) => _dbSet.Update(entity);

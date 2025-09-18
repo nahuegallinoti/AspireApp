@@ -1,4 +1,5 @@
 ﻿using AspireApp.Api.Models;
+using AspireApp.Core.ROP;
 
 namespace AspireApp.Application.Contracts.Base
 {
@@ -15,7 +16,7 @@ namespace AspireApp.Application.Contracts.Base
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        Task<T> AddAsync(T entity, CancellationToken ct);
+        Task<Result<T>> AddAsync(T entity, CancellationToken ct);
 
         /// <summary>
         /// Deletes an entity.

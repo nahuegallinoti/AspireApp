@@ -38,7 +38,7 @@ public class RegisterUserServiceDependenciesTest
 
         var id = user.SetId<UserRegister, Guid>();
 
-        _usuarioDA.Setup(x => x.AddAsync(It.IsAny<Ent.User>(), CancellationToken.None)).Returns(Task.CompletedTask);
+        //_usuarioDA.Setup(x => x.AddAsync(It.IsAny<Ent.User>(), CancellationToken.None)).Returns(Task.CompletedTask);
 
         _usuarioDA.Setup(x => x.SaveChangesAsync(CancellationToken.None)).Returns(Task.CompletedTask);
 

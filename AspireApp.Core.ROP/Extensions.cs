@@ -27,11 +27,6 @@ public static class Result
     public static Result<Unit> Success() => new(Unit, HttpStatusCode.OK);
 
     /// <summary>
-    /// Converts a synchronous Result structure into async
-    /// </summary>
-    public static Task<Result<T>> Async<T>(this Result<T> r) => Task.FromResult(r);
-
-    /// <summary>
     /// Converts the type into the error flow with  HttpStatusCode.BadRequest
     /// </summary>
     public static Result<T> Failure<T>(ImmutableArray<string> errors) => new(errors, HttpStatusCode.BadRequest);
@@ -45,6 +40,11 @@ public static class Result
     /// Converts the type into the error flow with  HttpStatusCode.BadRequest
     /// </summary>
     public static Result<T> Failure<T>(string error) => new([error], HttpStatusCode.BadRequest);
+
+    /// <summary>
+    /// Converts the type into the error flow with  HttpStatusCode.BadRequest
+    /// </summary>
+    public static Result<T> Failure<T>(string error, HttpStatusCode httpStatusCode) => new([error], httpStatusCode);
 
     /// <summary>
     /// Converts the type into the error flow with  HttpStatusCode.BadRequest

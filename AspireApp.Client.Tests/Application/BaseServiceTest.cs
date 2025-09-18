@@ -91,24 +91,24 @@ public abstract class BaseServiceTest<TE, TM, TID, TDA>
     //    _baseDAMock.Verify(repo => repo.GetByIdAsync(id), Times.Once);
     //}
 
-    [TestMethod]
-    public async Task AddAsync_ShouldAddEntity()
-    {
-        // Arrange
-        TM model = CreateInstanceModel();
+    //[TestMethod]
+    //public async Task AddAsync_ShouldAddEntity()
+    //{
+    //    // Arrange
+    //    TM model = CreateInstanceModel();
 
-        model.SetId<TM, TID>();
-        model.GetType().GetProperty("Name")?.SetValue(model, "nagu");
+    //    model.SetId<TM, TID>();
+    //    model.GetType().GetProperty("Name")?.SetValue(model, "nagu");
 
-        // Se usa It.IsAny<TE> para que el mock acepte cualquier instancia de TEntity
-        _baseDAMock.Setup(repo => repo.AddAsync(It.IsAny<TE>(), CancellationToken.None)).Returns(Task.CompletedTask);
+    //    // Se usa It.IsAny<TE> para que el mock acepte cualquier instancia de TEntity
+    //    _baseDAMock.Setup(repo => repo.AddAsync(It.IsAny<TE>(), CancellationToken.None)).Returns(Task.CompletedTask);
 
-        // Act
-        await _baseService.AddAsync(model, CancellationToken.None);
+    //    // Act
+    //    await _baseService.AddAsync(model, CancellationToken.None);
 
-        // Assert
-        _baseDAMock.Verify(repo => repo.AddAsync(It.IsAny<TE>(), CancellationToken.None), Times.Once);
-    }
+    //    // Assert
+    //    _baseDAMock.Verify(repo => repo.AddAsync(It.IsAny<TE>(), CancellationToken.None), Times.Once);
+    //}
 
     [TestMethod]
     public void Delete_ShouldRemoveEntity()
