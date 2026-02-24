@@ -16,6 +16,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\AspireApp.Api.Modelos\AspireApp.Application.Models.csproj" />
 		<ProjectReference Include="..\AspireApp.Api.Services.Contracts\AspireApp.Application.Contracts.csproj" />
 		<ProjectReference Include="..\AspireApp.Common\AspireApp.Core.Mappers.csproj" />
 		<ProjectReference Include="..\AspireApp.DataAccess.Contracts\AspireApp.DataAccess.Contracts.csproj" />

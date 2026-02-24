@@ -88,7 +88,7 @@ public class RabbitMQMessageBus : IMessageBus
                 basicProperties: properties,
                 body: body);
 
-            _logger.LogInformation($"Mensaje enviado a '{ExchangeName}' con routing key '{routingKey}_rk': {message.Message}");
+            _logger.LogInformation("Mensaje enviado a '{ExchangeName}' con routing key '{RoutingKey}': {Message}", ExchangeName, $"{routingKey}_rk", message.Message);
             return message.Message.Success();
         }
         catch (Exception ex)
@@ -136,7 +136,7 @@ public class RabbitMQMessageBus : IMessageBus
 
         // Marcar la routingKey como configurada
         _topologiesConfigured.TryAdd(routingKey, true);
-        _logger.LogInformation($"Topología configurada para la routingKey: {routingKey}");
+        _logger.LogInformation("Topología configurada para la routingKey: {RoutingKey}", routingKey);
     }
 
     private static ImmutableArray<string> GetErrorMessages(Exception ex)

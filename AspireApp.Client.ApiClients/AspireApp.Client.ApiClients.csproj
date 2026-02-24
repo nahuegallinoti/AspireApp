@@ -9,7 +9,7 @@
     <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.3" />
     <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
-    <ProjectReference Include="..\AspireApp.Api.Modelos\AspireApp.Api.Models.csproj" />
+    <ProjectReference Include="..\AspireApp.Api.Modelos\AspireApp.Application.Models.csproj" />
     <ProjectReference Include="..\AspireApp.Core.ROP\AspireApp.Core.ROP.csproj" />
   </ItemGroup>
 

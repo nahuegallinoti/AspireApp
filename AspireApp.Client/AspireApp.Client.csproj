@@ -14,7 +14,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\AspireApp.Api.Modelos\AspireApp.Api.Models.csproj" />
+		<ProjectReference Include="..\AspireApp.Api.Modelos\AspireApp.Application.Models.csproj" />
 		<ProjectReference Include="..\AspireApp.Client.ApiClients\AspireApp.Client.ApiClients.csproj" />
 		<ProjectReference Include="..\AspireApp.ServiceDefaults\AspireApp.ServiceDefaults.csproj" />
 	</ItemGroup>
