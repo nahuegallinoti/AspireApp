@@ -1,0 +1,33 @@
+<Solution>
+  <Folder Name="/0.Domain/">
+    <Project Path="AspireApp.Core.ROP/AspireApp.Domain.ROP.csproj" />
+    <Project Path="AspireApp.Entidad/AspireApp.Domain.Entities.csproj" />
+  </Folder>
+  <Folder Name="/1.Application/">
+    <Project Path="AspireApp.Api.Modelos/AspireApp.Application.Models.csproj" />
+    <Project Path="AspireApp.Api.Services.Contracts/AspireApp.Application.Contracts.csproj" />
+    <Project Path="AspireApp.Api.Services.Implementations/AspireApp.Application.Implementations.csproj" />
+    <Project Path="AspireApp.Application.Persistence/AspireApp.Application.Persistence.csproj" />
+    <Project Path="AspireApp.Common/AspireApp.Application.Mappers.csproj" />
+  </Folder>
+  <Folder Name="/2.Presentation/">
+    <Project Path="AspireApp.Api/AspireApp.Api.csproj" />
+  </Folder>
+  <Folder Name="/3.Infrastructure/">
+    <Project Path="AspireApp.DataAccess/AspireApp.DataAccess.Implementations.csproj" />
+  </Folder>
+  <Folder Name="/4.Client/">
+    <Project Path="AspireApp.Client.ApiClients/AspireApp.Client.ApiClients.csproj" />
+    <Project Path="AspireApp.Client/AspireApp.Client.csproj" />
+  </Folder>
+  <Folder Name="/Host/">
+    <Project Path="AspireApp.AppHost/AspireApp.AppHost.csproj" />
+    <Project Path="AspireApp.ServiceDefaults/AspireApp.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Readme.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="AspireApp.Client.Tests/AspireApp.Tests.Client.csproj" />
+  </Folder>
+</Solution>
