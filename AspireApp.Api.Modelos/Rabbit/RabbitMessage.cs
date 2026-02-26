@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AspireApp.Api.Models.Rabbit;
+namespace AspireApp.Application.Models.Rabbit;
 
 [Serializable]
 public class RabbitMessage

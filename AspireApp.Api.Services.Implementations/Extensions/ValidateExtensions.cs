@@ -1,4 +1,4 @@
-﻿using AspireApp.Core.ROP;
+﻿using AspireApp.Domain.ROP;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 

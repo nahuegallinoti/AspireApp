@@ -1,4 +1,4 @@
-﻿namespace AspireApp.Api.Models.Auth.User;
+﻿namespace AspireApp.Application.Models.Auth.User;
 
 public class UserLogin : UserBase
 {

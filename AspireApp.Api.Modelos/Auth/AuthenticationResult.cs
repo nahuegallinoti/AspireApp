@@ -1,3 +1,3 @@
-﻿namespace AspireApp.Api.Models.Auth;
+﻿namespace AspireApp.Application.Models.Auth;
 
 public readonly record struct AuthenticationResult(string Token);

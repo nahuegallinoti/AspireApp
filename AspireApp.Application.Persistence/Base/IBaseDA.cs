@@ -1,7 +1,7 @@
-﻿using AspireApp.Core.ROP;
-using AspireApp.Entities.Base;
+﻿using AspireApp.Domain.Entities.Base;
+using AspireApp.Domain.ROP;
 
-namespace AspireApp.DataAccess.Contracts.Base;
+namespace AspireApp.Application.Persistence.Base;
 
 /// <summary>
 /// Defines the contract for data access operations.

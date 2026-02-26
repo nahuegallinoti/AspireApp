@@ -1,9 +1,9 @@
-﻿using AspireApp.Api.Models;
-using AspireApp.Application.Contracts.Base;
+﻿using AspireApp.Application.Contracts.Base;
+using AspireApp.Application.Models;
+using AspireApp.Application.Persistence.Base;
 using AspireApp.Core.Mappers;
-using AspireApp.Core.ROP;
-using AspireApp.DataAccess.Contracts.Base;
-using AspireApp.Entities.Base;
+using AspireApp.Domain.Entities.Base;
+using AspireApp.Domain.ROP;
 using Microsoft.Extensions.Caching.Hybrid;
 
 namespace AspireApp.Application.Implementations.Base;

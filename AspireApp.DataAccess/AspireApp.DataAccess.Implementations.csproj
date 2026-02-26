@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AspireApp.DataAccess.Contracts\AspireApp.DataAccess.Contracts.csproj" />
-    <ProjectReference Include="..\AspireApp.Entidad\AspireApp.Entities.csproj" />
+    <ProjectReference Include="..\AspireApp.Application.Persistence\AspireApp.Application.Persistence.csproj" />
+    <ProjectReference Include="..\AspireApp.Entidad\AspireApp.Domain.Entities.csproj" />
   </ItemGroup>
 
 </Project>

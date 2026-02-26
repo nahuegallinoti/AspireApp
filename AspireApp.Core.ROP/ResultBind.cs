@@ -1,6 +1,6 @@
 ﻿using System.Runtime.ExceptionServices;
 
-namespace AspireApp.Core.ROP;
+namespace AspireApp.Domain.ROP;
 
 public static class Result_Bind
 {

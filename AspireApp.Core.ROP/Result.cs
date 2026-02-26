@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Net;
 
-namespace AspireApp.Core.ROP;
+namespace AspireApp.Domain.ROP;
 
 public readonly struct Result<T>
 {

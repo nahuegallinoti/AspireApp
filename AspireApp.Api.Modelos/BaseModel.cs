@@ -1,4 +1,4 @@
-﻿namespace AspireApp.Api.Models;
+﻿namespace AspireApp.Application.Models;
 
 /// <summary>
 /// Represents a base model with an identifier.

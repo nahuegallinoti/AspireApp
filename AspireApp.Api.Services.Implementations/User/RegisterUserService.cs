@@ -1,7 +1,7 @@
-﻿using AspireApp.Api.Models.Auth.User;
-using AspireApp.Application.Contracts.User;
+﻿using AspireApp.Application.Contracts.User;
 using AspireApp.Application.Implementations.Extensions;
-using AspireApp.Core.ROP;
+using AspireApp.Application.Models.Auth.User;
+using AspireApp.Domain.ROP;
 
 namespace AspireApp.Application.Implementations.User;
 

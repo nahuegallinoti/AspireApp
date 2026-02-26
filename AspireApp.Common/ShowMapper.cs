@@ -1,13 +1,13 @@
-﻿using AspireApp.Api.Models.App;
-using Ent = AspireApp.Entities;
+﻿using AspireApp.Core.Mappers;
+using Show = AspireApp.Application.Models.App.Show;
 
-namespace AspireApp.Core.Mappers;
+namespace AspireApp.Application.Mappers;
 
-public sealed class ShowMapper : BaseMapper<Show, Ent.Show>
+public sealed class ShowMapper : BaseMapper<Show, Domain.Entities.Show>
 {
     public ShowMapper() { }
 
-    public override Show ToModel(Ent.Show entity)
+    public override Show ToModel(Domain.Entities.Show entity)
     {
         if (entity is null) return new();
 
@@ -19,11 +19,11 @@ public sealed class ShowMapper : BaseMapper<Show, Ent.Show>
         };
     }
 
-    public override Ent.Show ToEntity(Show model)
+    public override Domain.Entities.Show ToEntity(Show model)
     {
         if (model is null) return new();
 
-        return new Ent.Show
+        return new Domain.Entities.Show
         {
             Id = model.Id,
             Name = model.Name,

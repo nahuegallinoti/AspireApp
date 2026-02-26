@@ -1,6 +1,6 @@
 ﻿using AspireApp.DataAccess.Implementations;
 using AspireApp.DataAccess.Implementations.Base;
-using AspireApp.Entities.Base;
+using AspireApp.Domain.Entities.Base;
 using AspireApp.Tests.Client.Extensions;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,5 +1,5 @@
-﻿using AspireApp.Api.Models.Rabbit;
-using AspireApp.Core.ROP;
+﻿using AspireApp.Application.Models.Rabbit;
+using AspireApp.Domain.ROP;
 
 namespace AspireApp.Client.ApiClients;
 

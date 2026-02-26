@@ -1,9 +1,9 @@
 ﻿using AspireApp.Api.Controllers;
-using AspireApp.Api.Models.Auth;
-using AspireApp.Api.Models.Auth.User;
 using AspireApp.Application.Contracts.Auth;
 using AspireApp.Application.Contracts.User;
-using AspireApp.Core.ROP;
+using AspireApp.Application.Models.Auth;
+using AspireApp.Application.Models.Auth.User;
+using AspireApp.Domain.ROP;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Net;

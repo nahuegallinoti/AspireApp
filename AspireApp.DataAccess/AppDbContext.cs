@@ -1,5 +1,4 @@
-﻿using AspireApp.DataAccess.Contracts;
-using AspireApp.Entities;
+﻿using AspireApp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AspireApp.DataAccess.Implementations;

@@ -1,6 +1,5 @@
 ﻿using AspireApp.Client.ApiClients;
 using Microsoft.AspNetCore.Components;
-using Dto = AspireApp.Api.Models.App;
 
 namespace AspireApp.Client.Components.Pages;
 
@@ -10,9 +9,9 @@ public partial class Show : ComponentBase
     public ShowApiClient ShowApi { get; set; } = null!;
 
     [SupplyParameterFromForm]
-    public Dto.Show Model { get; set; } = new();
+    public Application.Models.App.Show Model { get; set; } = new();
 
-    private List<Dto.Show> shows = [];
+    private List<Application.Models.App.Show> shows = [];
     private string errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()

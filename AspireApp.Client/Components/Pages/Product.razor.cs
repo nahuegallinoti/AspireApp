@@ -1,6 +1,5 @@
 ﻿using AspireApp.Client.ApiClients;
 using Microsoft.AspNetCore.Components;
-using Dto = AspireApp.Api.Models.App;
 
 namespace AspireApp.Client.Components.Pages;
 
@@ -10,9 +9,9 @@ public partial class Product : ComponentBase
     public ProductApiClient ProductApi { get; set; } = null!;
 
     [SupplyParameterFromForm]
-    public Dto.Product Model { get; set; } = new();
+    public Application.Models.App.Product Model { get; set; } = new();
 
-    private List<Dto.Product> products = [];
+    private List<Application.Models.App.Product> products = [];
     private string errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()

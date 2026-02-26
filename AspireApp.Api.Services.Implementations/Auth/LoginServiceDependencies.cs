@@ -1,8 +1,8 @@
-﻿using AspireApp.Api.Models.Auth;
-using AspireApp.Api.Models.Auth.User;
-using AspireApp.Application.Contracts.Auth;
-using AspireApp.Core.ROP;
-using AspireApp.DataAccess.Contracts;
+﻿using AspireApp.Application.Contracts.Auth;
+using AspireApp.Application.Models.Auth;
+using AspireApp.Application.Models.Auth.User;
+using AspireApp.Application.Persistence;
+using AspireApp.Domain.ROP;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;

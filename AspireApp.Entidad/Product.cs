@@ -1,6 +1,6 @@
-﻿using AspireApp.Entities.Base;
+﻿using AspireApp.Domain.Entities.Base;
 
-namespace AspireApp.Entities;
+namespace AspireApp.Domain.Entities;
 
 public class Product : BaseEntity<long>
 {

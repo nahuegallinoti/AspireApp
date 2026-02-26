@@ -1,6 +1,6 @@
-﻿using AspireApp.Api.Models.App;
-using AspireApp.Application.Contracts.EventBus;
+﻿using AspireApp.Application.Contracts.EventBus;
 using AspireApp.Application.Contracts.Product;
+using AspireApp.Application.Models.App;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

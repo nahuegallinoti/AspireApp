@@ -1,4 +1,4 @@
-﻿namespace AspireApp.Core.ROP;
+﻿namespace AspireApp.Domain.ROP;
 
 public sealed class Unit
 {

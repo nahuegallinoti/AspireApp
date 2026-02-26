@@ -1,4 +1,4 @@
-﻿using AspireApp.Core.ROP;
+﻿using AspireApp.Domain.ROP;
 
 namespace AspireApp.Application.Contracts.EventBus;
 

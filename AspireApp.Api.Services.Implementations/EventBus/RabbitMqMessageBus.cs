@@ -1,7 +1,7 @@
-﻿using AspireApp.Api.Models.Rabbit;
-using AspireApp.Application.Contracts.EventBus;
+﻿using AspireApp.Application.Contracts.EventBus;
 using AspireApp.Application.Implementations.Extensions;
-using AspireApp.Core.ROP;
+using AspireApp.Application.Models.Rabbit;
+using AspireApp.Domain.ROP;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Net;
 
-namespace AspireApp.Core.ROP;
+namespace AspireApp.Domain.ROP;
 
 // La clase debe llamarse Result para que funcione
 public static class Result

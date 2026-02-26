@@ -1,6 +1,6 @@
-﻿using AspireApp.Core.ROP;
-using AspireApp.DataAccess.Contracts.Base;
-using AspireApp.Entities.Base;
+﻿using AspireApp.Application.Persistence.Base;
+using AspireApp.Domain.Entities.Base;
+using AspireApp.Domain.ROP;
 using Microsoft.EntityFrameworkCore;
 
 namespace AspireApp.DataAccess.Implementations.Base;

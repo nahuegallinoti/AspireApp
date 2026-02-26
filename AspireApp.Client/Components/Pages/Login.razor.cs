@@ -1,4 +1,4 @@
-﻿using AspireApp.Api.Models.Auth.User;
+﻿using AspireApp.Application.Models.Auth.User;
 using AspireApp.Client.ApiClients;
 using AspireApp.Client.Handlers;
 using Microsoft.AspNetCore.Components;

@@ -1,5 +1,5 @@
-﻿using AspireApp.Api.Models.Auth.User;
-using AspireApp.Entities;
+﻿using AspireApp.Application.Models.Auth.User;
+using AspireApp.Domain.Entities;
 
 namespace AspireApp.Core.Mappers;
 

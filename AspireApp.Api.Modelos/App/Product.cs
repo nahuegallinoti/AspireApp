@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AspireApp.Api.Models.App;
+namespace AspireApp.Application.Models.App;
 
 public class Product : BaseModel<long>
 {

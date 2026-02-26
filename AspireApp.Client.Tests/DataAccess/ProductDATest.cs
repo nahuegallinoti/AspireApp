@@ -1,5 +1,5 @@
 ﻿using AspireApp.DataAccess.Implementations;
-using AspireApp.Entities;
+using AspireApp.Domain.Entities;
 
 namespace AspireApp.Tests.Client.DataAccess;
 

@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AspireApp.Core.ROP\AspireApp.Core.ROP.csproj" />
-    <ProjectReference Include="..\AspireApp.Entidad\AspireApp.Entities.csproj" />
+    <ProjectReference Include="..\AspireApp.Core.ROP\AspireApp.Domain.ROP.csproj" />
+    <ProjectReference Include="..\AspireApp.Entidad\AspireApp.Domain.Entities.csproj" />
   </ItemGroup>
 
 </Project>

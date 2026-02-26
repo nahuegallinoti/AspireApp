@@ -1,17 +1,19 @@
-﻿using AspireApp.Api.Models.App;
-using Ent = AspireApp.Entities;
+﻿using AspireApp.Application.Models.App;
+using AspireApp.Core.Mappers;
+using AspireApp.Domain.Entities;
+using Dto = AspireApp.Application.Models;
 
-namespace AspireApp.Core.Mappers;
+namespace AspireApp.Application.Mappers;
 
-public sealed class ProductMapper : BaseMapper<Product, Ent.Product>
+public sealed class ProductMapper : BaseMapper<Dto.App.Product, Domain.Entities.Product>
 {
     public ProductMapper() { }
 
-    public override Product ToModel(Ent.Product entity)
+    public override Dto.App.Product ToModel(Domain.Entities.Product entity)
     {
         if (entity is null) return new();
 
-        return new Product
+        return new Dto.App.Product
         {
             Id = entity.Id,
             Name = entity.Name,
@@ -19,11 +21,11 @@ public sealed class ProductMapper : BaseMapper<Product, Ent.Product>
         };
     }
 
-    public override Ent.Product ToEntity(Product model)
+    public override Domain.Entities.Product ToEntity(Dto.App.Product model)
     {
         if (model is null) return new();
 
-        return new Ent.Product
+        return new Domain.Entities.Product
         {
             Id = model.Id,
             Name = model.Name,

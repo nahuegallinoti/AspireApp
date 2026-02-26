@@ -1,5 +1,5 @@
 ﻿using AspireApp.Application.Contracts.EventBus;
-using AspireApp.Core.ROP;
+using AspireApp.Domain.ROP;
 using Confluent.Kafka;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

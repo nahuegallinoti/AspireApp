@@ -1,4 +1,4 @@
-﻿using AspireApp.Api.Models.Rabbit;
+﻿using AspireApp.Application.Models.Rabbit;
 using AspireApp.Client;
 using AspireApp.Client.Services;
 using Microsoft.AspNetCore.Components;

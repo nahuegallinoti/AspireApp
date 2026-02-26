@@ -1,8 +1,8 @@
-﻿using AspireApp.Api.Models;
-using AspireApp.Application.Implementations.Base;
+﻿using AspireApp.Application.Implementations.Base;
+using AspireApp.Application.Models;
+using AspireApp.Application.Persistence.Base;
 using AspireApp.Core.Mappers;
-using AspireApp.DataAccess.Contracts.Base;
-using AspireApp.Entities.Base;
+using AspireApp.Domain.Entities.Base;
 using AspireApp.Tests.Client.Extensions;
 using Microsoft.Extensions.Caching.Hybrid;
 using Moq;

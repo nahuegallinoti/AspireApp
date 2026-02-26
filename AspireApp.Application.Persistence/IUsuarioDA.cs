@@ -1,7 +1,7 @@
-﻿using AspireApp.DataAccess.Contracts.Base;
-using AspireApp.Entities;
+﻿using AspireApp.Application.Persistence.Base;
+using AspireApp.Domain.Entities;
 
-namespace AspireApp.DataAccess.Contracts;
+namespace AspireApp.Application.Persistence;
 
 public interface IUsuarioDA : IBaseDA<User, Guid>
 {

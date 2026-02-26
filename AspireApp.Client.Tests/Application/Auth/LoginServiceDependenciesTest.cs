@@ -1,13 +1,12 @@
-﻿using AspireApp.Api.Models.Auth.User;
-using AspireApp.Application.Contracts.Auth;
+﻿using AspireApp.Application.Contracts.Auth;
 using AspireApp.Application.Implementations.Auth;
-using AspireApp.DataAccess.Contracts;
+using AspireApp.Application.Models.Auth.User;
+using AspireApp.Application.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Security.Cryptography;
 using System.Text;
-using Ent = AspireApp.Entities;
 
 namespace AspireApp.Tests.Client.Application.Auth;
 
@@ -48,7 +47,7 @@ public class LoginServiceDependenciesTest
             passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(userLogin.Password));
         }
 
-        Ent.User user = new()
+        Domain.Entities.User user = new()
         {
             Email = "nagu@gmail.com",
             PasswordHash = passwordHash,
@@ -79,7 +78,7 @@ public class LoginServiceDependenciesTest
             Password = "WrongPassword"
         };
 
-        _usuarioDAMock.Setup(x => x.GetUserByEmail(userLogin.Email, CancellationToken.None)).ReturnsAsync((Ent.User?)null);
+        _usuarioDAMock.Setup(x => x.GetUserByEmail(userLogin.Email, CancellationToken.None)).ReturnsAsync((Domain.Entities.User?)null);
 
         // Act
         var result = await _loginServiceDependencies.VerifyUserPassword(userLogin, CancellationToken.None);

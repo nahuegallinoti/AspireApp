@@ -1,4 +1,4 @@
-﻿using AspireApp.Entities.Base;
+﻿using AspireApp.Domain.Entities.Base;
 
 namespace AspireApp.Tests.Client.Extensions;
 

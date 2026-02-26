@@ -1,5 +1,5 @@
-﻿using AspireApp.Api.Models.Rabbit;
-using AspireApp.Application.Contracts.EventBus;
+﻿using AspireApp.Application.Contracts.EventBus;
+using AspireApp.Application.Models.Rabbit;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AspireApp.Api.Controllers;

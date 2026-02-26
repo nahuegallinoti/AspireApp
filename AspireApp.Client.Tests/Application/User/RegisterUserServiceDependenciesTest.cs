@@ -1,11 +1,10 @@
-﻿using AspireApp.Api.Models.Auth.User;
-using AspireApp.Application.Contracts.User;
+﻿using AspireApp.Application.Contracts.User;
 using AspireApp.Application.Implementations.User;
 using AspireApp.Core.Mappers;
-using AspireApp.DataAccess.Contracts;
-using Ent = AspireApp.Entities;
 using Moq;
 using AspireApp.Tests.Client.Extensions;
+using AspireApp.Application.Models.Auth.User;
+using AspireApp.Application.Persistence;
 
 namespace AspireApp.Tests.Client.Application.User;
 
@@ -47,7 +46,7 @@ public class RegisterUserServiceDependenciesTest
 
         // Assert
         Assert.IsTrue(result.Success, "El usuario debería haberse registrado correctamente.");
-        _usuarioDA.Verify(x => x.AddAsync(It.Is<Ent.User>(u => u.Email == user.Email && u.PasswordHash != null), CancellationToken.None), Times.Once);
+        _usuarioDA.Verify(x => x.AddAsync(It.Is<Domain.Entities.User>(u => u.Email == user.Email && u.PasswordHash != null), CancellationToken.None), Times.Once);
         _usuarioDA.Verify(x => x.SaveChangesAsync(CancellationToken.None), Times.Once);
     }
 

@@ -1,14 +1,14 @@
 ﻿using AspireApp.Api.Controllers;
 using AspireApp.Application.Contracts.EventBus;
 using AspireApp.Application.Contracts.Product;
+using AspireApp.Application.Models.App;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Dto = AspireApp.Api.Models.App;
 
 namespace AspireApp.Tests.Client.Controllers;
 
 [TestClass]
-public class ProductControllerTest : BaseControllerTest<Dto.Product, long, ProductController, IProductService>
+public class ProductControllerTest : BaseControllerTest<Product, long, ProductController, IProductService>
 {
     private Mock<IMessageBus> _messageBus = null!;
     private Mock<ILogger<ProductController>> _logger = null!;

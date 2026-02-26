@@ -1,5 +1,5 @@
-﻿using AspireApp.Api.Models;
-using AspireApp.Core.ROP;
+﻿using AspireApp.Application.Models;
+using AspireApp.Domain.ROP;
 
 namespace AspireApp.Application.Contracts.Base
 {

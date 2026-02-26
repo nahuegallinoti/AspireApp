@@ -1,6 +1,6 @@
 ﻿using AspireApp.Api.Controllers;
-using AspireApp.Api.Models;
 using AspireApp.Application.Contracts.Base;
+using AspireApp.Application.Models;
 using AspireApp.Tests.Client.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;

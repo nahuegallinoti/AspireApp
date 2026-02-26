@@ -1,8 +1,8 @@
-﻿using AspireApp.Api.Models.Auth.User;
-using AspireApp.Application.Contracts.User;
+﻿using AspireApp.Application.Contracts.User;
+using AspireApp.Application.Models.Auth.User;
+using AspireApp.Application.Persistence;
 using AspireApp.Core.Mappers;
-using AspireApp.Core.ROP;
-using AspireApp.DataAccess.Contracts;
+using AspireApp.Domain.ROP;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -15,7 +15,7 @@ public class RegisterUserServiceDependencies(IUsuarioDA usuarioDA, UsuarioMapper
 
     public async Task<Result<Guid>> AddUser(UserRegister userAccount, CancellationToken cancellationToken)
     {
-        Entities.User usuario = _usuarioMapper.ToEntity(userAccount);
+        Domain.Entities.User usuario = _usuarioMapper.ToEntity(userAccount);
 
         (byte[] passwordHash, byte[] passwordSalt) = CreatePasswordHash(userAccount.Password);
 

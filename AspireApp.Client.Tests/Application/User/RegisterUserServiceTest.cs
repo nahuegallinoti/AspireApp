@@ -1,7 +1,7 @@
-﻿using AspireApp.Api.Models.Auth.User;
-using AspireApp.Application.Contracts.User;
+﻿using AspireApp.Application.Contracts.User;
 using AspireApp.Application.Implementations.User;
-using AspireApp.Core.ROP;
+using AspireApp.Application.Models.Auth.User;
+using AspireApp.Domain.ROP;
 using Moq;
 
 namespace AspireApp.Tests.Client.Application.User;

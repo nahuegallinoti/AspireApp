@@ -1,4 +1,4 @@
-﻿namespace AspireApp.Entities.Base;
+﻿namespace AspireApp.Domain.Entities.Base;
 
 /// <summary>
 /// Represents a base entity with an identifier.

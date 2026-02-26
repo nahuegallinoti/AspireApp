@@ -1,12 +1,11 @@
-﻿using AspireApp.Core.Mappers;
-using AspireApp.DataAccess.Contracts;
-using Dto = AspireApp.Api.Models.App;
-using Ent = AspireApp.Entities;
+﻿using AspireApp.Application.Mappers;
+using AspireApp.Application.Persistence;
+using AspireApp.Core.Mappers;
 
 namespace AspireApp.Tests.Client.Application.Product;
 
 [TestClass]
-public sealed class ProductServiceTest : BaseServiceTest<Ent.Product, Dto.Product, long, IProductDA>
+public sealed class ProductServiceTest : BaseServiceTest<Domain.Entities.Product, AspireApp.Application.Models.App.Product, long, IProductDA>
 {
     [TestInitialize]
     public void SetupProductService()

@@ -1,6 +1,6 @@
-using AspireApp.Api.Models.Auth.User;
 using AspireApp.Application.Contracts.Auth;
 using AspireApp.Application.Contracts.User;
+using AspireApp.Application.Models.Auth.User;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AspireApp.Api.Controllers;
