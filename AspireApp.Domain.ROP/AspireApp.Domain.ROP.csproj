@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>AspireApp.Domain.ROP</RootNamespace>
+    <AssemblyName>AspireApp.Domain.ROP</AssemblyName>
+  </PropertyGroup>
+
+</Project>

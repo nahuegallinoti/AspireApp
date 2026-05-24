@@ -7,35 +7,23 @@ namespace AspireApp.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IRegisterUserService registerUserService, ILoginService loginUserService) : ControllerBase
+public class AuthController(IRegisterUserService registerService, ILoginService loginService) : ControllerBase
 {
-    private readonly ILoginService _loginUserService = loginUserService;
-    private readonly IRegisterUserService _registerUserService = registerUserService;
-
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] UserLogin model, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Login([FromBody] UserLogin model, CancellationToken ct)
     {
-        var result = await _loginUserService.Login(model, cancellationToken);
-
+        var result = await loginService.Login(model, ct);
         return result.Success
-                    ? Ok(result.Value)
-                    : Problem(
-                        detail: string.Join("; ", result.Errors),
-                        statusCode: (int)result.HttpStatusCode
-                    );
+            ? Ok(result.Value)
+            : Problem(detail: string.Join("; ", result.Errors), statusCode: (int)result.HttpStatusCode);
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] UserRegister model, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Register([FromBody] UserRegister model, CancellationToken ct)
     {
-        var result = await _registerUserService.AddUser(model, cancellationToken);
-
+        var result = await registerService.RegisterAsync(model, ct);
         return result.Success
-                    ? CreatedAtAction(nameof(Register), result.Value)
-                    : Problem(
-                        detail: string.Join("; ", result.Errors),
-                        statusCode: (int)result.HttpStatusCode
-                    );
+            ? CreatedAtAction(nameof(Register), result.Value)
+            : Problem(detail: string.Join("; ", result.Errors), statusCode: (int)result.HttpStatusCode);
     }
-
 }

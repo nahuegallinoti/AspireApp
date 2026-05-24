@@ -1,14 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <RootNamespace>AspireApp.Application.Persistence</RootNamespace>
+    <AssemblyName>AspireApp.Application.Persistence</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AspireApp.Core.ROP\AspireApp.Domain.ROP.csproj" />
-    <ProjectReference Include="..\AspireApp.Entidad\AspireApp.Domain.Entities.csproj" />
+    <ProjectReference Include="..\AspireApp.Domain.ROP\AspireApp.Domain.ROP.csproj" />
+    <ProjectReference Include="..\AspireApp.Domain.Entities\AspireApp.Domain.Entities.csproj" />
   </ItemGroup>
 
 </Project>

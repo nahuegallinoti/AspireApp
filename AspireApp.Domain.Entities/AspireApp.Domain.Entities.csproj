@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>AspireApp.Domain.Entities</RootNamespace>
+    <AssemblyName>AspireApp.Domain.Entities</AssemblyName>
+  </PropertyGroup>
+
+</Project>

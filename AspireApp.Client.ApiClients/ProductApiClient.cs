@@ -1,22 +1,23 @@
-﻿using AspireApp.Application.Models.App;
+using AspireApp.Application.Models.App;
 using AspireApp.Domain.ROP;
 
 namespace AspireApp.Client.ApiClients;
 
-public class ProductApiClient(IHttpClientFactory httpClientFactory) : BaseApiClient(httpClientFactory, "ApiClient")
+public sealed class ProductApiClient(IHttpClientFactory httpClientFactory)
+    : BaseApiClient(httpClientFactory, HttpClientNames.Api)
 {
-    public async Task<Result<Product>> GetProductAsync(int id, CancellationToken cancellationToken = default) =>
-        await GetAsync<Product>($"api/product/{id}", cancellationToken);
+    public Task<Result<Product>> GetAsync(int id, CancellationToken ct) =>
+        GetAsync<Product>($"api/product/{id}", ct);
 
-    public async Task<Result<Product>> CreateProductAsync(Product product, CancellationToken cancellationToken = default) =>
-        await PostAsync<Product, Product>("api/product", product, cancellationToken);
+    public Task<Result<Product>> CreateAsync(Product product, CancellationToken ct) =>
+        PostAsync<Product, Product>("api/product", product, ct);
 
-    public async Task<Result<Product>> UpdateProductAsync(Product product, CancellationToken cancellationToken = default) =>
-        await PutAsync($"api/product/{product.Id}", product, cancellationToken);
+    public Task<Result<Product>> UpdateAsync(Product product, CancellationToken ct) =>
+        PutAsync($"api/product/{product.Id}", product, ct);
 
-    public async Task<Result<Product>> DeleteProductAsync(int id, CancellationToken cancellationToken = default) =>
-        await DeleteAsync<Product>($"api/product/{id}", cancellationToken);
+    public Task<Result<Product>> DeleteAsync(int id, CancellationToken ct) =>
+        DeleteAsync<Product>($"api/product/{id}", ct);
 
-    public async Task<Result<IEnumerable<Product>>> GetProductsAsync(CancellationToken cancellationToken = default) =>
-        await GetAsync<IEnumerable<Product>>("api/product", cancellationToken);
+    public Task<Result<IEnumerable<Product>>> GetAllAsync(CancellationToken ct) =>
+        GetAsync<IEnumerable<Product>>("api/product", ct);
 }

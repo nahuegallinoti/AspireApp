@@ -1,131 +1,47 @@
+using AspireApp.Api.Infrastructure;
+using AspireApp.Application.Implementations;
+using AspireApp.Application.Implementations.EventBus;
 using AspireApp.DataAccess.Implementations;
 using AspireApp.ServiceDefaults;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
-using System.Text;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar la autenticación JWT
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    var jwtSettings = builder.Configuration.GetSection("Jwt");
-
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,  // Cambiado de false a true para validar el Audience
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],  // Configura el Issuer
-        ValidAudience = jwtSettings["Audience"],  // Configura el Audience
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new ArgumentNullException("Jwt:Key")))
-    };
-});
-
-builder.Services.RegisterMappers();
-builder.Services.RegisterDataAccess();
-builder.Services.RegisterAppServices();
-builder.Services.RegisterRabbitService();
-
-builder.Services.AddLogging(options =>
-{
-    options.AddConsole();  // Loguear a la consola
-    // Agregar otras opciones de logging (ej. archivos, bases de datos, etc.)
-});
-
-// CACHE
-
-// Memory cache. No es necesario si uso hybrid
-//builder.Services.AddMemoryCache(); 
-
-// Redis cache
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = "localhost:6379";
-});
-
-// Hybrid cache - buscará primero en in memory (cache level 1), si no en redis (cache level 2) si está configurado
-builder.Services.AddHybridCache();
-
-builder.Services.AddAuthorization();
-
-// Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
-// Add services to the container.
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.AddJwtAuthentication();
+builder.Services.AddAuthorization();
+
+builder.AddCaching();
+
+builder.Services.AddDataAccess();
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.AddMessageBus();
 
 builder.Services.AddControllers();
-
-//builder.Services.AddScoped(provider =>
-//    provider.GetService<AppDbContext>() ?? throw new ArgumentNullException(nameof(AppDbContext)))
-//    .AddSingleton(sp =>
-//    {
-//        var builder = new DbContextOptionsBuilder<AppDbContext>();
-//        return builder.Options;
-//    })
-//    .AddScoped(sp =>
-//    {
-//        return new AppDbContext(sp.GetRequiredService<DbContextOptions<AppDbContext>>());
-//    });
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("AspireAppDb"));
-
-// Agrega Swagger en el contenedor de servicios
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "AspireApp API",
-        Version = "v1",
-        Description = "API documentation for AspireApp"
-    });
-    // Si usas autenticación JWT, agrega el esquema de seguridad:
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-    options.AddSecurityRequirement((doc) => new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecuritySchemeReference("Bearer"),
-            new List<string>()
-        }
-    });
-});
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Habilita Swagger y Swagger UI en el pipeline
-app.UseSwagger();
-app.UseSwaggerUI(options =>
+if (app.Environment.IsDevelopment())
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "AspireApp API v1");
-    options.RoutePrefix = "swagger"; // Acceso en /swagger
-});
-
-// Configure the HTTP request pipeline.
-app.UseExceptionHandler();
+    app.MapOpenApi();
+    app.MapScalarApiReference("/scalar", options =>
+    {
+        options.WithTitle("AspireApp API")
+               .WithTheme(ScalarTheme.BluePlanet);
+    });
+}
 
 app.MapDefaultEndpoints();
-
-// Mapea controlador product y esos automáticamente
 app.MapControllers();
 
 app.Run();

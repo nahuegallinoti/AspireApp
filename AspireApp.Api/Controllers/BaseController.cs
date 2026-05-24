@@ -1,103 +1,73 @@
-﻿using AspireApp.Application.Contracts.Base;
+using AspireApp.Application.Contracts.Base;
 using AspireApp.Application.Contracts.EventBus;
 using AspireApp.Application.Models;
-using AspireApp.Application.Models.Rabbit;
+using AspireApp.Application.Models.EventBus;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AspireApp.Api.Controllers;
 
-/// <summary>
-/// Base controller providing common CRUD operations for API endpoints.
-/// </summary>
-/// <typeparam name="TModel">The model type.</typeparam>
-/// <typeparam name="TID">The type of the model identifier.</typeparam>
-/// <typeparam name="TService">The service type handling the operations.</typeparam>
-/// <param name="service">The service instance.</param>
-/// <param name="messageBus">The message bus for event publishing.</param>
-/// <param name="logger">The logger instance.</param>
-public abstract class BaseController<TModel, TID, TService>(TService service, IMessageBus messageBus, ILogger logger)
-    : ControllerBase where TModel : BaseModel<TID>
-                     where TID : struct
-                     where TService : IBaseService<TModel, TID>
+[ApiController]
+[Produces("application/json")]
+public abstract class BaseController<TModel, TID, TService>(
+    TService service,
+    IMessageBus messageBus,
+    ILogger logger) : ControllerBase
+    where TModel : BaseModel<TID>
+    where TID : struct
+    where TService : IBaseService<TModel, TID>
 {
-    protected readonly TService _service = service;
+    protected TService Service { get; } = service;
+    protected ILogger Logger { get; } = logger;
     private readonly IMessageBus _messageBus = messageBus;
-    private readonly ILogger _logger = logger;
 
-    /// <summary>
-    /// Retrieves all models.
-    /// </summary>
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken ct = default)
+    public async Task<IActionResult> GetAll(CancellationToken ct)
     {
-        var result = await _service.GetAllAsync(ct);
+        var result = await Service.GetAllAsync(ct);
         return Ok(result);
     }
 
-    /// <summary>
-    /// Retrieves an model by its ID.
-    /// </summary>
-    /// <param name="id">The modelidentifier.</param>
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(TID id)
+    public async Task<IActionResult> GetById(TID id, CancellationToken ct)
     {
-        var model = await _service.GetByIdAsync(id);
+        var model = await Service.GetByIdAsync(id, ct);
         return model is not null ? Ok(model) : NotFound();
     }
 
-    /// <summary>
-    /// Adds a new model.
-    /// </summary>
-    /// <param name="model">The model to add.</param>
     [HttpPost]
-    public virtual async Task<IActionResult> Add([FromBody] TModel model, CancellationToken ct = default)
+    public virtual async Task<IActionResult> Add([FromBody] TModel model, CancellationToken ct)
     {
-        var result = await _service.AddAsync(model, ct);
+        var result = await Service.AddAsync(model, ct);
 
         if (!result.Success)
-            return BadRequest(result.Errors);
+            return Problem(detail: string.Join("; ", result.Errors), statusCode: (int)result.HttpStatusCode);
 
         await _messageBus.PublishAsync(
-            message: new RabbitMessage { Message = $"Creado el pibe {result.Value.Id}" },
-            topic: $"{result.Value.GetType().Name}"
-        );
+            new EventMessage { Message = $"{typeof(TModel).Name} {result.Value.Id} created" },
+            topic: typeof(TModel).Name.ToLowerInvariant(),
+            ct);
 
-        // Incluye en los headers el Location con la URL para obtener el recurso recién creado
         return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
     }
 
-    /// <summary>
-    /// Updates an existing model.
-    /// </summary>
-    /// <param name="id">The model identifier.</param>
-    /// <param name="model">The updated modeldata.</param>
     [HttpPut("{id}")]
     public IActionResult Update(TID id, [FromBody] TModel model)
     {
         if (!id.Equals(model.Id))
-        {
-            return BadRequest("ID mismatch");
-        }
+            return BadRequest("Route id does not match payload id.");
 
-        _service.Update(model);
+        Service.Update(model);
         return NoContent();
     }
 
-    /// <summary>
-    /// Deletes an model by its ID.
-    /// </summary>
-    /// <param name="id">The model identifier.</param>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(TID id, CancellationToken ct = default)
+    public async Task<IActionResult> Delete(TID id, CancellationToken ct)
     {
-        var model = await _service.GetByIdAsync(id);
-        if (model is null)
-        {
-            return NotFound();
-        }
+        var model = await Service.GetByIdAsync(id, ct);
+        if (model is null) return NotFound();
 
-        _service.Delete(model);
-        await _service.SaveChangesAsync(ct);
+        Service.Delete(model);
+        await Service.SaveChangesAsync(ct);
         return NoContent();
     }
 }

@@ -1,0 +1,30 @@
+@page "/eventbus"
+
+<h3>Publish event</h3>
+
+<EditForm Model="@Model" OnValidSubmit="SendMessage" FormName="messageForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Message:</label>
+        <InputText @bind-Value="Model.Message" type="text" />
+    </div>
+
+    <button type="submit">Send</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3 flex-column">
+        @foreach (var error in errorMessage.Split("; "))
+        {
+            <div>@error</div>
+        }
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(responseMessage))
+{
+    <p>@responseMessage</p>
+}

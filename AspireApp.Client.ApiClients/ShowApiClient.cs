@@ -1,22 +1,23 @@
-﻿using AspireApp.Application.Models.App;
+using AspireApp.Application.Models.App;
 using AspireApp.Domain.ROP;
 
 namespace AspireApp.Client.ApiClients;
 
-public class ShowApiClient(IHttpClientFactory httpClientFactory) : BaseApiClient(httpClientFactory, "ApiClient")
+public sealed class ShowApiClient(IHttpClientFactory httpClientFactory)
+    : BaseApiClient(httpClientFactory, HttpClientNames.Api)
 {
-    public async Task<Result<Show>> GetShowAsync(int id, CancellationToken cancellationToken = default) =>
-        await GetAsync<Show>($"api/show/{id}", cancellationToken);
+    public Task<Result<Show>> GetAsync(int id, CancellationToken ct) =>
+        GetAsync<Show>($"api/show/{id}", ct);
 
-    public async Task<Result<Show>> CreateShowAsync(Show show, CancellationToken cancellationToken = default) =>
-        await PostAsync<Show, Show>("api/show", show, cancellationToken);
+    public Task<Result<Show>> CreateAsync(Show show, CancellationToken ct) =>
+        PostAsync<Show, Show>("api/show", show, ct);
 
-    public async Task<Result<Show>> UpdateShowAsync(Show show, CancellationToken cancellationToken = default) =>
-        await PutAsync($"api/show/{show.Id}", show, cancellationToken);
+    public Task<Result<Show>> UpdateAsync(Show show, CancellationToken ct) =>
+        PutAsync($"api/show/{show.Id}", show, ct);
 
-    public async Task<Result<Show>> DeleteShowAsync(int id, CancellationToken cancellationToken = default) =>
-        await DeleteAsync<Show>($"api/show/{id}", cancellationToken);
+    public Task<Result<Show>> DeleteAsync(int id, CancellationToken ct) =>
+        DeleteAsync<Show>($"api/show/{id}", ct);
 
-    public async Task<Result<IEnumerable<Show>>> GetShowsAsync(CancellationToken cancellationToken = default) =>
-        await GetAsync<IEnumerable<Show>>("api/show", cancellationToken);
+    public Task<Result<IEnumerable<Show>>> GetAllAsync(CancellationToken ct) =>
+        GetAsync<IEnumerable<Show>>("api/show", ct);
 }

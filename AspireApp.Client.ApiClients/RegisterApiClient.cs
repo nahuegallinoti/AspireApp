@@ -3,8 +3,9 @@ using AspireApp.Domain.ROP;
 
 namespace AspireApp.Client.ApiClients;
 
-public class RegisterApiClient(IHttpClientFactory httpClientFactory) : BaseApiClient(httpClientFactory, "ApiClient")
+public sealed class RegisterApiClient(IHttpClientFactory httpClientFactory)
+    : BaseApiClient(httpClientFactory, HttpClientNames.Api)
 {
-    public async Task<Result<Guid>> RegisterAsync(UserRegister userRegister, CancellationToken cancellationToken) =>
-        await PostAsync<Guid, UserRegister>("api/auth/register", userRegister, cancellationToken);
+    public Task<Result<Guid>> RegisterAsync(UserRegister userRegister, CancellationToken ct) =>
+        PostAsync<Guid, UserRegister>("api/auth/register", userRegister, ct);
 }

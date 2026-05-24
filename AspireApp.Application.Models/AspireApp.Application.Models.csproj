@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>AspireApp.Application.Models</RootNamespace>
+    <AssemblyName>AspireApp.Application.Models</AssemblyName>
+  </PropertyGroup>
+
+</Project>

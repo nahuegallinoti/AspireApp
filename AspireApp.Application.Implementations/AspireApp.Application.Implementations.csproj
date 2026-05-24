@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<RootNamespace>AspireApp.Application.Implementations</RootNamespace>
+		<AssemblyName>AspireApp.Application.Implementations</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Aspire.Confluent.Kafka" />
+		<PackageReference Include="Aspire.RabbitMQ.Client" />
+		<PackageReference Include="FluentValidation" />
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AspireApp.Application.Models\AspireApp.Application.Models.csproj" />
+		<ProjectReference Include="..\AspireApp.Application.Contracts\AspireApp.Application.Contracts.csproj" />
+		<ProjectReference Include="..\AspireApp.Application.Persistence\AspireApp.Application.Persistence.csproj" />
+		<ProjectReference Include="..\AspireApp.Application.Mappers\AspireApp.Application.Mappers.csproj" />
+	</ItemGroup>
+
+</Project>

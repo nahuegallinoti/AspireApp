@@ -1,6 +1,6 @@
-﻿namespace AspireApp.Client.Handlers;
+namespace AspireApp.Client.Handlers;
 
-public interface IJWTTokenProvider
+public interface IJwtTokenProvider
 {
     string? GetToken();
     void SetToken(string token);

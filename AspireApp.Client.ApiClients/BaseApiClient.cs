@@ -1,8 +1,8 @@
-﻿using AspireApp.Domain.ROP;
 using System.Collections.Immutable;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using AspireApp.Domain.ROP;
 
 namespace AspireApp.Client.ApiClients;
 
@@ -10,120 +10,72 @@ public record ProblemDetails(int Status, string? Detail, string? Type, string? T
 
 public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string clientName)
 {
-    protected readonly HttpClient _httpClient = httpClientFactory.CreateClient(clientName);
+    protected readonly HttpClient HttpClient = httpClientFactory.CreateClient(clientName);
 
-    /// <summary>
-    /// Envía una solicitud POST a la URL especificada con los datos indicados.
-    /// </summary>
-    public Task<Result<T>> PostAsync<T, U>(string url, U data, CancellationToken cancellationToken = default) =>
-        SendRequestAsync<T>(HttpMethod.Post, url, JsonContent.Create(data), cancellationToken);
+    private static readonly JsonSerializerOptions ProblemJson = new() { PropertyNameCaseInsensitive = true };
 
-    /// <summary>
-    /// Envía una solicitud GET a la URL especificada.
-    /// </summary>
-    public Task<Result<T>> GetAsync<T>(string url, CancellationToken cancellationToken = default) =>
-        SendRequestAsync<T>(HttpMethod.Get, url, cancellationToken: cancellationToken);
+    public Task<Result<T>> PostAsync<T, U>(string url, U data, CancellationToken ct) =>
+        SendAsync<T>(HttpMethod.Post, url, JsonContent.Create(data), ct);
 
-    /// <summary>
-    /// Envía una solicitud PUT a la URL especificada con los datos indicados.
-    /// </summary>
-    public Task<Result<T>> PutAsync<T>(string url, T data, CancellationToken cancellationToken = default) =>
-        SendRequestAsync<T>(HttpMethod.Put, url, JsonContent.Create(data), cancellationToken);
+    public Task<Result<T>> GetAsync<T>(string url, CancellationToken ct) =>
+        SendAsync<T>(HttpMethod.Get, url, content: null, ct);
 
-    /// <summary>
-    /// Envía una solicitud DELETE a la URL especificada.
-    /// </summary>
-    public Task<Result<T>> DeleteAsync<T>(string url, CancellationToken cancellationToken = default) =>
-        SendRequestAsync<T>(HttpMethod.Delete, url, cancellationToken: cancellationToken);
+    public Task<Result<T>> PutAsync<T>(string url, T data, CancellationToken ct) =>
+        SendAsync<T>(HttpMethod.Put, url, JsonContent.Create(data), ct);
 
-    /// <summary>
-    /// Envía una solicitud HTTP con el método, URL y contenido especificados.
-    /// </summary>
-    private async Task<Result<T>> SendRequestAsync<T>(HttpMethod method, string url, HttpContent? content = null, CancellationToken cancellationToken = default)
+    public Task<Result<T>> DeleteAsync<T>(string url, CancellationToken ct) =>
+        SendAsync<T>(HttpMethod.Delete, url, content: null, ct);
+
+    private async Task<Result<T>> SendAsync<T>(HttpMethod method, string url, HttpContent? content, CancellationToken ct)
     {
+        using var request = new HttpRequestMessage(method, url) { Content = content };
+        using var response = await HttpClient.SendAsync(request, ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errors = await ReadErrorAsync(response, ct);
+            return Result.Failure<T>(errors, response.StatusCode);
+        }
+
+        if (response.Content.Headers.ContentLength is 0 or null && method == HttpMethod.Delete)
+        {
+            T empty = default!;
+            return empty.Success(response.StatusCode);
+        }
+
         try
         {
-            using var request = new HttpRequestMessage(method, url) { Content = content };
-            using var response = await _httpClient.SendAsync(request, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                ImmutableArray<string> errorMessages = response.StatusCode switch
-                {
-                    HttpStatusCode.BadRequest => await ExtractErrorMessage(response),
-                    HttpStatusCode.Unauthorized => ["Credenciales inválidas"],
-                    HttpStatusCode.InternalServerError => ["Error en el servidor. Por favor intente más tarde"],
-                    _ => ["Error desconocido"]
-                };
-
-                return Result.Failure<T>(errorMessages, response.StatusCode);
-            }
-
-            try
-            {
-                var resultObj = await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
-
-                return resultObj is not null
-                    ? resultObj.Success(response.StatusCode)
-                    : Result.Failure<T>(["Respuesta vacía o nula del servidor."], response.StatusCode);
-            }
-            catch (JsonException)
-            {
-                var rawContent = await response.Content.ReadAsStringAsync(cancellationToken);
-
-                return string.IsNullOrWhiteSpace(rawContent)
-                    ? Result.Failure<T>(["Respuesta vacía o nula del servidor."], response.StatusCode)
-                    : ((T)(object)rawContent).Success(response.StatusCode);
-            }
+            var value = await response.Content.ReadFromJsonAsync<T>(ct);
+            return value is not null
+                ? value.Success(response.StatusCode)
+                : Result.Failure<T>("Empty response from server.", response.StatusCode);
         }
-
-        catch (HttpRequestException ex)
+        catch (JsonException)
         {
-            ImmutableArray<string> errorMessages = ex.StatusCode switch
-            {
-                HttpStatusCode.BadRequest => ["Error de solicitud incorrecta"],
-                HttpStatusCode.NotFound => ["Recurso no encontrado"],
-                _ => [$"Error de conexión: {ex.Message}"]
-            };
-
-            return Result.Failure<T>(errorMessages, ex.StatusCode ?? HttpStatusCode.BadRequest);
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<T>([$"Error inesperado: {ex.Message}"]);
+            var raw = await response.Content.ReadAsStringAsync(ct);
+            return string.IsNullOrWhiteSpace(raw)
+                ? Result.Failure<T>("Empty response from server.", response.StatusCode)
+                : ((T)(object)raw).Success(response.StatusCode);
         }
     }
 
-    /// <summary>
-    /// Extrae el mensaje de error de la respuesta HTTP.
-    /// </summary>
-    private static async Task<ImmutableArray<string>> ExtractErrorMessage(HttpResponseMessage response)
+    private static async Task<ImmutableArray<string>> ReadErrorAsync(HttpResponseMessage response, CancellationToken ct)
     {
+        if (response.StatusCode is HttpStatusCode.Unauthorized)
+            return ["Invalid credentials."];
+
+        var content = await response.Content.ReadAsStringAsync(ct);
+        if (string.IsNullOrWhiteSpace(content))
+            return [$"HTTP {(int)response.StatusCode} {response.ReasonPhrase}"];
+
         try
         {
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (string.IsNullOrWhiteSpace(content))
-                return [$"Error HTTP {response.StatusCode}"];
-
-            try
-            {
-                var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (!string.IsNullOrEmpty(problemDetails?.Detail))
-                    return [problemDetails.Detail];
-            }
-            catch
-            {
-                // Si no se puede parsear como ProblemDetails, se devuelve el contenido original.
-            }
-
-            // Si no se pudo parsear o el contenido está vacío, devolvemos el contenido original.
-            return [content];
+            var problem = JsonSerializer.Deserialize<ProblemDetails>(content, ProblemJson);
+            if (!string.IsNullOrEmpty(problem?.Detail))
+                return [problem.Detail];
         }
-        catch
-        {
-            return ["Ocurrió un error desconocido al procesar la respuesta del servidor."];
-        }
+        catch (JsonException) { /* fall through */ }
+
+        return [content];
     }
 }

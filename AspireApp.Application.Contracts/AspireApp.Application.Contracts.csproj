@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>AspireApp.Application.Contracts</RootNamespace>
+    <AssemblyName>AspireApp.Application.Contracts</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AspireApp.Application.Models\AspireApp.Application.Models.csproj" />
+    <ProjectReference Include="..\AspireApp.Domain.Entities\AspireApp.Domain.Entities.csproj" />
+    <ProjectReference Include="..\AspireApp.Domain.ROP\AspireApp.Domain.ROP.csproj" />
+  </ItemGroup>
+
+</Project>

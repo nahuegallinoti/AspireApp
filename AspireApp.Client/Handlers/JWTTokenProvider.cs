@@ -1,6 +1,6 @@
-﻿namespace AspireApp.Client.Handlers;
+namespace AspireApp.Client.Handlers;
 
-public class JWTTokenProvider : IJWTTokenProvider
+public sealed class JwtTokenProvider : IJwtTokenProvider
 {
     private string? _token;
 
