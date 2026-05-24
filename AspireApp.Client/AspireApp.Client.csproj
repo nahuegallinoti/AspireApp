@@ -5,15 +5,6 @@
 		<AssemblyName>AspireApp.Client</AssemblyName>
 	</PropertyGroup>
 
-	<PropertyGroup>
-		<TypeScriptCompileBlocked>false</TypeScriptCompileBlocked>
-		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
-	</PropertyGroup>
-
-	<Target Name="CompileTypeScript" BeforeTargets="Build">
-		<Exec Command="tsc -p tsconfig.json" />
-	</Target>
-
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.TypeScript.MSBuild">
 	    <PrivateAssets>all</PrivateAssets>
