@@ -105,8 +105,7 @@ public class LoginServiceDependenciesTest
         var result = _loginServiceDependencies.CreateToken(userLogin);
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.IsNotNull(result.Value);
+        Assert.IsTrue(result.Success);
     }
 
     [TestMethod]

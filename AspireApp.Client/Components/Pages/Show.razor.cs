@@ -1,4 +1,5 @@
 ﻿using AspireApp.Client.ApiClients;
+using AspireApp.Domain.ROP;
 using Microsoft.AspNetCore.Components;
 
 namespace AspireApp.Client.Components.Pages;
@@ -18,11 +19,11 @@ public partial class Show : ComponentBase
     {
         try
         {
-            var result = await ShowApi.GetShowsAsync();
+            Result<IEnumerable<Application.Models.App.Show>> result = await ShowApi.GetShowsAsync();
 
             if (result.Success)
             {
-                shows = result.Value.ToList();
+                shows = [.. result.Value];
             }
             else
             {

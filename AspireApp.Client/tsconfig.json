@@ -6,7 +6,8 @@
     "target": "ES6",
     "module": "es6",
     "sourceMap": true,
-    "outDir": "wwwroot/js"
+    "outDir": "wwwroot/js",
+    "rootDir": "Typescript"
   },
   "include": [
     "Typescript/**/*"

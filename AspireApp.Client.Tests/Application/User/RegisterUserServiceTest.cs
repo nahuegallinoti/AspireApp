@@ -38,7 +38,6 @@ public sealed class RegisterUserServiceTest
 
         // Act
         var result = await _registerUserService.AddUser(user, cancellationToken);
-        Assert.IsNotNull(result);
         Assert.IsTrue(result.Success);
     }
 }

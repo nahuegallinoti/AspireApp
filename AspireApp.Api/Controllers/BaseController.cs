@@ -12,6 +12,9 @@ namespace AspireApp.Api.Controllers;
 /// <typeparam name="TModel">The model type.</typeparam>
 /// <typeparam name="TID">The type of the model identifier.</typeparam>
 /// <typeparam name="TService">The service type handling the operations.</typeparam>
+/// <param name="service">The service instance.</param>
+/// <param name="messageBus">The message bus for event publishing.</param>
+/// <param name="logger">The logger instance.</param>
 public abstract class BaseController<TModel, TID, TService>(TService service, IMessageBus messageBus, ILogger logger)
     : ControllerBase where TModel : BaseModel<TID>
                      where TID : struct
