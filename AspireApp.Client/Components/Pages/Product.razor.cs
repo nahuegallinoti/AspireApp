@@ -12,13 +12,10 @@ public partial class Product : ComponentBase
     private List<Application.Models.App.Product> products = [];
     private string errorMessage = string.Empty;
 
-    protected override void OnParametersSet()
-    {
-        Model ??= new Application.Models.App.Product();
-    }
-
     protected override async Task OnInitializedAsync()
     {
+        Model ??= new Application.Models.App.Product();
+
         var result = await ProductApi.GetAllAsync(CancellationToken.None);
         if (result.Success)
             products = result.Value.ToList();

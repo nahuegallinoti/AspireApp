@@ -37,7 +37,8 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
             return Result.Failure<T>(errors, response.StatusCode);
         }
 
-        if (response.Content.Headers.ContentLength is 0 or null && method == HttpMethod.Delete)
+        if (response.StatusCode == HttpStatusCode.NoContent
+            || (response.Content.Headers.ContentLength is 0 or null && (method == HttpMethod.Delete || method == HttpMethod.Put)))
         {
             T empty = default!;
             return empty.Success(response.StatusCode);

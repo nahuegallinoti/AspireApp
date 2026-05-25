@@ -1,0 +1,66 @@
+@page "/{{entity}}/new"
+@page "/{{entity}}/edit/{Id{{ID_ROUTE_CONSTRAINT}}}"
+@rendermode InteractiveServer
+
+<PageTitle>{{ENTITY}} @DisplayName</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <button type="button" class="btn btn-link p-0 me-2 align-baseline" @onclick="OnBack" title="Volver">
+            <span class="bi bi-arrow-left" aria-hidden="true"></span>
+        </button>
+        <h3 class="d-inline-block mb-0">{{ENTITY}} @DisplayName</h3>
+    </div>
+    @if (!IsNew)
+    {
+        <button type="button" class="btn btn-outline-danger" @onclick="OnDelete">
+            <span class="bi bi-trash" aria-hidden="true"></span> Borrar
+        </button>
+    }
+</div>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+
+@if (Model is null)
+{
+    <div class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <EditForm Model="@Model" OnValidSubmit="OnSave" FormName="{{entity}}EditForm">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="alert alert-warning" />
+
+                <div class="row g-3">
+{{PROPS_FORM_FIELDS}}
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary" disabled="@saving">
+                        @if (saving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        }
+                        else
+                        {
+                            <span class="bi bi-check-circle me-1" aria-hidden="true"></span>
+                        }
+                        Guardar
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" @onclick="OnBack">
+                        Cancelar
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}

@@ -31,7 +31,9 @@ public abstract class BaseController<TModel, TID, TService>(
     public async Task<IActionResult> GetById(TID id, CancellationToken ct)
     {
         var model = await Service.GetByIdAsync(id, ct);
-        return model is not null ? Ok(model) : NotFound();
+        return model is not null ? 
+            Ok(model) : 
+            NotFound();
     }
 
     [HttpPost]
@@ -51,12 +53,14 @@ public abstract class BaseController<TModel, TID, TService>(
     }
 
     [HttpPut("{id}")]
-    public IActionResult Update(TID id, [FromBody] TModel model)
+    public async Task<IActionResult> Update(TID id, [FromBody] TModel model, CancellationToken ct)
     {
         if (!id.Equals(model.Id))
             return BadRequest("Route id does not match payload id.");
 
         Service.Update(model);
+        await Service.SaveChangesAsync(ct);
+
         return NoContent();
     }
 
@@ -64,10 +68,13 @@ public abstract class BaseController<TModel, TID, TService>(
     public async Task<IActionResult> Delete(TID id, CancellationToken ct)
     {
         var model = await Service.GetByIdAsync(id, ct);
-        if (model is null) return NotFound();
+
+        if (model is null) 
+            return NotFound();
 
         Service.Delete(model);
         await Service.SaveChangesAsync(ct);
+
         return NoContent();
     }
 }

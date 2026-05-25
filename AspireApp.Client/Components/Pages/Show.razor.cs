@@ -12,13 +12,10 @@ public partial class Show : ComponentBase
     private List<Application.Models.App.Show> shows = [];
     private string errorMessage = string.Empty;
 
-    protected override void OnParametersSet()
-    {
-        Model ??= new Application.Models.App.Show();
-    }
-
     protected override async Task OnInitializedAsync()
     {
+        Model ??= new Application.Models.App.Show();
+
         var result = await ShowApi.GetAllAsync(CancellationToken.None);
         if (result.Success)
             shows = [.. result.Value];

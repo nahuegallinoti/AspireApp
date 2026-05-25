@@ -1,0 +1,8 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace AspireApp.Application.Models.App;
+
+public class {{ENTITY}} : BaseModel<{{ID_TYPE}}>
+{
+{{PROPS_MODEL}}
+}

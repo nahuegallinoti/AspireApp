@@ -1,0 +1,10 @@
+using AspireApp.Application.Persistence;
+using AspireApp.DataAccess.Implementations.Base;
+using AspireApp.Domain.Entities;
+
+namespace AspireApp.DataAccess.Implementations;
+
+public class {{ENTITY}}DA(AppDbContext context) : BaseDA<{{ENTITY}}, {{ID_TYPE}}>(context), I{{ENTITY}}DA
+{
+
+}

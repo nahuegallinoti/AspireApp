@@ -1,0 +1,8 @@
+using AspireApp.Domain.Entities.Base;
+
+namespace AspireApp.Domain.Entities;
+
+public class {{ENTITY}} : BaseEntity<{{ID_TYPE}}>
+{
+{{PROPS_ENTITY}}
+}

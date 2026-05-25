@@ -32,4 +32,7 @@
   <Folder Name="/Tests/">
     <Project Path="AspireApp.Tests/AspireApp.Tests.csproj" />
   </Folder>
+  <Folder Name="/Tools/">
+    <Project Path="AspireApp.Tools.Generator/AspireApp.Tools.Generator.csproj" />
+  </Folder>
 </Solution>

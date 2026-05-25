@@ -1,0 +1,8 @@
+using AspireApp.Application.Contracts.Base;
+
+namespace AspireApp.Application.Contracts.{{ENTITY}};
+
+public interface I{{ENTITY}}Service : IBaseService<Models.App.{{ENTITY}}, {{ID_TYPE}}>
+{
+
+}

@@ -1,0 +1,10 @@
+using AspireApp.Application.Contracts.EventBus;
+using AspireApp.Application.Contracts.{{ENTITY}};
+using AspireApp.Application.Models.App;
+{{AUTHORIZE_USING}}using Microsoft.AspNetCore.Mvc;
+
+namespace AspireApp.Api.Controllers;
+
+[Route("api/[controller]")]
+{{AUTHORIZE_ATTR}}public class {{ENTITY}}Controller(I{{ENTITY}}Service {{ENTITY_CAMEL}}Service, IMessageBus messageBus, ILogger<{{ENTITY}}Controller> logger)
+    : BaseController<{{ENTITY}}, {{ID_TYPE}}, I{{ENTITY}}Service>({{ENTITY_CAMEL}}Service, messageBus, logger);

@@ -1,0 +1,75 @@
+using AspireApp.Client.ApiClients;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+using {{ENTITY}}Model = AspireApp.Application.Models.App.{{ENTITY}};
+
+namespace AspireApp.Client.Components.Pages;
+
+public partial class {{ENTITY}}Index : ComponentBase
+{
+    [Inject] public {{ENTITY}}ApiClient {{ENTITY}}Api { get; set; } = null!;
+    [Inject] public NavigationManager Nav { get; set; } = null!;
+    [Inject] public IJSRuntime JS { get; set; } = null!;
+
+    private List<{{ENTITY}}Model> all = [];
+    private List<{{ENTITY}}Model> filtered = [];
+    private string errorMessage = string.Empty;
+    private bool loading = true;
+
+{{PROPS_FILTER_STATE}}
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        var result = await {{ENTITY}}Api.GetAllAsync(CancellationToken.None);
+        if (result.Success)
+        {
+            all = [.. result.Value];
+            ApplyFilter();
+        }
+        else
+        {
+            errorMessage = result.Errors.FormatErrorMessages();
+        }
+        loading = false;
+    }
+
+    private void ApplyFilter()
+    {
+        IEnumerable<{{ENTITY}}Model> q = all;
+{{PROPS_FILTER_LOGIC}}
+        filtered = [.. q];
+    }
+
+    private void OnSearch() => ApplyFilter();
+
+    private void OnReset()
+    {
+{{PROPS_RESET_LOGIC}}
+        ApplyFilter();
+    }
+
+    private void OnNew() => Nav.NavigateTo($"/{{entity}}/new");
+
+    private void OnEdit({{ENTITY}}Model item) => Nav.NavigateTo($"/{{entity}}/edit/{item.Id}");
+
+    private async Task OnDelete({{ENTITY}}Model item)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"¿Borrar {{ENTITY}} #{item.Id}?");
+        if (!confirmed) return;
+
+        var result = await {{ENTITY}}Api.DeleteAsync(item.Id, CancellationToken.None);
+        if (result.Success)
+        {
+            all.Remove(item);
+            ApplyFilter();
+            errorMessage = string.Empty;
+        }
+        else
+        {
+            errorMessage = result.Errors.FormatErrorMessages();
+        }
+    }
+}
