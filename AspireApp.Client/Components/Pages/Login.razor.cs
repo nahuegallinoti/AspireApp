@@ -11,9 +11,14 @@ public partial class Login : ComponentBase
     [Inject] public LoginApiClient LoginApi { get; set; } = null!;
     [Inject] public IJwtTokenProvider TokenProvider { get; set; } = null!;
 
-    [SupplyParameterFromForm] private UserLogin Model { get; set; } = new();
+    [SupplyParameterFromForm] private UserLogin Model { get; set; } = default!;
 
     private string errorMessage = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        Model ??= new UserLogin();
+    }
 
     private async Task HandleLogin()
     {

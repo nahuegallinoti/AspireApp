@@ -8,9 +8,14 @@ public partial class Register : ComponentBase
 {
     [Inject] public RegisterApiClient RegisterApi { get; set; } = null!;
 
-    [SupplyParameterFromForm] public UserRegister Model { get; set; } = new();
+    [SupplyParameterFromForm] public UserRegister Model { get; set; } = default!;
 
     private string errorMessage = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        Model ??= new UserRegister();
+    }
 
     private async Task HandleRegister()
     {

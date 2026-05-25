@@ -10,11 +10,11 @@ public record ProblemDetails(int Status, string? Detail, string? Type, string? T
 
 public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string clientName)
 {
-    protected readonly HttpClient HttpClient = httpClientFactory.CreateClient(clientName);
+    private readonly HttpClient HttpClient = httpClientFactory.CreateClient(clientName);
 
     private static readonly JsonSerializerOptions ProblemJson = new() { PropertyNameCaseInsensitive = true };
 
-    public Task<Result<T>> PostAsync<T, U>(string url, U data, CancellationToken ct) =>
+    public Task<Result<T>> PostAsync<T, TR>(string url, TR data, CancellationToken ct) =>
         SendAsync<T>(HttpMethod.Post, url, JsonContent.Create(data), ct);
 
     public Task<Result<T>> GetAsync<T>(string url, CancellationToken ct) =>

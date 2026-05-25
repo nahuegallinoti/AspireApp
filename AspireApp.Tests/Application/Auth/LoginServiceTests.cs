@@ -15,7 +15,7 @@ public class LoginServiceTests
     private LoginService Sut() => new(_deps);
 
     [Fact]
-    public async Task Login_returns_token_when_credentials_are_valid()
+    public async Task LoginReturnsTokenWhenCredentialsAreValid()
     {
         var login = new UserLogin { Email = "nahuel@example.com", Password = "Strong!Password1" };
         var user = new UserEntity { Id = Guid.NewGuid(), Email = login.Email };
@@ -31,7 +31,7 @@ public class LoginServiceTests
     }
 
     [Fact]
-    public async Task Login_returns_unauthorized_when_credentials_are_invalid()
+    public async Task LoginReturnsUnauthorizedWhenCredentialsAreInvalid()
     {
         var login = new UserLogin { Email = "nahuel@example.com", Password = "wrong" };
 
@@ -45,7 +45,7 @@ public class LoginServiceTests
     }
 
     [Fact]
-    public async Task Login_short_circuits_when_payload_is_invalid()
+    public async Task LoginShortCircuitsWhenPayloadIsInvalid()
     {
         var login = new UserLogin { Email = string.Empty, Password = string.Empty };
 

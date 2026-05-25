@@ -7,7 +7,7 @@
     "module": "es6",
     "sourceMap": true,
     "outDir": "wwwroot/js",
-    "rootDir": "Typescript"
+    "rootDir": "./"
   },
   "include": [
     "Typescript/**/*"

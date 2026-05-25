@@ -1,4 +1,3 @@
-using AspireApp.Application.Models.App;
 using AspireApp.Client.ApiClients;
 using Microsoft.AspNetCore.Components;
 
@@ -8,10 +7,15 @@ public partial class Product : ComponentBase
 {
     [Inject] public ProductApiClient ProductApi { get; set; } = null!;
 
-    [SupplyParameterFromForm] public Application.Models.App.Product Model { get; set; } = new();
+    [SupplyParameterFromForm] public Application.Models.App.Product Model { get; set; } = default!;
 
     private List<Application.Models.App.Product> products = [];
     private string errorMessage = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        Model ??= new Application.Models.App.Product();
+    }
 
     protected override async Task OnInitializedAsync()
     {

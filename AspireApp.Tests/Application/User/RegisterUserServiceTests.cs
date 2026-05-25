@@ -13,7 +13,7 @@ public class RegisterUserServiceTests
     private RegisterUserService Sut() => new(_deps);
 
     [Fact]
-    public async Task Register_returns_id_when_payload_is_valid_and_user_does_not_exist()
+    public async Task RegisterReturnsIdWhenPayloadIsValidAndUserDoesNotExist()
     {
         var input = new UserRegister
         {
@@ -34,7 +34,7 @@ public class RegisterUserServiceTests
     }
 
     [Fact]
-    public async Task Register_returns_conflict_when_user_already_exists()
+    public async Task RegisterReturnsConflictWhenUserAlreadyExists()
     {
         var input = new UserRegister
         {

@@ -9,8 +9,8 @@ public class BaseDA<T, TID>(AppDbContext context) : IBaseDA<T, TID>
     where T : BaseEntity<TID>
     where TID : struct
 {
-    protected readonly AppDbContext _context = context;
-    protected readonly DbSet<T> _dbSet = context.Set<T>();
+    internal readonly AppDbContext _context = context;
+    private readonly DbSet<T> _dbSet = context.Set<T>();
 
     public async Task<T?> GetByIdAsync(TID id, CancellationToken ct) =>
         await _dbSet.FindAsync([id], ct);

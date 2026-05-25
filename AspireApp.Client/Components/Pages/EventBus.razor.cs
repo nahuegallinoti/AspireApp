@@ -7,7 +7,7 @@ namespace AspireApp.Client.Components.Pages;
 public partial class EventBus : ComponentBase
 {
     [SupplyParameterFromForm]
-    public EventMessage Model { get; set; } = new();
+    public EventMessage Model { get; set; } = default!;
 
     [Inject]
     public ILogger<EventBus> Logger { get; set; } = null!;
@@ -17,6 +17,11 @@ public partial class EventBus : ComponentBase
 
     private string responseMessage = string.Empty;
     private string errorMessage = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        Model ??= new EventMessage();
+    }
 
     private async Task SendMessage()
     {

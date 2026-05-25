@@ -7,10 +7,15 @@ public partial class Show : ComponentBase
 {
     [Inject] public ShowApiClient ShowApi { get; set; } = null!;
 
-    [SupplyParameterFromForm] public Application.Models.App.Show Model { get; set; } = new();
+    [SupplyParameterFromForm] public Application.Models.App.Show Model { get; set; } = default!;
 
     private List<Application.Models.App.Show> shows = [];
     private string errorMessage = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        Model ??= new Application.Models.App.Show();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -24,6 +29,7 @@ public partial class Show : ComponentBase
     private async Task HandleRegister()
     {
         var response = await ShowApi.CreateAsync(Model, CancellationToken.None);
+
         if (response.Success)
         {
             shows.Add(response.Value);

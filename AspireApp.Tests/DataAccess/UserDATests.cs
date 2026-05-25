@@ -12,11 +12,11 @@ public class UserDATests
             .Options);
 
     [Fact]
-    public async Task ExistsAsync_returns_true_when_email_is_registered()
+    public async Task ExistsAsyncReturnsTrueWhenEmailIsRegistered()
     {
         await using var ctx = CreateContext();
         ctx.Users.Add(new User { Id = Guid.NewGuid(), Email = "found@example.com", Name = "N", Surname = "G" });
-        await ctx.SaveChangesAsync();
+        await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new UserDA(ctx);
 
@@ -25,12 +25,12 @@ public class UserDATests
     }
 
     [Fact]
-    public async Task GetByEmailAsync_returns_the_persisted_user()
+    public async Task GetByEmailAsyncReturnsThePersistedUser()
     {
         await using var ctx = CreateContext();
         var user = new User { Id = Guid.NewGuid(), Email = "found@example.com", Name = "N", Surname = "G" };
         ctx.Users.Add(user);
-        await ctx.SaveChangesAsync();
+        await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new UserDA(ctx);
 

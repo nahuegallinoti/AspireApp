@@ -9,7 +9,7 @@ public class ProductMapperTests
     private readonly ProductMapper _mapper = new();
 
     [Fact]
-    public void Round_trip_preserves_data()
+    public void RoundTripPreservesData()
     {
         var model = new ProductModel { Id = 7, Name = "Pencil", Description = "HB" };
 
@@ -20,7 +20,7 @@ public class ProductMapperTests
     }
 
     [Fact]
-    public void ToModelList_maps_every_entity()
+    public void ToModelListMapsEveryEntity()
     {
         var entities = new[]
         {
