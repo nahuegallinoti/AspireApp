@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>AspireApp.Api</RootNamespace>
     <AssemblyName>AspireApp.Api</AssemblyName>
+	<NoWarn>CA1848</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

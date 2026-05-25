@@ -3,6 +3,7 @@
 	<PropertyGroup>
 		<RootNamespace>AspireApp.Application.Implementations</RootNamespace>
 		<AssemblyName>AspireApp.Application.Implementations</AssemblyName>
+		<NoWarn>CA1848,CA1873</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -3,6 +3,7 @@
 	<PropertyGroup>
 		<RootNamespace>AspireApp.Client</RootNamespace>
 		<AssemblyName>AspireApp.Client</AssemblyName>
+		<NoWarn>CA1848</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
