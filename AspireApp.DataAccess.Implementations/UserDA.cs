@@ -52,7 +52,7 @@ public class UserDA(AppDbContext context) : BaseDA<User, Guid>(context), IUserDA
             var s = search.Trim().ToUpperInvariant();
             query = query.Where(u =>
                 u.NormalizedEmail.Contains(s) ||
-                (u.Name + " " + u.Surname).ToUpper().Contains(s));
+                (u.Name + " " + u.Surname).Contains(s, StringComparison.CurrentCultureIgnoreCase));
         }
 
         return await query
@@ -71,7 +71,7 @@ public class UserDA(AppDbContext context) : BaseDA<User, Guid>(context), IUserDA
             var s = search.Trim().ToUpperInvariant();
             query = query.Where(u =>
                 u.NormalizedEmail.Contains(s) ||
-                (u.Name + " " + u.Surname).ToUpper().Contains(s));
+                (u.Name + " " + u.Surname).Contains(s, StringComparison.CurrentCultureIgnoreCase));
         }
 
         return query.CountAsync(ct);

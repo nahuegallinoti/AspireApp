@@ -22,27 +22,27 @@ public sealed class JwtTokenHandler(
 {
     private static readonly SemaphoreSlim RefreshLock = new(1, 1);
 
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var sessionId = GetSessionId();
-        AuthSession? session = sessionId is null ? null : await sessionStore.GetAsync(sessionId, ct);
+        AuthSession? session = sessionId is null ? null : await sessionStore.GetAsync(sessionId, cancellationToken);
 
         AttachAccessToken(request, session);
 
-        var response = await base.SendAsync(request, ct);
+        var response = await base.SendAsync(request, cancellationToken);
 
         if (response.StatusCode != HttpStatusCode.Unauthorized || sessionId is null || session is null)
             return response;
 
         response.Dispose();
 
-        var refreshed = await TryRefreshAsync(sessionId, session, ct);
+        var refreshed = await TryRefreshAsync(sessionId, session, cancellationToken);
         if (refreshed is null)
             return new HttpResponseMessage(HttpStatusCode.Unauthorized);
 
-        var retry = await CloneRequestAsync(request, ct);
+        var retry = await CloneRequestAsync(request, cancellationToken);
         AttachAccessToken(retry, refreshed);
-        return await base.SendAsync(retry, ct);
+        return await base.SendAsync(retry, cancellationToken);
     }
 
     private string? GetSessionId() =>
@@ -108,7 +108,7 @@ public sealed class JwtTokenHandler(
         }
     }
 
-    private static async Task<HttpRequestMessage> CloneRequestAsync(HttpRequestMessage request, CancellationToken ct)
+    private static async Task<HttpRequestMessage> CloneRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var clone = new HttpRequestMessage(request.Method, request.RequestUri)
         {
@@ -118,7 +118,7 @@ public sealed class JwtTokenHandler(
         if (request.Content is not null)
         {
             var stream = new MemoryStream();
-            await request.Content.CopyToAsync(stream, ct);
+            await request.Content.CopyToAsync(stream, cancellationToken);
             stream.Position = 0;
             clone.Content = new StreamContent(stream);
             foreach (var header in request.Content.Headers)

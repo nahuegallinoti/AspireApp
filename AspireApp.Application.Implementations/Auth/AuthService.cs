@@ -110,7 +110,7 @@ internal sealed class AuthService(
         var user = await userDA.GetByIdWithRolesAsync(userId, ct);
         return user is null
             ? Result.NotFound<UserDto>("User not found.")
-            : userMapper.ToDto(user).Success();
+            : UserMapper.ToDto(user).Success();
     }
 
     private async Task<Result<AuthenticationResult>> AuthenticateAsync(UserLogin login, string? ip, CancellationToken ct)

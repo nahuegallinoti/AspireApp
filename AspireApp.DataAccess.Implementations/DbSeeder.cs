@@ -80,8 +80,8 @@ public sealed class DbSeeder(
             user.PasswordIterations = iterations;
         }
 
-        var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.NormalizedName == RoleNames.Admin.ToUpperInvariant(), ct);
-        var userRole = await context.Roles.FirstOrDefaultAsync(r => r.NormalizedName == RoleNames.User.ToUpperInvariant(), ct);
+        var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.NormalizedName.Equals(RoleNames.Admin, StringComparison.InvariantCultureIgnoreCase), ct);
+        var userRole = await context.Roles.FirstOrDefaultAsync(r => r.NormalizedName.Equals(RoleNames.User, StringComparison.InvariantCultureIgnoreCase), ct);
 
         if (adminRole is not null)
             user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = adminRole.Id });

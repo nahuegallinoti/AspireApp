@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AspireApp.Client.Authentication;
 
@@ -16,7 +18,14 @@ public static class AuthExtensions
         services.AddHttpContextAccessor();
 
 #pragma warning disable EXTEXP0018
-        services.AddHybridCache();
+        services.AddHybridCache(options =>
+        {
+            options.DefaultEntryOptions = new HybridCacheEntryOptions
+            {
+                Expiration = TimeSpan.FromDays(30),
+                LocalCacheExpiration = TimeSpan.FromMinutes(10)
+            };
+        });
 #pragma warning restore EXTEXP0018
 
         services.AddSingleton<IAuthSessionStore, AuthSessionStore>();
@@ -44,6 +53,13 @@ public static class AuthExtensions
             options.LoginPath = "/login";
             options.LogoutPath = "/logout";
             options.AccessDeniedPath = "/access-denied";
+
+            // The cookie carries identity claims, but the access/refresh tokens live in
+            // the IAuthSessionStore. If the store loses the session (e.g. process restart
+            // with no L2 cache, or session was explicitly revoked) we must reject the
+            // cookie so the UI doesn't show a logged-in state while every API call fails
+            // with "invalid credentials".
+            options.Events.OnValidatePrincipal = ValidateSessionExistsAsync;
         });
 
         if (googleOpts.Enabled && !string.IsNullOrWhiteSpace(googleOpts.ClientId) && !string.IsNullOrWhiteSpace(googleOpts.ClientSecret))
@@ -74,6 +90,44 @@ public static class AuthExtensions
         services.AddCascadingAuthenticationState();
 
         return services;
+    }
+
+    private static async Task ValidateSessionExistsAsync(CookieValidatePrincipalContext context)
+    {
+        var sid = context.Principal?.FindFirstValue(AuthClaimTypes.SessionId);
+        if (string.IsNullOrEmpty(sid))
+        {
+            await RejectAsync(context);
+            return;
+        }
+
+        var services = context.HttpContext.RequestServices;
+        var store = services.GetRequiredService<IAuthSessionStore>();
+        var ct = context.HttpContext.RequestAborted;
+
+        AuthSession? session;
+        try
+        {
+            session = await store.GetAsync(sid, ct);
+        }
+        catch (Exception ex)
+        {
+            // Don't lock users out if the session store backend (e.g. Redis) hiccups —
+            // the JwtTokenHandler will surface a 401 if the request actually needs a token.
+            services.GetService<ILoggerFactory>()?
+                .CreateLogger(typeof(AuthExtensions))
+                .LogWarning(ex, "Auth session store lookup failed; allowing cookie through.");
+            return;
+        }
+
+        if (session is null)
+            await RejectAsync(context);
+    }
+
+    private static async Task RejectAsync(CookieValidatePrincipalContext context)
+    {
+        context.RejectPrincipal();
+        await context.HttpContext.SignOutAsync(AuthClaimTypes.CookieScheme);
     }
 
     /// <summary>

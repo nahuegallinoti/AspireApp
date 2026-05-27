@@ -9,7 +9,7 @@ public interface IAuthService
 {
     Task<Result<AuthenticationResult>> LoginAsync(UserLogin login, string? ip, CancellationToken ct);
 
-    Task<Result<AuthenticationResult>> RegisterAsync(UserRegister register, string? ip, CancellationToken ct);
+    Task<Result<AuthenticationResult>> RegisterAsync(UserRegister userRegister, string? ip, CancellationToken ct);
 
     Task<Result<AuthenticationResult>> RefreshAsync(RefreshTokenRequest request, string? ip, CancellationToken ct);
 

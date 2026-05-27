@@ -14,7 +14,6 @@ internal sealed class UserService(
     IRoleDA roleDA,
     IRefreshTokenDA refreshTokenDA,
     IPasswordHasher passwordHasher,
-    UserMapper userMapper,
     TimeProvider timeProvider) : IUserService
 {
     public async Task<Result<UserDto>> GetByIdAsync(Guid id, CancellationToken ct)
@@ -22,7 +21,7 @@ internal sealed class UserService(
         var user = await userDA.GetByIdWithRolesAsync(id, ct);
         return user is null
             ? Result.NotFound<UserDto>("User not found.")
-            : userMapper.ToDto(user).Success();
+            : UserMapper.ToDto(user).Success();
     }
 
     public async Task<UserListPage> ListAsync(int page, int pageSize, string? search, CancellationToken ct)
@@ -34,7 +33,7 @@ internal sealed class UserService(
         var users = await userDA.ListWithRolesAsync(skip, pageSize, search, ct);
         var total = await userDA.CountAsync(search, ct);
 
-        var items = users.Select(userMapper.ToDto).ToList();
+        var items = users.Select(UserMapper.ToDto).ToList();
         return new UserListPage(items, total, page, pageSize);
     }
 
@@ -56,7 +55,7 @@ internal sealed class UserService(
         userDA.Update(user);
         await userDA.SaveChangesAsync(ct);
 
-        return userMapper.ToDto(user).Success();
+        return UserMapper.ToDto(user).Success();
     }
 
     public async Task<Result<Unit>> DeleteAsync(Guid id, CancellationToken ct)
@@ -99,7 +98,7 @@ internal sealed class UserService(
 
         await refreshTokenDA.RevokeAllForUserAsync(user.Id, "RolesChanged", null, ct);
 
-        return userMapper.ToDto(user).Success();
+        return UserMapper.ToDto(user).Success();
     }
 
     public async Task<Result<Unit>> ChangePasswordAsync(Guid userId, ChangePasswordRequest request, CancellationToken ct)

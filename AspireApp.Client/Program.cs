@@ -13,6 +13,11 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
+// Redis is wired up by the AppHost (`webfrontend` resource references `redis`).
+// Registering it here lets HybridCache use it as the L2 backplane, so auth sessions
+// survive process restarts instead of being lost with the in-memory L1 cache.
+builder.AddRedisDistributedCache("redis");
+
 builder.Services.AddAspireAppAuth(builder.Configuration);
 
 builder.Services.AddScoped<JwtTokenHandler>();

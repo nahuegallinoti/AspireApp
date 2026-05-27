@@ -23,7 +23,7 @@ public sealed class UserMapper : BaseMapper<UserRegister, User>
         Surname = model.Surname.Trim()
     };
 
-    public UserDto ToDto(User entity)
+    public static UserDto ToDto(User entity)
     {
         var roles = entity.UserRoles?.Select(ur => ur.Role?.Name ?? string.Empty)
                                      .Where(r => !string.IsNullOrWhiteSpace(r))
