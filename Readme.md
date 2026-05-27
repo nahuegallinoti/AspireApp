@@ -25,37 +25,85 @@ Versiones centralizadas en [Directory.Packages.props](Directory.Packages.props).
 
 ## Estructura
 
+Estructura real actual del workspace (punta a punta):
+
 ```
-0.Domain/
-  AspireApp.Domain.Entities       Entidades puras del dominio
-  AspireApp.Domain.ROP            Result<T> + Bind/Map (Railway Oriented Programming)
+AspireApp/
+  AspireApp.AppHost
+    Orquestación Aspire: levanta Redis, RabbitMQ/Kafka, API y WebFrontend.
+    Inyecta configuración cross-service (JWT, SSO, EventBus provider).
 
-1.Application/
-  AspireApp.Application.Contracts       Interfaces de servicios + Options (Jwt, EventBus)
-  AspireApp.Application.Implementations Lógica de negocio + DependencyInjection.AddApplicationServices
-  AspireApp.Application.Mappers         Mappers manuales (Entity ↔ Model)
-  AspireApp.Application.Models          DTOs / payloads HTTP
-  AspireApp.Application.Persistence     Interfaces de DataAccess (IBaseDA, IUserDA, ...)
+  AspireApp.ServiceDefaults
+    Defaults transversales: health checks, OpenTelemetry, resiliencia y service discovery.
 
-2.Infrastructure/
-  AspireApp.DataAccess.Implementations  EF Core + AppDbContext + AddDataAccess
+  AspireApp.Api
+    Capa HTTP (Controllers + auth + autorización + OpenAPI/Scalar + excepción global).
+    Composition root del backend: AddDataAccess + AddApplicationServices + AddMessageBus + AddCaching.
 
-3.Presentation/
-  AspireApp.Api                          Controllers, JWT, OpenAPI, Scalar UI, GlobalExceptionHandler
+  AspireApp.DataAccess
+    Contratos de acceso a datos (proyecto de soporte de la capa de datos).
 
-4.Client/
-  AspireApp.Client                       Blazor Server (Razor Components)
-  AspireApp.Client.ApiClients            Tipados sobre HttpClient con ROP
+  AspireApp.DataAccess.Implementations
+    Implementación EF Core: AppDbContext, DA concretos (UserDA, RoleDA, ProductDA, ShowDA, RefreshTokenDA),
+    seeding inicial (roles/admin) y wiring de persistencia.
 
-Host/
-  AspireApp.AppHost                      Orquesta Redis + RabbitMQ/Kafka + Api + WebFrontend
-  AspireApp.ServiceDefaults              Health checks, OpenTelemetry, resilience, service discovery
+  AspireApp.Application.Contracts
+    Interfaces de servicios de aplicación + options (Jwt, Identity, EventBus, SSO, etc).
 
-Tests/
-  AspireApp.Tests                        xUnit + FluentAssertions + NSubstitute
+  AspireApp.Application.Persistence
+    Contratos de persistencia consumidos por la capa de aplicación (IBaseDA, IUserDA, IRoleDA, ...).
+
+  AspireApp.Application.Models
+    DTOs, requests/responses, modelos de autenticación/autorización y contratos de entrada/salida.
+
+  AspireApp.Application.Mappers
+    Mappers manuales Entity <-> Model / DTO.
+
+  AspireApp.Application.Implementations
+    Lógica de negocio (Auth, Users, Roles, Product, Show, EventBus RabbitMQ/Kafka, validaciones).
+    Implementa contratos de Application.Contracts usando Persistence + Mappers.
+
+  AspireApp.Api.Modelos
+    Modelos compartidos/compatibilidad para la capa API (proyecto auxiliar).
+
+  AspireApp.Api.Services.Contracts
+    Contratos de servicios orientados a API (proyecto auxiliar).
+
+  AspireApp.Api.Services.Implementations
+    Implementaciones de servicios orientados a API (proyecto auxiliar).
+
+  AspireApp.Client
+    Frontend Blazor Server: componentes Razor, flujo de autenticación cookie+JWT, páginas de administración.
+
+  AspireApp.Client.ApiClients
+    Clientes tipados HttpClient para consumir la API desde el frontend.
+
+  AspireApp.Client.Tests
+    Tests enfocados en cliente (proyecto de pruebas del frontend).
+
+  AspireApp.Common
+    Utilidades y piezas comunes reutilizables entre proyectos.
+
+  AspireApp.Core.ROP
+    Núcleo ROP compartido (proyecto base legado/compatibilidad).
+
+  AspireApp.Domain.Entities
+    Entidades de dominio puras (User, Role, UserRole, Product, Show, RefreshToken, ...).
+
+  AspireApp.Domain.ROP
+    Result<T>, Unit, Bind/Map y extensiones para Railway Oriented Programming.
+
+  AspireApp.Entidad
+    Proyecto de entidades/modelos heredados o auxiliares (según migración).
+
+  AspireApp.Tools.Generator
+    Herramientas/CLI internas para generación de artefactos.
+
+  AspireApp.Tests
+    Test suite principal (xUnit + FluentAssertions + NSubstitute) para aplicación, auth, mappers y data access.
 ```
 
-Cada capa **solo** referencia las capas inferiores (Domain ← Application ← Infra/Presentation). `ServiceDefaults` es transversal y no conoce la app.
+Regla arquitectónica general: `Domain` no depende de nadie; `Application` depende de `Domain`; `DataAccess` implementa contratos de `Application.Persistence`; `Api` y `Client` son capas de entrada/salida; `AppHost` y `ServiceDefaults` orquestan/runtime.
 
 ---
 
