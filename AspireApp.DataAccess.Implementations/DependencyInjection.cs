@@ -15,8 +15,12 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(inMemoryDatabaseName));
 
         services.AddScoped<IUserDA, UserDA>();
+        services.AddScoped<IRoleDA, RoleDA>();
+        services.AddScoped<IRefreshTokenDA, RefreshTokenDA>();
         services.AddScoped<IProductDA, ProductDA>();
         services.AddScoped<IShowDA, ShowDA>();
+
+        services.AddScoped<DbSeeder>();
 
         return services;
     }

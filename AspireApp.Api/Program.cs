@@ -3,6 +3,7 @@ using AspireApp.Application.Implementations;
 using AspireApp.Application.Implementations.EventBus;
 using AspireApp.DataAccess.Implementations;
 using AspireApp.ServiceDefaults;
+using Microsoft.Extensions.DependencyInjection;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +14,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.AddJwtAuthentication();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationPolicies();
 
 builder.AddCaching();
 
@@ -21,12 +22,24 @@ builder.Services.AddDataAccess();
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.AddMessageBus();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(p => p
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .SetIsOriginAllowed(_ => true));
+});
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+await SeedDatabaseAsync(app);
+
 app.UseExceptionHandler();
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -45,3 +58,10 @@ app.MapDefaultEndpoints();
 app.MapControllers();
 
 app.Run();
+
+static async Task SeedDatabaseAsync(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+    await seeder.SeedAsync();
+}

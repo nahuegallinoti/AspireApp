@@ -1,3 +1,8 @@
 ﻿namespace AspireApp.Application.Models.Auth;
 
-public readonly record struct AuthenticationResult(string Token);
+public sealed record AuthenticationResult(
+    string AccessToken,
+    string RefreshToken,
+    DateTimeOffset AccessTokenExpiresUtc,
+    DateTimeOffset RefreshTokenExpiresUtc,
+    string TokenType = "Bearer");

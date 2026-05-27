@@ -1,4 +1,6 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using AspireApp.Application.Models.Auth
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">AspireApp</a>
     </div>
@@ -14,35 +16,62 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="register">
-                <span class="bi bi-list-nested" aria-hidden="true"></span> Register
-            </NavLink>
-        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="profile">
+                        <span class="bi bi-person-circle" aria-hidden="true"></span> Profile
+                    </NavLink>
+                </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="login">
-                <span class="bi bi-list-nested" aria-hidden="true"></span> Login
-            </NavLink>
-        </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="product">
+                        <span class="bi bi-box-seam" aria-hidden="true"></span> Products
+                    </NavLink>
+                </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="product">
-                <span class="bi bi-list-nested" aria-hidden="true"></span> Products
-            </NavLink>
-        </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="show">
+                        <span class="bi bi-tv" aria-hidden="true"></span> Shows
+                    </NavLink>
+                </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="show">
-                <span class="bi bi-list-nested" aria-hidden="true"></span> Shows
-            </NavLink>
-        </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="eventbus">
+                        <span class="bi bi-broadcast" aria-hidden="true"></span> Event Bus
+                    </NavLink>
+                </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="eventbus">
-                <span class="bi bi-list-nested" aria-hidden="true"></span> Event Bus
-            </NavLink>
-        </div>
+                <AuthorizeView Policy="@AuthPolicies.AdminOnly" Context="adminCtx">
+                    <Authorized>
+                        <hr class="text-secondary mx-3" />
+                        <div class="nav-item px-3 text-uppercase small text-secondary">Admin</div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="admin/users">
+                                <span class="bi bi-people-fill" aria-hidden="true"></span> Users
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="admin/roles">
+                                <span class="bi bi-shield-lock-fill" aria-hidden="true"></span> Roles
+                            </NavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+            </Authorized>
 
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="login">
+                        <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Sign in
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="register">
+                        <span class="bi bi-person-plus" aria-hidden="true"></span> Register
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
     </nav>
 </div>

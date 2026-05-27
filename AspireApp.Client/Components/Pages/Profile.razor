@@ -1,0 +1,121 @@
+@page "/profile"
+@using AspireApp.Application.Models.Users
+@using AspireApp.Client.ApiClients
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject UsersApiClient UsersApi
+
+<PageTitle>My profile</PageTitle>
+
+<h1>My profile</h1>
+
+@if (_loading)
+{
+    <p>Loading…</p>
+}
+else if (_user is null)
+{
+    <p class="text-danger">@_error</p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <dl class="row">
+                <dt class="col-sm-4">Email</dt>
+                <dd class="col-sm-8">@_user.Email</dd>
+
+                <dt class="col-sm-4">Name</dt>
+                <dd class="col-sm-8">@_user.Name @_user.Surname</dd>
+
+                <dt class="col-sm-4">Provider</dt>
+                <dd class="col-sm-8">@(_user.ExternalProvider ?? "Local")</dd>
+
+                <dt class="col-sm-4">Roles</dt>
+                <dd class="col-sm-8">
+                    @foreach (var role in _user.Roles)
+                    {
+                        <span class="badge bg-secondary me-1">@role</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-4">Created</dt>
+                <dd class="col-sm-8">@_user.CreatedUtc.ToLocalTime().ToString("g")</dd>
+
+                <dt class="col-sm-4">Last login</dt>
+                <dd class="col-sm-8">@(_user.LastLoginUtc?.ToLocalTime().ToString("g") ?? "—")</dd>
+            </dl>
+        </div>
+    </div>
+
+    @if (_user.ExternalProvider is null)
+    {
+        <hr />
+        <h2 class="h4">Change password</h2>
+
+        @if (!string.IsNullOrEmpty(_changePwdMessage))
+        {
+            <div class="alert alert-@_changePwdAlertKind">@_changePwdMessage</div>
+        }
+
+        <EditForm Model="_changePwd" OnValidSubmit="ChangePasswordAsync" FormName="changePassword" class="vstack gap-3" style="max-width:32rem;">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div>
+                <label class="form-label">Current password</label>
+                <InputText type="password" @bind-Value="_changePwd.CurrentPassword" class="form-control" />
+            </div>
+            <div>
+                <label class="form-label">New password</label>
+                <InputText type="password" @bind-Value="_changePwd.NewPassword" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary align-self-start" disabled="@_changing">Update password</button>
+        </EditForm>
+    }
+}
+
+@code {
+    private UserDto? _user;
+    private bool _loading = true;
+    private string? _error;
+
+    private readonly ChangePasswordRequest _changePwd = new();
+    private string? _changePwdMessage;
+    private string _changePwdAlertKind = "success";
+    private bool _changing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await UsersApi.GetMeAsync(CancellationToken.None);
+        if (result.Success)
+            _user = result.Value;
+        else
+            _error = string.Join("; ", result.Errors);
+        _loading = false;
+    }
+
+    private async Task ChangePasswordAsync()
+    {
+        _changing = true;
+        _changePwdMessage = null;
+        try
+        {
+            var result = await UsersApi.ChangePasswordAsync(_changePwd, CancellationToken.None);
+            if (result.Success)
+            {
+                _changePwdMessage = "Password updated. Please sign in again on other devices.";
+                _changePwdAlertKind = "success";
+            }
+            else
+            {
+                _changePwdMessage = string.Join("; ", result.Errors);
+                _changePwdAlertKind = "danger";
+            }
+        }
+        finally
+        {
+            _changing = false;
+        }
+    }
+}

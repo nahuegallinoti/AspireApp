@@ -1,0 +1,232 @@
+@page "/admin/users"
+@using AspireApp.Application.Models.Auth
+@using AspireApp.Application.Models.Roles
+@using AspireApp.Application.Models.Users
+@using AspireApp.Client.ApiClients
+@attribute [Authorize(Policy = AuthPolicies.AdminOnly)]
+@rendermode InteractiveServer
+@inject UsersApiClient UsersApi
+@inject RolesApiClient RolesApi
+
+<PageTitle>Users · Admin</PageTitle>
+
+<h1>Users</h1>
+
+<div class="d-flex gap-2 mb-3">
+    <input class="form-control" placeholder="Search by email or name…" @bind="_search" @bind:event="oninput" />
+    <button class="btn btn-outline-secondary" @onclick="ReloadAsync">Refresh</button>
+</div>
+
+@if (_loading)
+{
+    <p>Loading…</p>
+}
+else if (_page is null)
+{
+    <p class="text-danger">@_error</p>
+}
+else
+{
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Roles</th>
+                <th>Created</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in _page.Items)
+            {
+                <tr>
+                    <td>@u.Email @(u.ExternalProvider is not null ? $"({u.ExternalProvider})" : "")</td>
+                    <td>@u.Name @u.Surname</td>
+                    <td>
+                        @if (u.IsActive)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Disabled</span>
+                        }
+                    </td>
+                    <td>
+                        @foreach (var r in u.Roles)
+                        {
+                            <span class="badge bg-info text-dark me-1">@r</span>
+                        }
+                    </td>
+                    <td>@u.CreatedUtc.ToLocalTime().ToString("g")</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-primary" @onclick="() => EditAsync(u)">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteAsync(u)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            <li class="page-item @(_page.Page <= 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPageAsync(_page.Page - 1)">«</button>
+            </li>
+            <li class="page-item disabled"><span class="page-link">@_page.Page / @TotalPages</span></li>
+            <li class="page-item @(_page.Page >= TotalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPageAsync(_page.Page + 1)">»</button>
+            </li>
+        </ul>
+    </nav>
+}
+
+@if (_editing is not null)
+{
+    <div class="modal d-block" tabindex="-1" style="background-color:rgba(0,0,0,0.4)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit @_editing.Email</h5>
+                    <button type="button" class="btn-close" @onclick="() => _editing = null"></button>
+                </div>
+                <div class="modal-body vstack gap-3">
+                    @if (!string.IsNullOrEmpty(_editError))
+                    {
+                        <div class="alert alert-danger">@_editError</div>
+                    }
+                    <div>
+                        <label class="form-label">Name</label>
+                        <input class="form-control" @bind="_editForm.Name" />
+                    </div>
+                    <div>
+                        <label class="form-label">Surname</label>
+                        <input class="form-control" @bind="_editForm.Surname" />
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" id="active" type="checkbox" @bind="_editForm.IsActive" />
+                        <label class="form-check-label" for="active">Active</label>
+                    </div>
+                    <div>
+                        <label class="form-label">Roles</label>
+                        <div>
+                            @foreach (var role in _allRoles)
+                            {
+                                var name = role.Name;
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="role-@role.Id"
+                                           checked="@_selectedRoles.Contains(name)"
+                                           @onchange="(ChangeEventArgs e) => ToggleRole(name, (bool)(e.Value ?? false))" />
+                                    <label class="form-check-label" for="role-@role.Id">@name</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => _editing = null">Cancel</button>
+                    <button class="btn btn-primary" @onclick="SaveEditAsync" disabled="@_saving">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private UsersApiClient.UserListPage? _page;
+    private bool _loading = true;
+    private string? _error;
+    private string _search = string.Empty;
+    private const int PageSize = 20;
+    private int _currentPage = 1;
+    private int TotalPages => _page is null ? 1 : Math.Max(1, (int)Math.Ceiling(_page.Total / (double)PageSize));
+
+    private UserDto? _editing;
+    private readonly UpdateUserRequest _editForm = new();
+    private readonly HashSet<string> _selectedRoles = new(StringComparer.OrdinalIgnoreCase);
+    private IReadOnlyList<RoleDto> _allRoles = [];
+    private string? _editError;
+    private bool _saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var roles = await RolesApi.GetAllAsync(CancellationToken.None);
+        if (roles.Success) _allRoles = roles.Value;
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        _loading = true;
+        var result = await UsersApi.ListAsync(_currentPage, PageSize, _search, CancellationToken.None);
+        if (result.Success) _page = result.Value;
+        else _error = string.Join("; ", result.Errors);
+        _loading = false;
+    }
+
+    private async Task GoToPageAsync(int target)
+    {
+        if (target < 1 || target > TotalPages) return;
+        _currentPage = target;
+        await ReloadAsync();
+    }
+
+    private async Task EditAsync(UserDto u)
+    {
+        _editing = u;
+        _editForm.Name = u.Name;
+        _editForm.Surname = u.Surname;
+        _editForm.IsActive = u.IsActive;
+        _selectedRoles.Clear();
+        foreach (var r in u.Roles) _selectedRoles.Add(r);
+        _editError = null;
+    }
+
+    private void ToggleRole(string role, bool selected)
+    {
+        if (selected) _selectedRoles.Add(role);
+        else _selectedRoles.Remove(role);
+    }
+
+    private async Task SaveEditAsync()
+    {
+        if (_editing is null) return;
+        _saving = true;
+        _editError = null;
+        try
+        {
+            var updateResult = await UsersApi.UpdateAsync(_editing.Id, _editForm, CancellationToken.None);
+            if (updateResult.IsFailure)
+            {
+                _editError = string.Join("; ", updateResult.Errors);
+                return;
+            }
+
+            var rolesRequest = new AssignRolesRequest { Roles = _selectedRoles.ToList() };
+            var rolesResult = await UsersApi.AssignRolesAsync(_editing.Id, rolesRequest, CancellationToken.None);
+            if (rolesResult.IsFailure)
+            {
+                _editError = string.Join("; ", rolesResult.Errors);
+                return;
+            }
+
+            _editing = null;
+            await ReloadAsync();
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task DeleteAsync(UserDto u)
+    {
+        var result = await UsersApi.DeleteAsync(u.Id, CancellationToken.None);
+        if (result.Success) await ReloadAsync();
+        else _error = string.Join("; ", result.Errors);
+    }
+}

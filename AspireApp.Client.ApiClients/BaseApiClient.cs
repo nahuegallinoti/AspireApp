@@ -23,6 +23,9 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
     public Task<Result<T>> PutAsync<T>(string url, T data, CancellationToken ct) =>
         SendAsync<T>(HttpMethod.Put, url, JsonContent.Create(data), ct);
 
+    public Task<Result<TOut>> PutAsync<TOut, TIn>(string url, TIn data, CancellationToken ct) =>
+        SendAsync<TOut>(HttpMethod.Put, url, JsonContent.Create(data), ct);
+
     public Task<Result<T>> DeleteAsync<T>(string url, CancellationToken ct) =>
         SendAsync<T>(HttpMethod.Delete, url, content: null, ct);
 

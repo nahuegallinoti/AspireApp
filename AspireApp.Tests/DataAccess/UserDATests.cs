@@ -15,7 +15,7 @@ public class UserDATests
     public async Task ExistsAsyncReturnsTrueWhenEmailIsRegistered()
     {
         await using var ctx = CreateContext();
-        ctx.Users.Add(new User { Id = Guid.NewGuid(), Email = "found@example.com", Name = "N", Surname = "G" });
+        ctx.Users.Add(new User { Id = Guid.NewGuid(), Email = "found@example.com", NormalizedEmail = "FOUND@EXAMPLE.COM", Name = "N", Surname = "G" });
         await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new UserDA(ctx);
@@ -28,7 +28,7 @@ public class UserDATests
     public async Task GetByEmailAsyncReturnsThePersistedUser()
     {
         await using var ctx = CreateContext();
-        var user = new User { Id = Guid.NewGuid(), Email = "found@example.com", Name = "N", Surname = "G" };
+        var user = new User { Id = Guid.NewGuid(), Email = "found@example.com", NormalizedEmail = "FOUND@EXAMPLE.COM", Name = "N", Surname = "G" };
         ctx.Users.Add(user);
         await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 

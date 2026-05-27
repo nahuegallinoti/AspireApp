@@ -1,4 +1,5 @@
 using AspireApp.Client.ApiClients;
+using AspireApp.Client.Authentication;
 using AspireApp.Client.Components;
 using AspireApp.Client.Handlers;
 using AspireApp.ServiceDefaults;
@@ -12,18 +13,20 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
+builder.Services.AddAspireAppAuth(builder.Configuration);
+
 builder.Services.AddScoped<JwtTokenHandler>();
-builder.Services.AddSingleton<IJwtTokenProvider, JwtTokenProvider>();
 
 builder.Services
-    .AddHttpClient(HttpClientNames.Api, client =>
-    {
-        client.BaseAddress = new Uri("https+http://api");
-    })
+    .AddHttpClient(HttpClientNames.Api, client => client.BaseAddress = new Uri("https+http://api"))
     .AddHttpMessageHandler<JwtTokenHandler>();
 
-builder.Services.AddScoped<LoginApiClient>();
-builder.Services.AddScoped<RegisterApiClient>();
+builder.Services
+    .AddHttpClient(HttpClientNames.ApiRaw, client => client.BaseAddress = new Uri("https+http://api"));
+
+builder.Services.AddScoped<AuthApiClient>();
+builder.Services.AddScoped<UsersApiClient>();
+builder.Services.AddScoped<RolesApiClient>();
 builder.Services.AddScoped<ProductApiClient>();
 builder.Services.AddScoped<ShowApiClient>();
 builder.Services.AddScoped<MessageBusApiClient>();
@@ -38,8 +41,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 app.UseOutputCache();
+
+app.MapAuthEndpoints();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -1,0 +1,102 @@
+@page "/admin/roles"
+@using AspireApp.Application.Models.Auth
+@using AspireApp.Application.Models.Roles
+@using AspireApp.Client.ApiClients
+@attribute [Authorize(Policy = AuthPolicies.AdminOnly)]
+@rendermode InteractiveServer
+@inject RolesApiClient RolesApi
+
+<PageTitle>Roles · Admin</PageTitle>
+
+<h1>Roles</h1>
+
+@if (!string.IsNullOrEmpty(_message))
+{
+    <div class="alert alert-@_alertKind">@_message</div>
+}
+
+<div class="row">
+    <div class="col-md-7">
+        <table class="table">
+            <thead><tr><th>Name</th><th>Description</th><th>System</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var role in _roles)
+                {
+                    <tr>
+                        <td>@role.Name</td>
+                        <td>@role.Description</td>
+                        <td>@(role.IsSystem ? "Yes" : "No")</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-danger" disabled="@role.IsSystem" @onclick="() => DeleteAsync(role)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-md-5">
+        <h2 class="h5">New role</h2>
+        <EditForm Model="_create" OnValidSubmit="CreateAsync" FormName="createRole" class="vstack gap-3">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div>
+                <label class="form-label">Name</label>
+                <InputText @bind-Value="_create.Name" class="form-control" />
+            </div>
+            <div>
+                <label class="form-label">Description</label>
+                <InputText @bind-Value="_create.Description" class="form-control" />
+            </div>
+            <button class="btn btn-primary align-self-start" type="submit">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private IReadOnlyList<RoleDto> _roles = [];
+    private CreateRoleRequest _create = new();
+    private string? _message;
+    private string _alertKind = "success";
+
+    protected override Task OnInitializedAsync() => ReloadAsync();
+
+    private async Task ReloadAsync()
+    {
+        var result = await RolesApi.GetAllAsync(CancellationToken.None);
+        if (result.Success) _roles = result.Value;
+        else SetError(string.Join("; ", result.Errors));
+    }
+
+    private async Task CreateAsync()
+    {
+        var result = await RolesApi.CreateAsync(_create, CancellationToken.None);
+        if (result.Success)
+        {
+            _create = new CreateRoleRequest();
+            SetInfo($"Role '{result.Value.Name}' created.");
+            await ReloadAsync();
+        }
+        else
+        {
+            SetError(string.Join("; ", result.Errors));
+        }
+    }
+
+    private async Task DeleteAsync(RoleDto role)
+    {
+        var result = await RolesApi.DeleteAsync(role.Id, CancellationToken.None);
+        if (result.Success)
+        {
+            SetInfo($"Role '{role.Name}' deleted.");
+            await ReloadAsync();
+        }
+        else
+        {
+            SetError(string.Join("; ", result.Errors));
+        }
+    }
+
+    private void SetInfo(string msg) { _message = msg; _alertKind = "success"; }
+    private void SetError(string msg) { _message = msg; _alertKind = "danger"; }
+}
