@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>AspireApp.DataAccess.Implementations</RootNamespace>
     <AssemblyName>AspireApp.DataAccess.Implementations</AssemblyName>
+	  <NoWarn>CA1848,CA1873</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

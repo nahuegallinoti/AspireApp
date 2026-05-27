@@ -6,7 +6,7 @@
     "target": "ES6",
     "module": "es6",
     "sourceMap": true,
-    "outDir": "wwwroot/js",
+    "outDir": "obj/typescript",
     "rootDir": "Typescript"
   },
   "include": [
@@ -14,6 +14,8 @@
   ],
   "exclude": [
     "node_modules",
-    "wwwroot"
+    "wwwroot",
+    "obj",
+    "bin"
   ]
 }

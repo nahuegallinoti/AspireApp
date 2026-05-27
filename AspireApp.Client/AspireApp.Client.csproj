@@ -27,4 +27,15 @@
 	  <Folder Include="Typescript\" />
 	</ItemGroup>
 
+	<Target Name="CompileTypeScriptAndStageOutput"
+	        BeforeTargets="ResolveStaticWebAssetsConfiguration;AssignTargetPaths;GetCopyToOutputDirectoryItems"
+	        DependsOnTargets="CompileTypeScriptWithTSConfig">
+		<ItemGroup>
+			<_TypeScriptOutputs Include="obj\typescript\**\*.js;obj\typescript\**\*.map" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_TypeScriptOutputs)"
+		      DestinationFolder="wwwroot\js\%(RecursiveDir)"
+		      SkipUnchangedFiles="true" />
+	</Target>
+
 </Project>
