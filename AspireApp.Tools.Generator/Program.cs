@@ -1,6 +1,10 @@
-﻿using AspireApp.Tools.Generator.Commands;
+﻿using System.Text;
+using AspireApp.Tools.Generator.Commands;
 using Spectre.Console;
 using Spectre.Console.Cli;
+
+Console.OutputEncoding = Encoding.UTF8;
+Console.InputEncoding = Encoding.UTF8;
 
 try
 {

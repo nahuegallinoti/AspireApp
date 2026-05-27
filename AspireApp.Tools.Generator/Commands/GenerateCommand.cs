@@ -117,13 +117,13 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
             .AddColumn(new GridColumn().NoWrap().PadRight(2))
             .AddColumn();
 
-        grid.AddRow("[grey]📁 Root[/]", $"[aqua]{paths.SolutionRoot.EscapeMarkup()}[/]");
+        grid.AddRow("[grey]▸ Root[/]", $"[aqua]{paths.SolutionRoot.EscapeMarkup()}[/]");
         if (settings.DryRun)
-            grid.AddRow("[grey]🧪 Modo[/]", "[bold yellow on grey15]  DRY-RUN  [/] [grey]no se escribe nada en disco[/]");
+            grid.AddRow("[grey]▸ Modo[/]", "[bold yellow on grey15]  DRY-RUN  [/] [grey]no se escribe nada en disco[/]");
         else
-            grid.AddRow("[grey]⚙ Modo[/]", "[bold green]✔ APPLY[/] [grey]se escribirán archivos en disco[/]");
+            grid.AddRow("[grey]▸ Modo[/]", "[bold green]✔ APPLY[/] [grey]se escribirán archivos en disco[/]");
         if (settings.Yes)
-            grid.AddRow("[grey]🔕 Prompts[/]", "[grey]desactivados (--yes)[/]");
+            grid.AddRow("[grey]▸ Prompts[/]", "[grey]desactivados (--yes)[/]");
 
         AnsiConsole.Write(new Padder(grid).Padding(2, 0, 0, 1));
     }
@@ -139,7 +139,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         var totals = new Totals();
 
         AnsiConsole.WriteLine();
-        AnsiConsole.Write(new Rule("[bold mediumpurple1]⚙ Generando[/]").RuleStyle("grey39").LeftJustified());
+        AnsiConsole.Write(new Rule("[bold mediumpurple1]✦ Generando[/]").RuleStyle("grey39").LeftJustified());
         AnsiConsole.WriteLine();
 
         await AnsiConsole.Status()
@@ -226,7 +226,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         var hasErrors = totals.Failed > 0;
         var statusColor = hasErrors ? "red" : "green";
         var statusText = hasErrors ? "Completado con errores" : "Listo";
-        var statusIcon = hasErrors ? "⚠" : "✔";
+        var statusIcon = hasErrors ? "✗" : "✔";
 
         var grid = new Grid()
             .AddColumn(new GridColumn().NoWrap().PadRight(2))
@@ -251,7 +251,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         if (settings.DryRun)
         {
             AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[yellow]ℹ Dry-run: nada fue escrito en disco. Re-corré sin [/][bold yellow]--dry-run[/][yellow] para aplicar.[/]");
+            AnsiConsole.MarkupLine("[yellow]→ Dry-run: nada fue escrito en disco. Re-corré sin [/][bold yellow]--dry-run[/][yellow] para aplicar.[/]");
             return;
         }
 
@@ -259,7 +259,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
             return;
 
         AnsiConsole.WriteLine();
-        AnsiConsole.Write(new Rule("[bold mediumpurple1]🚀 Próximos pasos[/]").RuleStyle("grey39").LeftJustified());
+        AnsiConsole.Write(new Rule("[bold mediumpurple1]❯❯ Próximos pasos[/]").RuleStyle("grey39").LeftJustified());
 
         var next = new Grid().AddColumn(new GridColumn().NoWrap().PadRight(2)).AddColumn();
         next.AddRow("[green]❯[/] [bold green]1[/]", "[white]dotnet build[/] [grey]— compilar y validar[/]");
@@ -341,7 +341,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
 
         if (properties.Count == 0)
         {
-            AnsiConsole.MarkupLine("[yellow]ℹ No se especificaron propiedades. Se generará con el body vacío (podés agregarlas después).[/]");
+            AnsiConsole.MarkupLine("[yellow]→ No se especificaron propiedades. Se generará con el body vacío (podés agregarlas después).[/]");
         }
 
         var interactive = !settings.Yes;
@@ -393,7 +393,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
     private static void RenderEntitySummary(EntitySpec entity)
     {
         AnsiConsole.WriteLine();
-        AnsiConsole.Write(new Rule("[bold mediumpurple1]📦 Entity preview[/]").RuleStyle("grey39").LeftJustified());
+        AnsiConsole.Write(new Rule("[bold mediumpurple1]◆ Entity preview[/]").RuleStyle("grey39").LeftJustified());
         AnsiConsole.WriteLine();
 
         var accentColor = MapAccentToSpectre(entity.Accent);
@@ -405,11 +405,11 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         headerGrid.AddRow(
             $"[bold {accentColor} on grey15]   bi-{entity.Icon.EscapeMarkup()}   [/]",
             $"[bold white]{entity.Name.EscapeMarkup()}[/]  [grey]·[/] plural [aqua]{entity.Plural.EscapeMarkup()}[/]");
-        headerGrid.AddRow("[grey]🔑 Id type[/]", $"[white]{entity.IdType}[/]");
-        headerGrid.AddRow("[grey]🎨 Acento[/]", $"[{accentColor}]●[/] [white]{entity.Accent}[/]");
-        headerGrid.AddRow("[grey]🖼  Blazor UI[/]", entity.GenerateBlazorPage ? "[green]✔ sí[/]" : "[grey]✘ no[/]");
-        headerGrid.AddRow("[grey]🧭 NavMenu[/]", entity.GenerateBlazorPage && entity.RegisterInNavMenu ? "[green]✔ sí[/]" : "[grey]✘ no[/]");
-        headerGrid.AddRow("[grey]🔒 Authorize[/]", entity.RequireAuth ? "[green]✔ sí[/]" : "[grey]✘ no[/]");
+        headerGrid.AddRow("[grey]# Id type[/]", $"[white]{entity.IdType}[/]");
+        headerGrid.AddRow("[grey]● Acento[/]", $"[{accentColor}]●[/] [white]{entity.Accent}[/]");
+        headerGrid.AddRow("[grey]▣ Blazor UI[/]", entity.GenerateBlazorPage ? "[green]✔ sí[/]" : "[grey]✘ no[/]");
+        headerGrid.AddRow("[grey]▸ NavMenu[/]", entity.GenerateBlazorPage && entity.RegisterInNavMenu ? "[green]✔ sí[/]" : "[grey]✘ no[/]");
+        headerGrid.AddRow("[grey]★ Authorize[/]", entity.RequireAuth ? "[green]✔ sí[/]" : "[grey]✘ no[/]");
 
         AnsiConsole.Write(new Panel(headerGrid)
         {
@@ -462,11 +462,11 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
 
     private static void RenderPlan(GenerationPlan plan, PathResolver paths)
     {
-        AnsiConsole.Write(new Rule("[bold mediumpurple1]🗺  Plan de generación[/]").RuleStyle("grey39").LeftJustified());
+        AnsiConsole.Write(new Rule("[bold mediumpurple1]◈ Plan de generación[/]").RuleStyle("grey39").LeftJustified());
         AnsiConsole.WriteLine();
 
         var tree = new Tree(
-            $"[bold]📂 Archivos[/] [grey]·[/] [green]✚ {plan.Creations.Count}[/] [grey]a crear[/], " +
+            $"[bold]▸ Archivos[/] [grey]·[/] [green]✚ {plan.Creations.Count}[/] [grey]a crear[/], " +
             $"[aqua]✎ {plan.Mutators.Count}[/] [grey]a actualizar[/]")
         {
             Style = new Style(Color.Grey50),

@@ -111,12 +111,14 @@ Por defecto todas las entidades comparten el acento `primary` para que la app se
 La terminal muestra (todo en español, con iconografía consistente):
 
 1. **Banner Figlet "AspireApp"** en violeta + tagline con la cadena de capas (`Domain › Application › Infra › Api › Client`) cada una en su color.
-2. **Context bar** con `📁 Root`, `⚙ Modo` (APPLY verde o DRY-RUN amarillo) y, si aplica, `🔕 Prompts desactivados`.
-3. **Panel "Entity preview"** con borde violeta: bloque con icono Bootstrap detectado + nombre + plural, `🔑 Id type`, `🎨 Acento` con bullet de color, `🖼 Blazor UI`, `🧭 NavMenu`, `🔒 Authorize`. Luego una **tabla de propiedades** (`# / Nombre / Tipo / Req`) con marca `✔` para los requeridos.
-4. **Tree del plan** (`🗺 Plan de generación`) con los archivos a crear agrupados por capa, cada una con su glifo: `◆ Domain` magenta, `▼ Application` azul, `▣ Infrastructure` violeta, `▲ Api` dorado, `✦ Client` aqua, `✎ Shared` naranja.
+2. **Context bar** con `▸ Root`, `▸ Modo` (APPLY verde o DRY-RUN amarillo) y, si aplica, `▸ Prompts desactivados`.
+3. **Panel "Entity preview"** con borde violeta: bloque con icono Bootstrap detectado + nombre + plural, `# Id type`, `● Acento` con bullet de color, `▣ Blazor UI`, `▸ NavMenu`, `★ Authorize`. Luego una **tabla de propiedades** (`# / Nombre / Tipo / Req`) con marca `✔` para los requeridos.
+4. **Tree del plan** (`◈ Plan de generación`) con los archivos a crear agrupados por capa, cada una con su glifo: `◆ Domain` magenta, `▼ Application` azul, `▣ Infrastructure` violeta, `▲ Api` dorado, `✦ Client` aqua, `✎ Shared` naranja.
 5. **Status spinner** durante la creación con el tag de capa coloreada por línea y prefijos `✚` (creado) / `○` (omitido) / `✎` (mutado) / `✗` (error).
 6. **Panel `▣ Resumen`** con borde doble verde (o rojo si hubo errores), filas iconadas `✔` estado, `✚ Creados`, `✎ Actualizados`, `○ Omitidos`, `✗ Fallidos`.
-7. **Sección `🚀 Próximos pasos`** con los comandos sugeridos numerados.
+7. **Sección `❯❯ Próximos pasos`** con los comandos sugeridos numerados.
+
+> Todos los glifos están dentro del BMP de Unicode (no emojis) para garantizar que se rendericen bien en cualquier consola (Windows Terminal, conhost.exe, PowerShell ISE, etc.). Además, el CLI fuerza `Console.OutputEncoding = UTF-8` al iniciar.
 
 ## Idempotencia
 
