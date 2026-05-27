@@ -45,6 +45,9 @@ internal sealed class TemplateRenderer
         ["entity_plural"] = entity.PluralLower,
         ["ID_TYPE"] = entity.IdType,
         ["ID_ROUTE_CONSTRAINT"] = BuildIdRouteConstraint(entity.IdType),
+        ["ENTITY_ICON"] = entity.Icon,
+        ["ACCENT"] = entity.Accent,
+        ["ACCENT_SUBTLE"] = $"{entity.Accent}-subtle",
         ["PROPS_ENTITY"] = BuildEntityProps(entity),
         ["PROPS_MODEL"] = BuildModelProps(entity),
         ["PROPS_DBCONFIG"] = BuildDbConfigProps(entity),
@@ -146,22 +149,28 @@ internal sealed class TemplateRenderer
 
     private static string BuildFormFields(EntitySpec entity)
     {
-        if (entity.Properties.Count == 0) return string.Empty;
+        if (entity.Properties.Count == 0)
+        {
+            return "                    <div class=\"col-12\">"
+                 + Environment.NewLine
+                 + "                        <p class=\"text-muted small mb-0\">Esta entidad no tiene campos. Agregalos en la clase modelo.</p>"
+                 + Environment.NewLine
+                 + "                    </div>";
+        }
         var sb = new StringBuilder();
         for (var i = 0; i < entity.Properties.Count; i++)
         {
             var p = entity.Properties[i];
             var requiredMark = p.Required ? " *" : string.Empty;
-            var label = $"{p.Name}{requiredMark}";
 
             if (p.IsBool)
             {
                 sb.AppendLine("                    <div class=\"col-md-6\">");
-                sb.AppendLine("                        <div class=\"form-check mt-4\">");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"                            <InputCheckbox id=\"{p.CamelName}\" class=\"form-check-input\" @bind-Value=\"Model.{p.Name}\" />");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"                            <label for=\"{p.CamelName}\" class=\"form-check-label\">{label}</label>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"                            <ValidationMessage For=\"() => Model.{p.Name}\" class=\"text-danger small d-block\" />");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"                        <div class=\"form-check form-switch mt-4\">");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"                            <InputCheckbox id=\"{p.CamelName}\" class=\"form-check-input\" role=\"switch\" @bind-Value=\"Model.{p.Name}\" />");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"                            <label for=\"{p.CamelName}\" class=\"form-check-label\">{p.Name}</label>");
                 sb.AppendLine("                        </div>");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"                        <ValidationMessage For=\"() => Model.{p.Name}\" class=\"text-danger small d-block\" />");
                 sb.Append("                    </div>");
             }
             else
@@ -169,7 +178,7 @@ internal sealed class TemplateRenderer
                 var componentName = p.RazorInputComponent;
                 var colClass = p.IsString ? "col-md-12" : "col-md-6";
                 sb.AppendLine(CultureInfo.InvariantCulture, $"                    <div class=\"{colClass}\">");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"                        <label for=\"{p.CamelName}\" class=\"form-label\">{label}</label>");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"                        <label for=\"{p.CamelName}\" class=\"form-label\">{p.Name}{requiredMark}</label>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"                        <{componentName} id=\"{p.CamelName}\" class=\"form-control\" @bind-Value=\"Model.{p.Name}\" />");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"                        <ValidationMessage For=\"() => Model.{p.Name}\" class=\"text-danger small\" />");
                 sb.Append("                    </div>");
@@ -186,7 +195,9 @@ internal sealed class TemplateRenderer
         var sb = new StringBuilder();
         for (var i = 0; i < entity.Properties.Count; i++)
         {
-            sb.Append(CultureInfo.InvariantCulture, $"                    <th scope=\"col\">{entity.Properties[i].Name}</th>");
+            var p = entity.Properties[i];
+            var alignClass = p.IsNumeric ? " class=\"text-end\"" : string.Empty;
+            sb.Append(CultureInfo.InvariantCulture, $"                    <th scope=\"col\"{alignClass}>{p.Name}</th>");
             if (i < entity.Properties.Count - 1) sb.AppendLine();
         }
         return sb.ToString();
@@ -199,10 +210,32 @@ internal sealed class TemplateRenderer
         for (var i = 0; i < entity.Properties.Count; i++)
         {
             var p = entity.Properties[i];
-            var formatted = p.IsDateTime
-                ? $"@item.{p.Name}.ToString(\"yyyy-MM-dd\")"
-                : $"@item.{p.Name}";
-            sb.Append(CultureInfo.InvariantCulture, $"                        <td>{formatted}</td>");
+            string cell;
+            if (p.IsBool)
+            {
+                cell = $"<td>@(item.{p.Name} ? \"Sí\" : \"No\")</td>";
+            }
+            else if (p.IsDateTime)
+            {
+                cell = $"<td class=\"text-nowrap\">@item.{p.Name}.ToString(\"yyyy-MM-dd\")</td>";
+            }
+            else if (p.IsNumeric)
+            {
+                cell = $"<td class=\"text-end font-monospace\">@item.{p.Name}</td>";
+            }
+            else if (p.IsString && p.Name.Equals("Email", StringComparison.OrdinalIgnoreCase))
+            {
+                cell = $"<td><a href=\"mailto:@item.{p.Name}\" class=\"text-decoration-none\">@item.{p.Name}</a></td>";
+            }
+            else if (p.IsString && (p.Name.Contains("Phone", StringComparison.OrdinalIgnoreCase) || p.Name.Equals("Mobile", StringComparison.OrdinalIgnoreCase)))
+            {
+                cell = $"<td><a href=\"tel:@item.{p.Name}\" class=\"text-decoration-none\">@item.{p.Name}</a></td>";
+            }
+            else
+            {
+                cell = $"<td>@item.{p.Name}</td>";
+            }
+            sb.Append("                        ").Append(cell);
             if (i < entity.Properties.Count - 1) sb.AppendLine();
         }
         return sb.ToString();
@@ -223,7 +256,7 @@ internal sealed class TemplateRenderer
         for (var i = 0; i < filterable.Length; i++)
         {
             var p = filterable[i];
-            sb.AppendLine(CultureInfo.InvariantCulture, $"            <div class=\"col-md-4\">");
+            sb.AppendLine("            <div class=\"col-md-4\">");
             sb.AppendLine(CultureInfo.InvariantCulture, $"                <label for=\"filter_{p.CamelName}\" class=\"form-label small text-muted\">{p.Name}</label>");
             sb.AppendLine(CultureInfo.InvariantCulture, $"                <input id=\"filter_{p.CamelName}\" type=\"text\" class=\"form-control form-control-sm\" @bind=\"filter_{p.CamelName}\" @bind:event=\"oninput\" placeholder=\"Buscar por {p.Name.ToLowerInvariant()}...\" />");
             sb.Append("            </div>");

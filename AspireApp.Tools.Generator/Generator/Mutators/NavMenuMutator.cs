@@ -33,7 +33,7 @@ internal sealed class NavMenuMutator(string targetPath) : IFileMutator
         var sb = new StringBuilder();
         sb.Append("        <div class=\"nav-item px-3\">").Append(newline);
         sb.Append(CultureInfo.InvariantCulture, $"            <NavLink class=\"nav-link\" href=\"{entity.Lower}\">").Append(newline);
-        sb.Append(CultureInfo.InvariantCulture, $"                <span class=\"bi bi-list-nested\" aria-hidden=\"true\"></span> {entity.Plural}").Append(newline);
+        sb.Append(CultureInfo.InvariantCulture, $"                <span class=\"bi bi-{entity.Icon}\" aria-hidden=\"true\"></span> {entity.Plural}").Append(newline);
         sb.Append("            </NavLink>").Append(newline);
         sb.Append("        </div>");
         return sb.ToString();

@@ -28,6 +28,7 @@ public partial class {{ENTITY}}Index : ComponentBase
         {
             all = [.. result.Value];
             ApplyFilter();
+            errorMessage = string.Empty;
         }
         else
         {

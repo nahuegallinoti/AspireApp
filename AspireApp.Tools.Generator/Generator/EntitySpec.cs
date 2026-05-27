@@ -6,13 +6,21 @@ internal sealed record EntitySpec(
     IReadOnlyList<PropertySpec> Properties,
     bool GenerateBlazorPage,
     bool RegisterInNavMenu,
-    bool RequireAuth)
+    bool RequireAuth,
+    string? IconOverride = null,
+    string? AccentOverride = null)
 {
     public string Lower => Name.ToLowerInvariant();
     public string Camel => char.ToLowerInvariant(Name[0]) + Name[1..];
     public string Plural => SimplePluralize(Name);
     public string PluralLower => Plural.ToLowerInvariant();
     public string PluralCamel => char.ToLowerInvariant(Plural[0]) + Plural[1..];
+
+    /// <summary>Bootstrap Icons class name (without the leading "bi-") for this entity.</summary>
+    public string Icon => IconOverride ?? IconPicker.PickFor(Name);
+
+    /// <summary>Bootstrap theme accent (primary, success, info, warning, danger).</summary>
+    public string Accent => AccentOverride ?? AccentPicker.PickFor(Name);
 
     private static string SimplePluralize(string singular)
     {
