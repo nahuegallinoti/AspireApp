@@ -17,12 +17,17 @@ public class ExternalAuthController(IExternalAuthService externalAuthService) : 
     /// </summary>
     [HttpPost("{provider}")]
     [ProducesResponseType(typeof(AuthenticationResult), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Login(string provider, [FromBody] IdTokenPayload payload, CancellationToken ct)
+    public async Task<IActionResult> Login(string provider, [FromBody] ExternalProviderPayload payload, CancellationToken ct)
     {
-        var request = new ExternalLoginRequest { Provider = provider, IdToken = payload?.IdToken ?? string.Empty };
+        var request = new ExternalLoginRequest
+        {
+            Provider = provider,
+            IdToken = payload?.IdToken,
+            AccessToken = payload?.AccessToken
+        };
         var result = await externalAuthService.LoginAsync(request, HttpContext.GetClientIp(), ct);
         return result.ToActionResult(this);
     }
 
-    public sealed record IdTokenPayload(string IdToken);
+    public sealed record ExternalProviderPayload(string? IdToken, string? AccessToken);
 }

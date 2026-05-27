@@ -24,14 +24,18 @@ internal sealed class ExternalAuthService(
 
     public async Task<Result<AuthenticationResult>> LoginAsync(ExternalLoginRequest request, string? ip, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(request.Provider) || string.IsNullOrWhiteSpace(request.IdToken))
-            return Result.Failure<AuthenticationResult>("Provider and IdToken are required.");
+        if (string.IsNullOrWhiteSpace(request.Provider))
+            return Result.Failure<AuthenticationResult>("Provider is required.");
+
+        if (string.IsNullOrWhiteSpace(request.IdToken) && string.IsNullOrWhiteSpace(request.AccessToken))
+            return Result.Failure<AuthenticationResult>("Either IdToken or AccessToken is required.");
 
         var validator = validators.FirstOrDefault(v => string.Equals(v.Provider, request.Provider, StringComparison.OrdinalIgnoreCase));
         if (validator is null)
             return Result.Failure<AuthenticationResult>($"External provider '{request.Provider}' is not configured.", System.Net.HttpStatusCode.BadRequest);
 
-        var identityResult = await validator.ValidateAsync(request.IdToken, ct);
+        var identityResult = await ValidateExternalIdentityAsync(validator, request, ct);
+
         if (identityResult.IsFailure)
             return Result.Failure<AuthenticationResult>(identityResult.Errors, identityResult.HttpStatusCode);
 
@@ -83,6 +87,41 @@ internal sealed class ExternalAuthService(
 
         logger.LogInformation("External login for {Email} via {Provider}.", identity.Email, identity.Provider);
         return new AuthenticationResult(access.Token, refresh.Token, access.ExpiresUtc, refresh.ExpiresUtc);
+    }
+
+    private async Task<Result<ExternalIdentity>> ValidateExternalIdentityAsync(
+        IExternalIdentityValidator validator,
+        ExternalLoginRequest request,
+        CancellationToken ct)
+    {
+        var hasIdToken = !string.IsNullOrWhiteSpace(request.IdToken);
+        var hasAccessToken = !string.IsNullOrWhiteSpace(request.AccessToken);
+
+        if (hasIdToken)
+        {
+            var idResult = await validator.ValidateIdTokenAsync(request.IdToken!, ct);
+            if (idResult.Success)
+                return idResult;
+
+            if (hasAccessToken)
+            {
+                logger.LogWarning(
+                    "id_token validation failed for {Provider} ({Errors}); retrying with access_token.",
+                    request.Provider,
+                    string.Join("; ", idResult.Errors));
+
+                return await validator.ValidateAccessTokenAsync(request.AccessToken!, ct);
+            }
+
+            return idResult;
+        }
+
+        if (hasAccessToken)
+            return await validator.ValidateAccessTokenAsync(request.AccessToken!, ct);
+
+        return Result.Failure<ExternalIdentity>(
+            "Either IdToken or AccessToken is required.",
+            System.Net.HttpStatusCode.BadRequest);
     }
 
     private async Task<UserEntity> CreateUserFromExternalAsync(ExternalIdentity identity, CancellationToken ct)

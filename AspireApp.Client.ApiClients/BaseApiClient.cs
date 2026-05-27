@@ -65,21 +65,24 @@ public abstract class BaseApiClient(IHttpClientFactory httpClientFactory, string
 
     private static async Task<ImmutableArray<string>> ReadErrorAsync(HttpResponseMessage response, CancellationToken ct)
     {
+        var content = await response.Content.ReadAsStringAsync(ct);
+
+        if (!string.IsNullOrWhiteSpace(content))
+        {
+            try
+            {
+                var problem = JsonSerializer.Deserialize<ProblemDetails>(content, ProblemJson);
+                if (!string.IsNullOrEmpty(problem?.Detail))
+                    return [problem.Detail];
+            }
+            catch (JsonException) { /* fall through */ }
+
+            return [content];
+        }
+
         if (response.StatusCode is HttpStatusCode.Unauthorized)
             return ["Invalid credentials."];
 
-        var content = await response.Content.ReadAsStringAsync(ct);
-        if (string.IsNullOrWhiteSpace(content))
-            return [$"HTTP {(int)response.StatusCode} {response.ReasonPhrase}"];
-
-        try
-        {
-            var problem = JsonSerializer.Deserialize<ProblemDetails>(content, ProblemJson);
-            if (!string.IsNullOrEmpty(problem?.Detail))
-                return [problem.Detail];
-        }
-        catch (JsonException) { /* fall through */ }
-
-        return [content];
+        return [$"HTTP {(int)response.StatusCode} {response.ReasonPhrase}"];
     }
 }

@@ -4,6 +4,7 @@ using AspireApp.Application.Models.Users;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AspireApp.Client.Authentication;
@@ -49,10 +50,20 @@ public static class AuthExtensions
         {
             authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
             {
+                options.SignInScheme = AuthClaimTypes.CookieScheme;
                 options.ClientId = googleOpts.ClientId!;
                 options.ClientSecret = googleOpts.ClientSecret!;
                 options.CallbackPath = "/signin-google";
                 options.SaveTokens = true;
+                options.Scope.Clear();
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.Scope.Add("email");
+                options.Events.OnCreatingTicket = context =>
+                {
+                    GoogleAuthTokenResolver.PersistIdTokenFromOAuthResponse(context);
+                    return Task.CompletedTask;
+                };
             });
         }
 

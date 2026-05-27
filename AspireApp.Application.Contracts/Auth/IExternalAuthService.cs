@@ -16,7 +16,9 @@ public interface IExternalIdentityValidator
 {
     string Provider { get; }
 
-    Task<Result<ExternalIdentity>> ValidateAsync(string idToken, CancellationToken ct);
+    Task<Result<ExternalIdentity>> ValidateIdTokenAsync(string idToken, CancellationToken ct);
+
+    Task<Result<ExternalIdentity>> ValidateAccessTokenAsync(string accessToken, CancellationToken ct);
 }
 
 public sealed record ExternalIdentity(

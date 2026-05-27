@@ -10,7 +10,10 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21185",
-        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22240"
+        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22240",
+        "GOOGLE_CLIENT_ID": "REEMPLAZAR_GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET": "REEMPLAZAR_GOOGLE_CLIENT_SECRET",
+        "SSO_GOOGLE_ENABLED": "true"
       }
     },
     "http": {
@@ -22,7 +25,10 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19157",
-        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20155"
+        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20155",
+        "GOOGLE_CLIENT_ID": "REEMPLAZAR_GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET": "REEMPLAZAR_GOOGLE_CLIENT_SECRET",
+        "SSO_GOOGLE_ENABLED": "true"
       }
     }
   }

@@ -116,15 +116,11 @@ public static class AuthEndpoints
         IAuthSessionStore sessionStore,
         CancellationToken ct)
     {
-        var authenticate = await httpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-        if (!authenticate.Succeeded)
-            return Results.Redirect(BuildLoginUrl(returnUrl, errors: ["Google authentication failed."]));
+        var (idToken, accessToken) = await GoogleAuthTokenResolver.ResolveAsync(httpContext);
+        if (string.IsNullOrEmpty(idToken) && string.IsNullOrEmpty(accessToken))
+            return Results.Redirect(BuildLoginUrl(returnUrl, errors: ["Google did not return authentication tokens."]));
 
-        var idToken = authenticate.Properties?.GetTokenValue("id_token");
-        if (string.IsNullOrEmpty(idToken))
-            return Results.Redirect(BuildLoginUrl(returnUrl, errors: ["Google did not provide an id_token."]));
-
-        var result = await authApi.LoginWithGoogleAsync(idToken, ct);
+        var result = await authApi.LoginWithGoogleAsync(idToken, accessToken, ct);
         if (result.IsFailure)
             return Results.Redirect(BuildLoginUrl(returnUrl, errors: result.Errors));
 
@@ -132,7 +128,7 @@ public static class AuthEndpoints
         if (user is null)
             return Results.Redirect(BuildLoginUrl(returnUrl, errors: ["Could not load user profile."]));
 
-        await httpContext.SignOutAsync(GoogleDefaults.AuthenticationScheme);
+        await httpContext.SignOutAsync(AuthClaimTypes.CookieScheme);
         await EstablishSessionAsync(httpContext, sessionStore, user, result.Value, ct);
 
         return Results.LocalRedirect(SafeReturnUrl(returnUrl));

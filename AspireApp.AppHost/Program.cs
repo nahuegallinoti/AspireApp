@@ -12,14 +12,19 @@ IResourceBuilder<IResourceWithConnectionString> messaging = provider.Equals("Kaf
         .WithManagementPlugin()
         .WithDataVolume();
 
-// Auth / SSO secrets — provided via user-secrets in dev, env vars in prod.
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "ReplaceThisDevKeyWithAtLeast32CharactersLong!!";
-var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "AspireApp";
-var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "AspireApp.Clients";
+// JWT: env vars JWT_KEY, JWT_ISSUER, JWT_AUDIENCE (o appsettings / user-secrets)
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
+    ?? builder.Configuration["Jwt:Key"]
+    ?? "ReplaceThisDevKeyWithAtLeast32CharactersLong!!";
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+    ?? builder.Configuration["Jwt:Issuer"]
+    ?? "AspireApp";
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+    ?? builder.Configuration["Jwt:Audience"]
+    ?? "AspireApp.Clients";
 
-var googleEnabled = builder.Configuration["Sso:Google:Enabled"] ?? "false";
-var googleClientId = builder.Configuration["Sso:Google:ClientId"] ?? string.Empty;
-var googleClientSecret = builder.Configuration["Sso:Google:ClientSecret"] ?? string.Empty;
+// Google SSO: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SSO_GOOGLE_ENABLED (ver SsoConfiguration)
+var google = SsoConfiguration.ReadGoogle(builder.Configuration);
 
 var api = builder.AddProject<Projects.AspireApp_Api>("api")
     .WithReference(redis).WaitFor(redis)
@@ -28,16 +33,16 @@ var api = builder.AddProject<Projects.AspireApp_Api>("api")
     .WithEnvironment("Jwt__Key", jwtKey)
     .WithEnvironment("Jwt__Issuer", jwtIssuer)
     .WithEnvironment("Jwt__Audience", jwtAudience)
-    .WithEnvironment("Sso__Google__Enabled", googleEnabled)
-    .WithEnvironment("Sso__Google__ClientId", googleClientId)
-    .WithEnvironment("Sso__Google__ClientSecret", googleClientSecret);
+    .WithEnvironment("Sso__Google__Enabled", google.Enabled.ToString().ToLowerInvariant())
+    .WithEnvironment("Sso__Google__ClientId", google.ClientId)
+    .WithEnvironment("Sso__Google__ClientSecret", google.ClientSecret);
 
 builder.AddProject<Projects.AspireApp_Client>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(redis).WaitFor(redis)
     .WithReference(api).WaitFor(api)
-    .WithEnvironment("Sso__Google__Enabled", googleEnabled)
-    .WithEnvironment("Sso__Google__ClientId", googleClientId)
-    .WithEnvironment("Sso__Google__ClientSecret", googleClientSecret);
+    .WithEnvironment("Sso__Google__Enabled", google.Enabled.ToString().ToLowerInvariant())
+    .WithEnvironment("Sso__Google__ClientId", google.ClientId)
+    .WithEnvironment("Sso__Google__ClientSecret", google.ClientSecret);
 
 builder.Build().Run();

@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoleService, RoleService>();
 
+        services.AddHttpClient(nameof(GoogleIdentityValidator));
         services.AddSingleton<IExternalIdentityValidator, GoogleIdentityValidator>();
 
         services.AddScoped<IProductService, ProductService>();

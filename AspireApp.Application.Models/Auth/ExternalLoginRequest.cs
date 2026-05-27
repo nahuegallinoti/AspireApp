@@ -7,9 +7,9 @@ public sealed class ExternalLoginRequest
     [Required]
     public string Provider { get; set; } = string.Empty;
 
-    /// <summary>
-    /// The id_token issued by the SSO provider (e.g. Google) - must be validated server-side.
-    /// </summary>
-    [Required]
-    public string IdToken { get; set; } = string.Empty;
+    /// <summary>OpenID Connect id_token (preferred).</summary>
+    public string? IdToken { get; set; }
+
+    /// <summary>OAuth access_token fallback when id_token is not issued.</summary>
+    public string? AccessToken { get; set; }
 }
