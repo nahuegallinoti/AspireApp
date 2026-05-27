@@ -7,6 +7,7 @@ internal sealed record EntitySpec(
     bool GenerateBlazorPage,
     bool RegisterInNavMenu,
     bool RequireAuth,
+    bool UseEventBus,
     string? IconOverride = null,
     string? AccentOverride = null)
 {

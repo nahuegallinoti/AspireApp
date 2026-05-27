@@ -62,6 +62,9 @@ internal sealed class TemplateRenderer
         ["PROPS_RESET_LOGIC"] = BuildResetLogic(entity),
         ["AUTHORIZE_ATTR"] = entity.RequireAuth ? "[Authorize]\n" : string.Empty,
         ["AUTHORIZE_USING"] = entity.RequireAuth ? "using Microsoft.AspNetCore.Authorization;\n" : string.Empty,
+        ["EVENT_BUS_USING"] = entity.UseEventBus ? "using AspireApp.Application.Contracts.EventBus;\n" : string.Empty,
+        ["EVENT_BUS_CTOR_PARAM"] = entity.UseEventBus ? ", IMessageBus messageBus" : string.Empty,
+        ["EVENT_BUS_BASE_ARG"] = entity.UseEventBus ? ", messageBus" : string.Empty,
         ["DISPLAY_NAME_EXPR"] = BuildDisplayNameExpression(entity),
     };
 

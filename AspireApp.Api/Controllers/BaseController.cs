@@ -11,7 +11,7 @@ namespace AspireApp.Api.Controllers;
 [Produces("application/json")]
 public abstract class BaseController<TModel, TID, TService>(
     TService service,
-    IMessageBus messageBus,
+    IMessageBus? messageBus,
     ILogger logger) : ControllerBase
     where TModel : BaseModel<TID>
     where TID : struct
@@ -19,7 +19,16 @@ public abstract class BaseController<TModel, TID, TService>(
 {
     protected TService Service { get; } = service;
     protected ILogger Logger { get; } = logger;
-    private readonly IMessageBus _messageBus = messageBus;
+    private readonly IMessageBus? _messageBus = messageBus;
+
+    /// <summary>
+    /// Overload for entities that don't publish to the event bus.
+    /// Forwards to the primary constructor with a <c>null</c> message bus.
+    /// </summary>
+    protected BaseController(TService service, ILogger logger)
+        : this(service, messageBus: null, logger)
+    {
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken ct) =>
@@ -68,6 +77,9 @@ public abstract class BaseController<TModel, TID, TService>(
 
     private async Task PublishCreatedEventAsync(TModel model, CancellationToken ct)
     {
+        if (_messageBus is null)
+            return;
+
         var topic = typeof(TModel).Name.ToLowerInvariant();
         var publishResult = await _messageBus.PublishAsync(
             new EventMessage { Message = $"{typeof(TModel).Name} {model.Id} created" },

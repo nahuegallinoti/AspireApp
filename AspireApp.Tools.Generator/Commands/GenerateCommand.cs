@@ -42,6 +42,10 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         [Description("Do not decorate the controller with the Authorize attribute.")]
         public bool NoAuth { get; init; }
 
+        [CommandOption("--event-bus")]
+        [Description("Publish an event to the message bus when a new entity is created. In interactive mode you are asked.")]
+        public bool EventBus { get; init; }
+
         [CommandOption("--dry-run")]
         [Description("Plan and preview without writing anything to disk.")]
         public bool DryRun { get; init; }
@@ -368,6 +372,16 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
 
         var requireAuth = !settings.NoAuth;
 
+        bool useEventBus;
+        if (settings.EventBus)
+            useEventBus = true;
+        else if (interactive)
+            useEventBus = AnsiConsole.Confirm(
+                "[bold mediumpurple1]❯[/] ¿Publicar un evento al [bold]event bus[/] cuando se cree una nueva instancia?",
+                defaultValue: false);
+        else
+            useEventBus = false;
+
         var icon = settings.Icon?.Trim();
         if (!string.IsNullOrEmpty(icon) && icon.StartsWith("bi-", StringComparison.OrdinalIgnoreCase))
             icon = icon[3..];
@@ -383,6 +397,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
             generateBlazor,
             registerNav,
             requireAuth,
+            useEventBus,
             string.IsNullOrEmpty(icon) ? null : icon,
             string.IsNullOrEmpty(accent) ? null : accent);
     }
@@ -410,6 +425,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         headerGrid.AddRow("[grey]▣ Blazor UI[/]", entity.GenerateBlazorPage ? "[green]✔ sí[/]" : "[grey]✘ no[/]");
         headerGrid.AddRow("[grey]▸ NavMenu[/]", entity.GenerateBlazorPage && entity.RegisterInNavMenu ? "[green]✔ sí[/]" : "[grey]✘ no[/]");
         headerGrid.AddRow("[grey]★ Authorize[/]", entity.RequireAuth ? "[green]✔ sí[/]" : "[grey]✘ no[/]");
+        headerGrid.AddRow("[grey]✉ Event bus[/]", entity.UseEventBus ? "[green]✔ sí (publica al crear)[/]" : "[grey]✘ no[/]");
 
         AnsiConsole.Write(new Panel(headerGrid)
         {

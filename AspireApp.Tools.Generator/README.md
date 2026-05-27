@@ -20,8 +20,11 @@ dotnet run --project AspireApp.Tools.Generator -- generate Order `
   --prop "Total:decimal:required" `
   --prop "Notes:string" `
   --prop "PlacedAt:DateTime:required" `
+  --event-bus `
   --yes
 ```
+
+> En modo interactivo se pregunta si la entidad debe publicar un evento al event bus cuando se cree una nueva instancia. En no-interactivo, agregá `--event-bus` para activarlo (por defecto está apagado).
 
 ### Opciones
 
@@ -35,6 +38,7 @@ dotnet run --project AspireApp.Tools.Generator -- generate Order `
 | `--no-ui`             | No generar las pantallas Blazor (`Index` + `Edit`). En modo interactivo se pregunta.                   |
 | `--no-nav`            | No agregar el `NavLink` a `NavMenu.razor`.                                                             |
 | `--no-auth`           | No decorar el controller con `[Authorize]`.                                                            |
+| `--event-bus`         | Inyectar `IMessageBus` y publicar un evento al crear una nueva instancia. En interactivo se pregunta.  |
 | `--dry-run`           | Mostrar el plan sin tocar nada en disco.                                                               |
 | `-y, --yes`           | Ejecutar sin pedir confirmación.                                                                       |
 | `--root <PATH>`       | Path explícito a la raíz de la solución (auto-detectado por defecto).                                  |
@@ -149,5 +153,8 @@ Los templates están en [`Templates/`](./Templates/) como `*.scriban` (texto pla
 | `{{PROPS_FILTER_FIELDS}}`    | input-groups con icono `bi-search`             |
 | `{{AUTHORIZE_ATTR}}`         | `[Authorize]\n` o vacío                        |
 | `{{AUTHORIZE_USING}}`        | El using correspondiente                       |
+| `{{EVENT_BUS_USING}}`        | `using AspireApp.Application.Contracts.EventBus;` o vacío |
+| `{{EVENT_BUS_CTOR_PARAM}}`   | `, IMessageBus messageBus` o vacío             |
+| `{{EVENT_BUS_BASE_ARG}}`     | `, messageBus` o vacío                         |
 
 Los archivos compartidos los manejan los mutadores en [`Generator/Mutators/`](./Generator/Mutators/), que detectan duplicados antes de insertar líneas.
