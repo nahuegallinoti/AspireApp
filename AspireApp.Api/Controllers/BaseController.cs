@@ -1,3 +1,4 @@
+using AspireApp.Api.Infrastructure;
 using AspireApp.Application.Contracts.Base;
 using AspireApp.Application.Contracts.EventBus;
 using AspireApp.Application.Models;
@@ -21,34 +22,24 @@ public abstract class BaseController<TModel, TID, TService>(
     private readonly IMessageBus _messageBus = messageBus;
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken ct)
-    {
-        var result = await Service.GetAllAsync(ct);
-        return Ok(result);
-    }
+    public async Task<IActionResult> GetAll(CancellationToken ct) =>
+        Ok(await Service.GetAllAsync(ct));
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(TID id, CancellationToken ct)
     {
         var model = await Service.GetByIdAsync(id, ct);
-        return model is not null ? 
-            Ok(model) : 
-            NotFound();
+        return model is not null ? Ok(model) : NotFound();
     }
 
     [HttpPost]
     public virtual async Task<IActionResult> Add([FromBody] TModel model, CancellationToken ct)
     {
         var result = await Service.AddAsync(model, ct);
-
         if (!result.Success)
-            return Problem(detail: string.Join("; ", result.Errors), statusCode: (int)result.HttpStatusCode);
+            return result.ToActionResult(this);
 
-        await _messageBus.PublishAsync(
-            new EventMessage { Message = $"{typeof(TModel).Name} {result.Value.Id} created" },
-            topic: typeof(TModel).Name.ToLowerInvariant(),
-            ct);
-
+        await PublishCreatedEventAsync(result.Value, ct);
         return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
     }
 
@@ -60,7 +51,6 @@ public abstract class BaseController<TModel, TID, TService>(
 
         Service.Update(model);
         await Service.SaveChangesAsync(ct);
-
         return NoContent();
     }
 
@@ -68,13 +58,24 @@ public abstract class BaseController<TModel, TID, TService>(
     public async Task<IActionResult> Delete(TID id, CancellationToken ct)
     {
         var model = await Service.GetByIdAsync(id, ct);
-
-        if (model is null) 
+        if (model is null)
             return NotFound();
 
         Service.Delete(model);
         await Service.SaveChangesAsync(ct);
-
         return NoContent();
+    }
+
+    private async Task PublishCreatedEventAsync(TModel model, CancellationToken ct)
+    {
+        var topic = typeof(TModel).Name.ToLowerInvariant();
+        var publishResult = await _messageBus.PublishAsync(
+            new EventMessage { Message = $"{typeof(TModel).Name} {model.Id} created" },
+            topic,
+            ct);
+
+        if (!publishResult.Success)
+            Logger.LogWarning("Failed to publish '{Topic}' event: {Errors}",
+                topic, string.Join("; ", publishResult.Errors));
     }
 }

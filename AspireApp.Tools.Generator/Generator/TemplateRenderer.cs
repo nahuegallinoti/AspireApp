@@ -110,8 +110,14 @@ internal sealed class TemplateRenderer
             var p = entity.Properties[i];
             if (p.Required)
                 sb.AppendLine("    [Required(ErrorMessage = \"Field {0} is required.\")]");
+            if (p.IsString)
+                sb.AppendLine(CultureInfo.InvariantCulture, $"    [MaxLength({(p.Required ? 256 : 2000)})]");
             sb.Append(CultureInfo.InvariantCulture, $"    public {p.Type} {p.Name} {{ get; set; }}{p.DefaultSuffix}");
-            if (i < entity.Properties.Count - 1) sb.AppendLine();
+            if (i < entity.Properties.Count - 1)
+            {
+                sb.AppendLine();
+                sb.AppendLine();
+            }
         }
         return sb.ToString();
     }

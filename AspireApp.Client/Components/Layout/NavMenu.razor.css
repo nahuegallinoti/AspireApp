@@ -24,7 +24,7 @@
     font-size: 1.1rem;
 }
 
-/* Bootstrap Icons CDN — solo espaciado; sin background-image duplicado */
+/* Bootstrap Icons (loaded via CDN in App.razor) — spacing only. */
 .nav-item ::deep .bi {
     margin-right: 0.75rem;
     font-size: 1.1rem;

@@ -1,20 +1,80 @@
-﻿@page "/"
-@inject IJSRuntime JS
-@rendermode InteractiveServer
+@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>AspireApp</PageTitle>
 
-<h3>Home</h3>
+<div class="py-3">
+    <h1 class="display-5 fw-bold mb-1">Welcome to AspireApp</h1>
+    <p class="lead text-muted">
+        A .NET 10 + Aspire boilerplate with Blazor Server, Clean Architecture,
+        Railway Oriented Programming, hybrid caching and a RabbitMQ &harr; Kafka message bus.
+    </p>
 
-<h3>Ejemplo de TypeScript con Blazor</h3>
-<button class="btn btn-primary" @onclick="MostrarAlerta">Mostrar alerta</button>
+    <AuthorizeView>
+        <Authorized>
+            <p>You are signed in as <strong>@context.User.Identity?.Name</strong>.</p>
+        </Authorized>
+        <NotAuthorized>
+            <p>
+                <a class="btn btn-primary" href="/login">Sign in</a>
+                <a class="btn btn-outline-secondary ms-2" href="/register">Create account</a>
+            </p>
+        </NotAuthorized>
+    </AuthorizeView>
 
+    <hr class="my-4" />
 
-@code {
-
-    private async Task MostrarAlerta()
-    {
-        await JS.InvokeVoidAsync("showAlert", "¡Hola desde Blazor y TypeScript!");
-    }
-
-}
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-3">
+            <a href="/product" class="card h-100 text-decoration-none text-reset shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-box-seam fs-4 text-primary"></i>
+                        <h3 class="h5 mb-0">Products</h3>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        CRUD demo backed by EF Core with cached reads and event publishing on create.
+                    </p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="/show" class="card h-100 text-decoration-none text-reset shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-tv fs-4 text-primary"></i>
+                        <h3 class="h5 mb-0">Shows</h3>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        A second demo entity sharing the BaseService / BaseController generic pipeline.
+                    </p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="/eventbus" class="card h-100 text-decoration-none text-reset shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-broadcast fs-4 text-primary"></i>
+                        <h3 class="h5 mb-0">Event Bus</h3>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        Publish messages through the configured broker (RabbitMQ or Kafka).
+                    </p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="/profile" class="card h-100 text-decoration-none text-reset shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-person-circle fs-4 text-primary"></i>
+                        <h3 class="h5 mb-0">Profile</h3>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        View your account, change your password and review session metadata.
+                    </p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

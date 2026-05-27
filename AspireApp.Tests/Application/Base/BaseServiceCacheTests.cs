@@ -17,9 +17,12 @@ namespace AspireApp.Tests.Application.Base;
 /// </summary>
 public class BaseServiceCacheTests
 {
-    private sealed class Sut(BaseService<ProductEntity, ProductModel, long> service, IProductDA da, HybridCache cache)
+    private sealed class TestProductService(IProductDA da, ProductMapper mapper, HybridCache cache)
+        : BaseService<ProductEntity, ProductModel, long>(da, mapper, cache);
+
+    private sealed class Sut(TestProductService service, IProductDA da, HybridCache cache)
     {
-        public BaseService<ProductEntity, ProductModel, long> Service { get; } = service;
+        public TestProductService Service { get; } = service;
         public IProductDA Da { get; } = da;
         public HybridCache Cache { get; } = cache;
     }
@@ -39,7 +42,7 @@ public class BaseServiceCacheTests
         });
         var hybridCache = services.BuildServiceProvider().GetRequiredService<HybridCache>();
 
-        var service = new BaseService<ProductEntity, ProductModel, long>(da, new ProductMapper(), hybridCache);
+        var service = new TestProductService(da, new ProductMapper(), hybridCache);
         return new Sut(service, da, hybridCache);
     }
 

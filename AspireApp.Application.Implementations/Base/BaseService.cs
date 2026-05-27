@@ -8,7 +8,7 @@ using Microsoft.Extensions.Caching.Hybrid;
 
 namespace AspireApp.Application.Implementations.Base;
 
-public class BaseService<TEntity, TModel, TID>(
+public abstract class BaseService<TEntity, TModel, TID>(
     IBaseDA<TEntity, TID> baseDA,
     BaseMapper<TModel, TEntity> mapper,
     HybridCache hybridCache) : IBaseService<TModel, TID>
@@ -17,45 +17,57 @@ public class BaseService<TEntity, TModel, TID>(
     where TID : struct
 {
     private static readonly HybridCacheEntryOptions CacheOptions = new() { Expiration = TimeSpan.FromMinutes(5) };
-    private static readonly string ModelName = typeof(TModel).Name;
+    private static readonly string CacheTag = typeof(TModel).Name;
 
-    public Task SaveChangesAsync(CancellationToken ct) => baseDA.SaveChangesAsync(ct);
+    private bool _pendingInvalidation;
 
-    public Task<Result<TModel>> AddAsync(TModel model, CancellationToken ct)
+    public async Task SaveChangesAsync(CancellationToken ct)
     {
-        TEntity entity = mapper.ToEntity(model);
-
-        return baseDA.AddAsync(entity, ct)
-            .Bind(async _ =>
-            {
-                await baseDA.SaveChangesAsync(ct);
-                model.Id = entity.Id;
-                await hybridCache.RemoveByTagAsync(ModelName, ct);
-                return Result.Success(model);
-            });
+        await baseDA.SaveChangesAsync(ct);
+        if (_pendingInvalidation)
+        {
+            await hybridCache.RemoveByTagAsync(CacheTag, ct);
+            _pendingInvalidation = false;
+        }
     }
 
-    public void Delete(TModel model) => baseDA.Delete(mapper.ToEntity(model));
+    public async Task<Result<TModel>> AddAsync(TModel model, CancellationToken ct)
+    {
+        var entity = mapper.ToEntity(model);
+        await baseDA.AddAsync(entity, ct);
+        await baseDA.SaveChangesAsync(ct);
+        model.Id = entity.Id;
+        await hybridCache.RemoveByTagAsync(CacheTag, ct);
+        return Result.Success(model);
+    }
+
+    public void Delete(TModel model)
+    {
+        baseDA.Delete(mapper.ToEntity(model));
+        _pendingInvalidation = true;
+    }
 
     public async Task<IEnumerable<TModel>> GetAllAsync(CancellationToken ct)
     {
-        IEnumerable<TEntity> entities = await baseDA.GetAllAsync(ct);
+        var entities = await baseDA.GetAllAsync(ct);
         return mapper.ToModelList(entities);
     }
 
     public async Task<TModel?> GetByIdAsync(TID id, CancellationToken ct)
     {
-        string cacheKey = $"{ModelName}:{id}";
-
-        TEntity? entity = await hybridCache.GetOrCreateAsync(
-            cacheKey,
+        var entity = await hybridCache.GetOrCreateAsync(
+            $"{CacheTag}:{id}",
             async token => await baseDA.GetByIdAsync(id, token),
             options: CacheOptions,
-            tags: [ModelName],
+            tags: [CacheTag],
             cancellationToken: ct);
 
         return entity is null ? null : mapper.ToModel(entity);
     }
 
-    public void Update(TModel model) => baseDA.Update(mapper.ToEntity(model));
+    public void Update(TModel model)
+    {
+        baseDA.Update(mapper.ToEntity(model));
+        _pendingInvalidation = true;
+    }
 }

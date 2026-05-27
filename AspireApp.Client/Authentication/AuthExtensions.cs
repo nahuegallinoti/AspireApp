@@ -97,6 +97,20 @@ public static class AuthExtensions
         var sid = context.Principal?.FindFirstValue(AuthClaimTypes.SessionId);
         if (string.IsNullOrEmpty(sid))
         {
+            // Google SSO signs into this cookie (with OAuth tokens, no sid yet) before
+            // /auth/google/callback exchanges them for an app session. Rejecting here would
+            // sign out and wipe id_token/access_token before the callback can read them.
+            var path = context.HttpContext.Request.Path;
+            if (path.StartsWithSegments("/auth/google/callback", StringComparison.OrdinalIgnoreCase)
+                || path.StartsWithSegments("/signin-google", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            var props = context.Properties;
+            if (props is not null
+                && (!string.IsNullOrEmpty(props.GetTokenValue("id_token"))
+                    || !string.IsNullOrEmpty(props.GetTokenValue("access_token"))))
+                return;
+
             await RejectAsync(context);
             return;
         }

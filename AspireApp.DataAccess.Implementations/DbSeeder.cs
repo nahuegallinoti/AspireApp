@@ -11,8 +11,12 @@ public sealed class DbSeeder(
     AppDbContext context,
     IPasswordHasher passwordHasher,
     IOptions<IdentityOptions> identityOptions,
+    TimeProvider timeProvider,
     ILogger<DbSeeder> logger)
 {
+    private static readonly string AdminNormalized = RoleNames.Admin.ToUpperInvariant();
+    private static readonly string UserNormalized = RoleNames.User.ToUpperInvariant();
+
     public async Task SeedAsync(CancellationToken ct = default)
     {
         await context.Database.EnsureCreatedAsync(ct);
@@ -29,6 +33,8 @@ public sealed class DbSeeder(
             .Select(r => r.NormalizedName)
             .ToListAsync(ct);
 
+        var now = timeProvider.GetUtcNow();
+
         foreach (var name in RoleNames.All)
         {
             var normalized = name.ToUpperInvariant();
@@ -42,7 +48,7 @@ public sealed class DbSeeder(
                 NormalizedName = normalized,
                 IsSystem = true,
                 Description = $"System role: {name}",
-                CreatedUtc = DateTimeOffset.UtcNow
+                CreatedUtc = now
             });
 
             logger.LogInformation("Seeded role {Role}", name);
@@ -60,6 +66,7 @@ public sealed class DbSeeder(
         if (exists)
             return;
 
+        var now = timeProvider.GetUtcNow();
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -69,7 +76,7 @@ public sealed class DbSeeder(
             Surname = seed.Surname,
             EmailConfirmed = true,
             IsActive = true,
-            CreatedUtc = DateTimeOffset.UtcNow
+            CreatedUtc = now
         };
 
         if (!string.IsNullOrEmpty(seed.Password))
@@ -80,13 +87,12 @@ public sealed class DbSeeder(
             user.PasswordIterations = iterations;
         }
 
-        var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.NormalizedName.Equals(RoleNames.Admin, StringComparison.InvariantCultureIgnoreCase), ct);
-        var userRole = await context.Roles.FirstOrDefaultAsync(r => r.NormalizedName.Equals(RoleNames.User, StringComparison.InvariantCultureIgnoreCase), ct);
+        var roles = await context.Roles
+            .Where(r => r.NormalizedName == AdminNormalized || r.NormalizedName == UserNormalized)
+            .ToListAsync(ct);
 
-        if (adminRole is not null)
-            user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = adminRole.Id });
-        if (userRole is not null)
-            user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = userRole.Id });
+        foreach (var role in roles)
+            user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = role.Id, AssignedUtc = now });
 
         context.Users.Add(user);
         logger.LogInformation("Seeded admin user {Email}", seed.Email);

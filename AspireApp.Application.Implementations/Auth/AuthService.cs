@@ -156,8 +156,6 @@ internal sealed class AuthService(
         entity.PasswordHash = hash;
         entity.PasswordSalt = salt;
         entity.PasswordIterations = iterations;
-        entity.EmailConfirmed = false;
-        entity.IsActive = true;
         entity.CreatedUtc = timeProvider.GetUtcNow();
 
         var defaultRole = await roleDA.GetByNameAsync(_identity.DefaultRole, ct);

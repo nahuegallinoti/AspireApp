@@ -3,7 +3,6 @@ using AspireApp.Application.Implementations;
 using AspireApp.Application.Implementations.EventBus;
 using AspireApp.DataAccess.Implementations;
 using AspireApp.ServiceDefaults;
-using Microsoft.Extensions.DependencyInjection;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,11 +23,15 @@ builder.AddMessageBus();
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(p => p
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials()
-        .SetIsOriginAllowed(_ => true));
+    var allowed = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyHeader().AllowAnyMethod();
+        if (allowed is { Length: > 0 })
+            policy.WithOrigins(allowed).AllowCredentials();
+        else
+            policy.SetIsOriginAllowed(_ => true); // dev fallback (no credentials)
+    });
 });
 
 builder.Services.AddControllers();

@@ -1,30 +1,41 @@
 @page "/eventbus"
+@attribute [Authorize]
 
-<h3>Publish event</h3>
+<PageTitle>Event bus</PageTitle>
 
-<EditForm Model="@Model" OnValidSubmit="SendMessage" FormName="messageForm">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<h1>Publish event</h1>
+<p class="text-muted">
+    Sends a message to the <code>demo</code> topic on the configured broker
+    (RabbitMQ routing key or Kafka topic, depending on the EventBus provider).
+</p>
 
-    <div>
-        <label>Message:</label>
-        <InputText @bind-Value="Model.Message" type="text" />
-    </div>
-
-    <button type="submit">Send</button>
-</EditForm>
-
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger mt-3 flex-column">
-        @foreach (var error in errorMessage.Split("; "))
+<div class="row">
+    <div class="col-lg-6">
+        @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div>@error</div>
+            <div class="alert alert-danger">
+                @foreach (var error in errorMessage.Split("; "))
+                {
+                    <div>@error</div>
+                }
+            </div>
         }
-    </div>
-}
 
-@if (!string.IsNullOrEmpty(responseMessage))
-{
-    <p>@responseMessage</p>
-}
+        @if (!string.IsNullOrEmpty(responseMessage))
+        {
+            <div class="alert alert-success">@responseMessage</div>
+        }
+
+        <EditForm Model="@Model" OnValidSubmit="SendMessage" FormName="messageForm" class="vstack gap-3">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div>
+                <label for="message" class="form-label">Message</label>
+                <InputText id="message" @bind-Value="Model.Message" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary align-self-start">Send</button>
+        </EditForm>
+    </div>
+</div>

@@ -33,9 +33,16 @@ else
 
                 <dt class="col-sm-4">Roles</dt>
                 <dd class="col-sm-8">
-                    @foreach (var role in _user.Roles)
+                    @if (_user.Roles.Count == 0)
                     {
-                        <span class="badge bg-secondary me-1">@role</span>
+                        <span class="text-muted">—</span>
+                    }
+                    else
+                    {
+                        @foreach (var role in _user.Roles)
+                        {
+                            <span class="badge bg-secondary me-1">@role</span>
+                        }
                     }
                 </dd>
 

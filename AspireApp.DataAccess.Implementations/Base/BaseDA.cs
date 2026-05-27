@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspireApp.DataAccess.Implementations.Base;
 
-public class BaseDA<T, TID>(AppDbContext context) : IBaseDA<T, TID>
+public abstract class BaseDA<T, TID>(AppDbContext context) : IBaseDA<T, TID>
     where T : BaseEntity<TID>
     where TID : struct
 {
-    internal readonly AppDbContext _context = context;
+    protected AppDbContext Context { get; } = context;
     private readonly DbSet<T> _dbSet = context.Set<T>();
 
     public async Task<T?> GetByIdAsync(TID id, CancellationToken ct) =>
@@ -28,5 +28,5 @@ public class BaseDA<T, TID>(AppDbContext context) : IBaseDA<T, TID>
 
     public void Delete(T entity) => _dbSet.Remove(entity);
 
-    public Task SaveChangesAsync(CancellationToken ct) => _context.SaveChangesAsync(ct);
+    public Task SaveChangesAsync(CancellationToken ct) => Context.SaveChangesAsync(ct);
 }

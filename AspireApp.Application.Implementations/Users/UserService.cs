@@ -58,6 +58,26 @@ internal sealed class UserService(
         return UserMapper.ToDto(user).Success();
     }
 
+    public async Task<Result<UserDto>> UpdateProfileAsync(Guid id, UpdateUserProfileRequest request, CancellationToken ct)
+    {
+        var validation = request.Validate();
+        if (validation.IsFailure)
+            return Result.Failure<UserDto>(validation.Errors, validation.HttpStatusCode);
+
+        var user = await userDA.GetByIdWithRolesAsync(id, ct);
+        if (user is null)
+            return Result.NotFound<UserDto>("User not found.");
+
+        user.Name = request.Name.Trim();
+        user.Surname = request.Surname.Trim();
+        user.UpdatedUtc = timeProvider.GetUtcNow();
+
+        userDA.Update(user);
+        await userDA.SaveChangesAsync(ct);
+
+        return UserMapper.ToDto(user).Success();
+    }
+
     public async Task<Result<Unit>> DeleteAsync(Guid id, CancellationToken ct)
     {
         var user = await userDA.GetByIdAsync(id, ct);

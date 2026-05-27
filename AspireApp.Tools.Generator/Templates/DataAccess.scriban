@@ -4,7 +4,4 @@ using AspireApp.Domain.Entities;
 
 namespace AspireApp.DataAccess.Implementations;
 
-public class {{ENTITY}}DA(AppDbContext context) : BaseDA<{{ENTITY}}, {{ID_TYPE}}>(context), I{{ENTITY}}DA
-{
-
-}
+public sealed class {{ENTITY}}DA(AppDbContext context) : BaseDA<{{ENTITY}}, {{ID_TYPE}}>(context), I{{ENTITY}}DA;

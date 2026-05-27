@@ -24,12 +24,20 @@ internal sealed class KafkaMessageBus(
             Value = json
         };
 
-        var deliveryResult = await producer.ProduceAsync(topic, kafkaMessage, ct);
+        try
+        {
+            var deliveryResult = await producer.ProduceAsync(topic, kafkaMessage, ct);
 
-        logger.LogInformation(
-            "Published message to Kafka topic '{Topic}' partition {Partition} offset {Offset}",
-            deliveryResult.Topic, deliveryResult.Partition.Value, deliveryResult.Offset.Value);
+            logger.LogInformation(
+                "Published message to Kafka topic '{Topic}' partition {Partition} offset {Offset}",
+                deliveryResult.Topic, deliveryResult.Partition.Value, deliveryResult.Offset.Value);
 
-        return Result.Success(json);
+            return Result.Success(json);
+        }
+        catch (ProduceException<string, string> ex)
+        {
+            logger.LogError(ex, "Failed to publish to Kafka topic '{Topic}': {Reason}", topic, ex.Error.Reason);
+            return Result.Failure<string>($"Kafka publish failed: {ex.Error.Reason}", System.Net.HttpStatusCode.BadGateway);
+        }
     }
 }

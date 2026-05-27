@@ -11,8 +11,8 @@ public sealed class UsersApiClient(IHttpClientFactory httpClientFactory)
     public Task<Result<UserDto>> GetMeAsync(CancellationToken ct) =>
         GetAsync<UserDto>("api/users/me", ct);
 
-    public Task<Result<UserDto>> UpdateMeAsync(UpdateUserRequest request, CancellationToken ct) =>
-        PutAsync<UserDto, UpdateUserRequest>("api/users/me", request, ct);
+    public Task<Result<UserDto>> UpdateMeAsync(UpdateUserProfileRequest request, CancellationToken ct) =>
+        PutAsync<UserDto, UpdateUserProfileRequest>("api/users/me", request, ct);
 
     public Task<Result<Unit>> ChangePasswordAsync(ChangePasswordRequest request, CancellationToken ct) =>
         PostAsync<Unit, ChangePasswordRequest>("api/users/me/change-password", request, ct);

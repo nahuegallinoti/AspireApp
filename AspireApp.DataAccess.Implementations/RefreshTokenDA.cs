@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspireApp.DataAccess.Implementations;
 
-public class RefreshTokenDA(AppDbContext context) : BaseDA<RefreshToken, Guid>(context), IRefreshTokenDA
+public sealed class RefreshTokenDA(AppDbContext context) : BaseDA<RefreshToken, Guid>(context), IRefreshTokenDA
 {
     public Task<RefreshToken?> GetActiveByHashAsync(string tokenHash, CancellationToken ct) =>
-        _context.RefreshTokens
+        Context.RefreshTokens
             .FirstOrDefaultAsync(rt => rt.TokenHash == tokenHash, ct);
 
     public async Task<int> RevokeAllForUserAsync(Guid userId, string reason, string? ip, CancellationToken ct)
     {
-        var active = await _context.RefreshTokens
+        var active = await Context.RefreshTokens
             .Where(rt => rt.UserId == userId && rt.RevokedUtc == null)
             .ToListAsync(ct);
 
@@ -28,21 +28,21 @@ public class RefreshTokenDA(AppDbContext context) : BaseDA<RefreshToken, Guid>(c
             token.RevokedReason = reason;
         }
 
-        await _context.SaveChangesAsync(ct);
+        await Context.SaveChangesAsync(ct);
         return active.Count;
     }
 
     public async Task<int> DeleteExpiredAsync(DateTimeOffset olderThanUtc, CancellationToken ct)
     {
-        var expired = await _context.RefreshTokens
+        var expired = await Context.RefreshTokens
             .Where(rt => rt.ExpiresUtc < olderThanUtc)
             .ToListAsync(ct);
 
         if (expired.Count == 0)
             return 0;
 
-        _context.RefreshTokens.RemoveRange(expired);
-        await _context.SaveChangesAsync(ct);
+        Context.RefreshTokens.RemoveRange(expired);
+        await Context.SaveChangesAsync(ct);
         return expired.Count;
     }
 }

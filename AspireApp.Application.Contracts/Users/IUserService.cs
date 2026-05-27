@@ -11,6 +11,8 @@ public interface IUserService
 
     Task<Result<UserDto>> UpdateAsync(Guid id, UpdateUserRequest request, CancellationToken ct);
 
+    Task<Result<UserDto>> UpdateProfileAsync(Guid id, UpdateUserProfileRequest request, CancellationToken ct);
+
     Task<Result<Unit>> DeleteAsync(Guid id, CancellationToken ct);
 
     Task<Result<UserDto>> AssignRolesAsync(Guid id, AssignRolesRequest request, CancellationToken ct);
