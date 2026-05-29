@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/0.Domain/">
     <Project Path="AspireApp.Domain.Entities/AspireApp.Domain.Entities.csproj" />
+    <Project Path="AspireApp.Domain.Paging/AspireApp.Domain.Paging.csproj" />
     <Project Path="AspireApp.Domain.ROP/AspireApp.Domain.ROP.csproj" />
   </Folder>
   <Folder Name="/1.Application/">

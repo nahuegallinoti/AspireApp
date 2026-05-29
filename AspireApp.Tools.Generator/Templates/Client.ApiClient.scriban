@@ -1,6 +1,6 @@
 using AspireApp.Application.Models.App;
 using AspireApp.Domain.ROP;
-
+{{API_CLIENT_EXTRA_USINGS}}
 namespace AspireApp.Client.ApiClients;
 
 public sealed class {{ENTITY}}ApiClient(IHttpClientFactory httpClientFactory)
@@ -20,4 +20,5 @@ public sealed class {{ENTITY}}ApiClient(IHttpClientFactory httpClientFactory)
 
     public Task<Result<IEnumerable<{{ENTITY}}>>> GetAllAsync(CancellationToken ct) =>
         GetAsync<IEnumerable<{{ENTITY}}>>("api/{{entity}}", ct);
+{{API_CLIENT_EXTRA_METHODS}}
 }

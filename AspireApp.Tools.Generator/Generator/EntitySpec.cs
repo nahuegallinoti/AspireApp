@@ -1,5 +1,11 @@
 namespace AspireApp.Tools.Generator.Generator;
 
+internal enum FilterMode
+{
+    Client,
+    Server,
+}
+
 internal sealed record EntitySpec(
     string Name,
     string IdType,
@@ -8,6 +14,8 @@ internal sealed record EntitySpec(
     bool RegisterInNavMenu,
     bool RequireAuth,
     bool UseEventBus,
+    FilterMode FilterMode,
+    int PageSize,
     string? IconOverride = null,
     string? AccentOverride = null)
 {
@@ -22,6 +30,17 @@ internal sealed record EntitySpec(
 
     /// <summary>Bootstrap theme accent (primary, success, info, warning, danger).</summary>
     public string Accent => AccentOverride ?? AccentPicker.PickFor(Name);
+
+    public bool IsServerFiltering => FilterMode == FilterMode.Server;
+
+    public IReadOnlyList<PropertySpec> FilterableProperties =>
+        Properties.Where(p => p.Filterable).ToArray();
+
+    public IReadOnlyList<PropertySpec> ListProperties =>
+        Properties.Where(p => p.ShowInList).ToArray();
+
+    public IReadOnlyList<PropertySpec> SortableProperties =>
+        Properties.Where(p => p.ShowInList && p.Sortable).ToArray();
 
     private static string SimplePluralize(string singular)
     {

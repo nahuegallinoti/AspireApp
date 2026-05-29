@@ -48,6 +48,7 @@ internal sealed class TemplateRenderer
         ["ENTITY_ICON"] = entity.Icon,
         ["ACCENT"] = entity.Accent,
         ["ACCENT_SUBTLE"] = $"{entity.Accent}-subtle",
+        ["PAGE_SIZE"] = entity.PageSize.ToString(CultureInfo.InvariantCulture),
         ["PROPS_ENTITY"] = BuildEntityProps(entity),
         ["PROPS_MODEL"] = BuildModelProps(entity),
         ["PROPS_DBCONFIG"] = BuildDbConfigProps(entity),
@@ -60,19 +61,28 @@ internal sealed class TemplateRenderer
         ["PROPS_FILTER_STATE"] = BuildFilterState(entity),
         ["PROPS_FILTER_LOGIC"] = BuildFilterLogic(entity),
         ["PROPS_RESET_LOGIC"] = BuildResetLogic(entity),
+        ["PROPS_SORT_CASES"] = BuildSortCases(entity),
+        ["PROPS_FILTER_DTO"] = BuildFilterDtoProps(entity),
         ["AUTHORIZE_ATTR"] = entity.RequireAuth ? "[Authorize]\n" : string.Empty,
         ["AUTHORIZE_USING"] = entity.RequireAuth ? "using Microsoft.AspNetCore.Authorization;\n" : string.Empty,
         ["EVENT_BUS_USING"] = entity.UseEventBus ? "using AspireApp.Application.Contracts.EventBus;\n" : string.Empty,
         ["EVENT_BUS_CTOR_PARAM"] = entity.UseEventBus ? ", IMessageBus messageBus" : string.Empty,
         ["EVENT_BUS_BASE_ARG"] = entity.UseEventBus ? ", messageBus" : string.Empty,
         ["DISPLAY_NAME_EXPR"] = BuildDisplayNameExpression(entity),
+        ["PERSISTENCE_USINGS"] = BuildPersistenceUsings(entity),
+        ["PERSISTENCE_BODY"] = BuildPersistenceBody(entity),
+        ["DA_USINGS"] = BuildDaUsings(entity),
+        ["DA_BODY"] = BuildDaBody(entity),
+        ["CONTRACT_USINGS"] = BuildContractUsings(entity),
+        ["CONTRACT_BODY"] = BuildContractBody(entity),
+        ["SERVICE_USINGS"] = BuildServiceUsings(entity),
+        ["SERVICE_BODY"] = BuildServiceBody(entity),
+        ["CONTROLLER_EXTRA_USINGS"] = BuildControllerExtraUsings(entity),
+        ["CONTROLLER_BODY"] = BuildControllerBody(entity),
+        ["API_CLIENT_EXTRA_USINGS"] = BuildApiClientExtraUsings(entity),
+        ["API_CLIENT_EXTRA_METHODS"] = BuildApiClientExtraMethods(entity),
     };
 
-    /// <summary>
-    /// Builds an expression for a "display name" of an entity instance, used in headers.
-    /// Picks the first string property called "Name" (case-insensitive) or falls back to the first string property.
-    /// If none, falls back to "#{Id}".
-    /// </summary>
     private static string BuildDisplayNameExpression(EntitySpec entity)
     {
         var displayProp =
@@ -200,25 +210,39 @@ internal sealed class TemplateRenderer
 
     private static string BuildTableHead(EntitySpec entity)
     {
-        if (entity.Properties.Count == 0) return string.Empty;
+        var listProps = entity.ListProperties;
+        if (listProps.Count == 0) return string.Empty;
+
         var sb = new StringBuilder();
-        for (var i = 0; i < entity.Properties.Count; i++)
+        for (var i = 0; i < listProps.Count; i++)
         {
-            var p = entity.Properties[i];
+            var p = listProps[i];
             var alignClass = p.IsNumeric ? " class=\"text-end\"" : string.Empty;
-            sb.Append(CultureInfo.InvariantCulture, $"                    <th scope=\"col\"{alignClass}>{p.Name}</th>");
-            if (i < entity.Properties.Count - 1) sb.AppendLine();
+
+            if (p.Sortable)
+            {
+                sb.Append(CultureInfo.InvariantCulture,
+                    $"                    <th scope=\"col\"{alignClass}><button type=\"button\" class=\"btn btn-link p-0 text-decoration-none text-reset fw-semibold\" @onclick='() => OnSort(\"{p.Name}\")'>{p.Name} <i class=\"bi @SortIcon(\"{p.Name}\")\"></i></button></th>");
+            }
+            else
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"                    <th scope=\"col\"{alignClass}>{p.Name}</th>");
+            }
+
+            if (i < listProps.Count - 1) sb.AppendLine();
         }
         return sb.ToString();
     }
 
     private static string BuildTableBody(EntitySpec entity)
     {
-        if (entity.Properties.Count == 0) return string.Empty;
+        var listProps = entity.ListProperties;
+        if (listProps.Count == 0) return string.Empty;
+
         var sb = new StringBuilder();
-        for (var i = 0; i < entity.Properties.Count; i++)
+        for (var i = 0; i < listProps.Count; i++)
         {
-            var p = entity.Properties[i];
+            var p = listProps[i];
             string cell;
             if (p.IsBool)
             {
@@ -245,78 +269,424 @@ internal sealed class TemplateRenderer
                 cell = $"<td>@item.{p.Name}</td>";
             }
             sb.Append("                        ").Append(cell);
-            if (i < entity.Properties.Count - 1) sb.AppendLine();
+            if (i < listProps.Count - 1) sb.AppendLine();
         }
         return sb.ToString();
     }
 
-    private static IEnumerable<PropertySpec> FilterableProperties(EntitySpec entity) =>
-        entity.Properties.Where(p => p.IsString);
+    // -------------- Smart filters --------------
 
     private static string BuildFilterFields(EntitySpec entity)
     {
-        var filterable = FilterableProperties(entity).ToArray();
-        if (filterable.Length == 0)
+        var filterable = entity.FilterableProperties;
+        if (filterable.Count == 0)
         {
             return "            <div class=\"col-12\"><p class=\"text-muted small mb-0\">No hay campos filtrables.</p></div>";
         }
 
+        var server = entity.IsServerFiltering;
         var sb = new StringBuilder();
-        for (var i = 0; i < filterable.Length; i++)
+        for (var i = 0; i < filterable.Count; i++)
         {
             var p = filterable[i];
-            sb.AppendLine("            <div class=\"col-md-4\">");
-            sb.AppendLine(CultureInfo.InvariantCulture, $"                <label for=\"filter_{p.CamelName}\" class=\"form-label small text-muted\">{p.Name}</label>");
-            sb.AppendLine(CultureInfo.InvariantCulture, $"                <input id=\"filter_{p.CamelName}\" type=\"text\" class=\"form-control form-control-sm\" @bind=\"filter_{p.CamelName}\" @bind:event=\"oninput\" placeholder=\"Buscar por {p.Name.ToLowerInvariant()}...\" />");
-            sb.Append("            </div>");
-            if (i < filterable.Length - 1) sb.AppendLine();
+            AppendFilterField(sb, p, server);
+            if (i < filterable.Count - 1) sb.AppendLine();
         }
         return sb.ToString();
     }
 
+    private static void AppendFilterField(StringBuilder sb, PropertySpec p, bool server)
+    {
+        if (p.IsString)
+        {
+            var binding = server ? $"filter.{p.Name}" : $"filter_{p.CamelName}";
+            var oninput = server ? string.Empty : " @bind:event=\"oninput\"";
+            sb.AppendLine("            <div class=\"col-md-4\">");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                <label for=\"filter_{p.CamelName}\" class=\"form-label small text-muted\">{p.Name}</label>");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                <input id=\"filter_{p.CamelName}\" type=\"text\" class=\"form-control form-control-sm\" @bind=\"{binding}\"{oninput} placeholder=\"Buscar por {p.Name.ToLowerInvariant()}...\" />");
+            sb.Append("            </div>");
+        }
+        else if (p.IsBool)
+        {
+            var binding = server ? $"filter.{p.Name}" : $"filter_{p.CamelName}";
+            sb.AppendLine("            <div class=\"col-md-3\">");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                <label for=\"filter_{p.CamelName}\" class=\"form-label small text-muted\">{p.Name}</label>");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                <select id=\"filter_{p.CamelName}\" class=\"form-select form-select-sm\" @bind=\"{binding}\">");
+            sb.AppendLine("                    <option value=\"\">Todos</option>");
+            sb.AppendLine("                    <option value=\"true\">Sí</option>");
+            sb.AppendLine("                    <option value=\"false\">No</option>");
+            sb.AppendLine("                </select>");
+            sb.Append("            </div>");
+        }
+        else if (p.IsNumeric)
+        {
+            var minBind = server ? $"filter.{p.Name}Min" : $"filter_{p.CamelName}Min";
+            var maxBind = server ? $"filter.{p.Name}Max" : $"filter_{p.CamelName}Max";
+            sb.AppendLine("            <div class=\"col-md-4\">");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                <label class=\"form-label small text-muted\">{p.Name} (mín – máx)</label>");
+            sb.AppendLine("                <div class=\"input-group input-group-sm\">");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                    <input type=\"number\" class=\"form-control\" @bind=\"{minBind}\" placeholder=\"mín\" />");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                    <input type=\"number\" class=\"form-control\" @bind=\"{maxBind}\" placeholder=\"máx\" />");
+            sb.AppendLine("                </div>");
+            sb.Append("            </div>");
+        }
+        else if (p.IsDateTime)
+        {
+            var fromBind = server ? $"filter.{p.Name}From" : $"filter_{p.CamelName}From";
+            var toBind = server ? $"filter.{p.Name}To" : $"filter_{p.CamelName}To";
+            sb.AppendLine("            <div class=\"col-md-4\">");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                <label class=\"form-label small text-muted\">{p.Name} (desde – hasta)</label>");
+            sb.AppendLine("                <div class=\"input-group input-group-sm\">");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                    <input type=\"date\" class=\"form-control\" @bind=\"{fromBind}\" />");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                    <input type=\"date\" class=\"form-control\" @bind=\"{toBind}\" />");
+            sb.AppendLine("                </div>");
+            sb.Append("            </div>");
+        }
+        else
+        {
+            // Guid and other fallbacks: text contains
+            var binding = server ? $"filter.{p.Name}" : $"filter_{p.CamelName}";
+            sb.AppendLine("            <div class=\"col-md-4\">");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                <label for=\"filter_{p.CamelName}\" class=\"form-label small text-muted\">{p.Name}</label>");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"                <input id=\"filter_{p.CamelName}\" type=\"text\" class=\"form-control form-control-sm\" @bind=\"{binding}\" placeholder=\"{p.Name}...\" />");
+            sb.Append("            </div>");
+        }
+    }
+
+    // -------------- Client-mode filter state / logic / reset / sort --------------
+
     private static string BuildFilterState(EntitySpec entity)
     {
-        var filterable = FilterableProperties(entity).ToArray();
-        if (filterable.Length == 0) return string.Empty;
+        if (entity.IsServerFiltering) return string.Empty;
+        var filterable = entity.FilterableProperties;
+        if (filterable.Count == 0) return string.Empty;
 
         var sb = new StringBuilder();
-        for (var i = 0; i < filterable.Length; i++)
+        var emitted = false;
+        foreach (var p in filterable)
         {
-            var p = filterable[i];
-            sb.Append(CultureInfo.InvariantCulture, $"    private string filter_{p.CamelName} = string.Empty;");
-            if (i < filterable.Length - 1) sb.AppendLine();
+            if (emitted) sb.AppendLine();
+            emitted = true;
+
+            if (p.IsString)
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"    private string? filter_{p.CamelName};");
+            }
+            else if (p.IsBool)
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"    private bool? filter_{p.CamelName};");
+            }
+            else if (p.IsNumeric)
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"    private {p.Type}? filter_{p.CamelName}Min;");
+                sb.AppendLine();
+                sb.Append(CultureInfo.InvariantCulture, $"    private {p.Type}? filter_{p.CamelName}Max;");
+            }
+            else if (p.IsDateTime)
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"    private {p.Type}? filter_{p.CamelName}From;");
+                sb.AppendLine();
+                sb.Append(CultureInfo.InvariantCulture, $"    private {p.Type}? filter_{p.CamelName}To;");
+            }
+            else
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"    private string? filter_{p.CamelName};");
+            }
         }
         return sb.ToString();
     }
 
     private static string BuildFilterLogic(EntitySpec entity)
     {
-        var filterable = FilterableProperties(entity).ToArray();
-        if (filterable.Length == 0) return string.Empty;
+        if (entity.IsServerFiltering) return string.Empty;
+        var filterable = entity.FilterableProperties;
+        if (filterable.Count == 0) return string.Empty;
 
         var sb = new StringBuilder();
-        for (var i = 0; i < filterable.Length; i++)
+        var emitted = false;
+        foreach (var p in filterable)
         {
-            var p = filterable[i];
-            sb.AppendLine(CultureInfo.InvariantCulture, $"        if (!string.IsNullOrWhiteSpace(filter_{p.CamelName}))");
-            sb.Append(CultureInfo.InvariantCulture, $"            q = q.Where(x => x.{p.Name} != null && x.{p.Name}.Contains(filter_{p.CamelName}, StringComparison.OrdinalIgnoreCase));");
-            if (i < filterable.Length - 1) sb.AppendLine();
+            if (emitted) sb.AppendLine();
+            emitted = true;
+
+            if (p.IsString)
+            {
+                sb.AppendLine(CultureInfo.InvariantCulture, $"        if (!string.IsNullOrWhiteSpace(filter_{p.CamelName}))");
+                sb.Append(CultureInfo.InvariantCulture, $"            q = q.Where(x => x.{p.Name} != null && x.{p.Name}.Contains(filter_{p.CamelName}!, StringComparison.OrdinalIgnoreCase));");
+            }
+            else if (p.IsBool)
+            {
+                sb.AppendLine(CultureInfo.InvariantCulture, $"        if (filter_{p.CamelName} is bool b_{p.CamelName})");
+                sb.Append(CultureInfo.InvariantCulture, $"            q = q.Where(x => x.{p.Name} == b_{p.CamelName});");
+            }
+            else if (p.IsNumeric)
+            {
+                sb.AppendLine(CultureInfo.InvariantCulture, $"        if (filter_{p.CamelName}Min.HasValue) q = q.Where(x => x.{p.Name} >= filter_{p.CamelName}Min.Value);");
+                sb.Append(CultureInfo.InvariantCulture, $"        if (filter_{p.CamelName}Max.HasValue) q = q.Where(x => x.{p.Name} <= filter_{p.CamelName}Max.Value);");
+            }
+            else if (p.IsDateTime)
+            {
+                sb.AppendLine(CultureInfo.InvariantCulture, $"        if (filter_{p.CamelName}From.HasValue) q = q.Where(x => x.{p.Name} >= filter_{p.CamelName}From.Value);");
+                sb.Append(CultureInfo.InvariantCulture, $"        if (filter_{p.CamelName}To.HasValue) q = q.Where(x => x.{p.Name} <= filter_{p.CamelName}To.Value);");
+            }
+            else
+            {
+                sb.AppendLine(CultureInfo.InvariantCulture, $"        if (!string.IsNullOrWhiteSpace(filter_{p.CamelName}))");
+                sb.Append(CultureInfo.InvariantCulture, $"            q = q.Where(x => x.{p.Name}.ToString()!.Contains(filter_{p.CamelName}!, StringComparison.OrdinalIgnoreCase));");
+            }
         }
         return sb.ToString();
     }
 
     private static string BuildResetLogic(EntitySpec entity)
     {
-        var filterable = FilterableProperties(entity).ToArray();
-        if (filterable.Length == 0) return string.Empty;
+        if (entity.IsServerFiltering) return string.Empty;
+        var filterable = entity.FilterableProperties;
+        if (filterable.Count == 0) return string.Empty;
 
         var sb = new StringBuilder();
-        for (var i = 0; i < filterable.Length; i++)
+        var emitted = false;
+        foreach (var p in filterable)
         {
-            var p = filterable[i];
-            sb.Append(CultureInfo.InvariantCulture, $"        filter_{p.CamelName} = string.Empty;");
-            if (i < filterable.Length - 1) sb.AppendLine();
+            if (emitted) sb.AppendLine();
+            emitted = true;
+
+            if (p.IsString)
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"        filter_{p.CamelName} = null;");
+            }
+            else if (p.IsBool)
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"        filter_{p.CamelName} = null;");
+            }
+            else if (p.IsNumeric)
+            {
+                sb.AppendLine(CultureInfo.InvariantCulture, $"        filter_{p.CamelName}Min = null;");
+                sb.Append(CultureInfo.InvariantCulture, $"        filter_{p.CamelName}Max = null;");
+            }
+            else if (p.IsDateTime)
+            {
+                sb.AppendLine(CultureInfo.InvariantCulture, $"        filter_{p.CamelName}From = null;");
+                sb.Append(CultureInfo.InvariantCulture, $"        filter_{p.CamelName}To = null;");
+            }
+            else
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"        filter_{p.CamelName} = null;");
+            }
         }
+        return sb.ToString();
+    }
+
+    private static string BuildSortCases(EntitySpec entity)
+    {
+        if (entity.IsServerFiltering) return string.Empty;
+        var sortable = entity.SortableProperties;
+        if (sortable.Count == 0) return string.Empty;
+
+        var sb = new StringBuilder();
+        for (var i = 0; i < sortable.Count; i++)
+        {
+            var p = sortable[i];
+            sb.Append(CultureInfo.InvariantCulture, $"            \"{p.Name}\" => sortDesc ? q.OrderByDescending(x => x.{p.Name}) : q.OrderBy(x => x.{p.Name}),");
+            if (i < sortable.Count - 1) sb.AppendLine();
+        }
+        return sb.ToString();
+    }
+
+    // -------------- Server-mode tokens --------------
+
+    private static string BuildFilterDtoProps(EntitySpec entity)
+    {
+        var filterable = entity.FilterableProperties;
+        if (filterable.Count == 0)
+        {
+            return "    // No filterable properties; paging & sort still apply.";
+        }
+
+        var sb = new StringBuilder();
+        var emitted = false;
+        foreach (var p in filterable)
+        {
+            if (emitted) sb.AppendLine();
+            emitted = true;
+
+            if (p.IsString)
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"    public string? {p.Name} {{ get; set; }}");
+            }
+            else if (p.IsBool)
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"    public bool? {p.Name} {{ get; set; }}");
+            }
+            else if (p.IsNumeric)
+            {
+                sb.AppendLine(CultureInfo.InvariantCulture, $"    public {p.Type}? {p.Name}Min {{ get; set; }}");
+                sb.Append(CultureInfo.InvariantCulture, $"    public {p.Type}? {p.Name}Max {{ get; set; }}");
+            }
+            else if (p.IsDateTime)
+            {
+                sb.AppendLine(CultureInfo.InvariantCulture, $"    public {p.Type}? {p.Name}From {{ get; set; }}");
+                sb.Append(CultureInfo.InvariantCulture, $"    public {p.Type}? {p.Name}To {{ get; set; }}");
+            }
+            else
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"    public string? {p.Name} {{ get; set; }}");
+            }
+        }
+        return sb.ToString();
+    }
+
+    private static string BuildPersistenceUsings(EntitySpec entity) =>
+        entity.IsServerFiltering
+            ? "using System.Linq.Expressions;\nusing AspireApp.Domain.Paging;\n"
+            : string.Empty;
+
+    private static string BuildPersistenceBody(EntitySpec entity)
+    {
+        if (!entity.IsServerFiltering) return string.Empty;
+        return $"    Task<PagedResult<{entity.Name}>> GetPagedAsync(PagedQuery query, IEnumerable<Expression<Func<{entity.Name}, bool>>> predicates, CancellationToken ct);";
+    }
+
+    private static string BuildDaUsings(EntitySpec entity) =>
+        entity.IsServerFiltering
+            ? "using System.Linq.Expressions;\nusing AspireApp.Domain.Paging;\nusing Microsoft.EntityFrameworkCore;\n"
+            : string.Empty;
+
+    private static string BuildDaBody(EntitySpec entity)
+    {
+        if (!entity.IsServerFiltering) return ";\n";
+
+        var sb = new StringBuilder();
+        sb.AppendLine();
+        sb.AppendLine("{");
+        sb.AppendLine($"    public async Task<PagedResult<{entity.Name}>> GetPagedAsync(PagedQuery query, IEnumerable<Expression<Func<{entity.Name}, bool>>> predicates, CancellationToken ct)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        var (page, size) = query.Normalize();");
+        sb.AppendLine($"        IQueryable<{entity.Name}> q = Context.Set<{entity.Name}>().AsNoTracking();");
+        sb.AppendLine();
+        sb.AppendLine("        foreach (var predicate in predicates)");
+        sb.AppendLine("            q = q.Where(predicate);");
+        sb.AppendLine();
+        sb.AppendLine("        q = query.SortBy switch");
+        sb.AppendLine("        {");
+        foreach (var p in entity.SortableProperties)
+        {
+            sb.AppendLine($"            \"{p.Name}\" => query.SortDir == SortDirection.Desc ? q.OrderByDescending(x => x.{p.Name}) : q.OrderBy(x => x.{p.Name}),");
+        }
+        sb.AppendLine("            _ => q.OrderBy(x => x.Id),");
+        sb.AppendLine("        };");
+        sb.AppendLine();
+        sb.AppendLine("        var total = await q.CountAsync(ct);");
+        sb.AppendLine("        var items = await q.Skip((page - 1) * size).Take(size).ToListAsync(ct);");
+        sb.AppendLine($"        return new PagedResult<{entity.Name}>(items, total, page, size);");
+        sb.AppendLine("    }");
+        sb.Append('}');
+        return sb.ToString();
+    }
+
+    private static string BuildContractUsings(EntitySpec entity) =>
+        entity.IsServerFiltering
+            ? "using AspireApp.Application.Models.App;\nusing AspireApp.Domain.Paging;\n"
+            : string.Empty;
+
+    private static string BuildContractBody(EntitySpec entity)
+    {
+        if (!entity.IsServerFiltering) return string.Empty;
+        return $"    Task<PagedResult<Models.App.{entity.Name}>> GetPagedAsync({entity.Name}Filter filter, CancellationToken ct);";
+    }
+
+    private static string BuildServiceUsings(EntitySpec entity) =>
+        entity.IsServerFiltering
+            ? "using System.Linq.Expressions;\nusing AspireApp.Application.Models.App;\nusing AspireApp.Domain.Paging;\n"
+            : string.Empty;
+
+    private static string BuildServiceBody(EntitySpec entity)
+    {
+        if (!entity.IsServerFiltering) return ";\n";
+
+        var sb = new StringBuilder();
+        sb.AppendLine();
+        sb.AppendLine("{");
+        sb.AppendLine($"    public async Task<PagedResult<{entity.Name}Model>> GetPagedAsync({entity.Name}Filter filter, CancellationToken ct)");
+        sb.AppendLine("    {");
+        sb.AppendLine($"        var predicates = new List<Expression<Func<{entity.Name}Entity, bool>>>();");
+
+        foreach (var p in entity.FilterableProperties)
+            AppendServicePredicate(sb, p, entity.Name);
+
+        sb.AppendLine();
+        sb.AppendLine($"        var entityPage = await {entity.Camel}DA.GetPagedAsync(filter, predicates, ct);");
+        sb.AppendLine($"        return new PagedResult<{entity.Name}Model>(");
+        sb.AppendLine("            [.. mapper.ToModelList(entityPage.Items)],");
+        sb.AppendLine("            entityPage.Total,");
+        sb.AppendLine("            entityPage.Page,");
+        sb.AppendLine("            entityPage.PageSize);");
+        sb.AppendLine("    }");
+        sb.Append('}');
+        return sb.ToString();
+    }
+
+    private static void AppendServicePredicate(StringBuilder sb, PropertySpec p, string entityName)
+    {
+        if (p.IsString)
+        {
+            sb.AppendLine($"        if (!string.IsNullOrWhiteSpace(filter.{p.Name}))");
+            sb.AppendLine($"            predicates.Add(x => x.{p.Name} != null && x.{p.Name}.Contains(filter.{p.Name}!));");
+        }
+        else if (p.IsBool)
+        {
+            sb.AppendLine($"        if (filter.{p.Name} is bool b_{p.CamelName})");
+            sb.AppendLine($"            predicates.Add(x => x.{p.Name} == b_{p.CamelName});");
+        }
+        else if (p.IsNumeric)
+        {
+            sb.AppendLine($"        if (filter.{p.Name}Min.HasValue) predicates.Add(x => x.{p.Name} >= filter.{p.Name}Min.Value);");
+            sb.AppendLine($"        if (filter.{p.Name}Max.HasValue) predicates.Add(x => x.{p.Name} <= filter.{p.Name}Max.Value);");
+        }
+        else if (p.IsDateTime)
+        {
+            sb.AppendLine($"        if (filter.{p.Name}From.HasValue) predicates.Add(x => x.{p.Name} >= filter.{p.Name}From.Value);");
+            sb.AppendLine($"        if (filter.{p.Name}To.HasValue) predicates.Add(x => x.{p.Name} <= filter.{p.Name}To.Value);");
+        }
+        else
+        {
+            sb.AppendLine($"        if (!string.IsNullOrWhiteSpace(filter.{p.Name}))");
+            sb.AppendLine($"            predicates.Add(x => x.{p.Name}.ToString()!.Contains(filter.{p.Name}!));");
+        }
+    }
+
+    private static string BuildControllerExtraUsings(EntitySpec entity) =>
+        entity.IsServerFiltering
+            ? string.Empty // AspireApp.Application.Models.App already imported in template
+            : string.Empty;
+
+    private static string BuildControllerBody(EntitySpec entity)
+    {
+        if (!entity.IsServerFiltering) return ";\n";
+
+        var sb = new StringBuilder();
+        sb.AppendLine();
+        sb.AppendLine("{");
+        sb.AppendLine("    [HttpPost(\"query\")]");
+        sb.AppendLine($"    public async Task<IActionResult> GetPaged([FromBody] {entity.Name}Filter filter, CancellationToken ct) =>");
+        sb.AppendLine("        Ok(await Service.GetPagedAsync(filter, ct));");
+        sb.Append('}');
+        return sb.ToString();
+    }
+
+    private static string BuildApiClientExtraUsings(EntitySpec entity) =>
+        entity.IsServerFiltering
+            ? "using AspireApp.Domain.Paging;\n"
+            : string.Empty;
+
+    private static string BuildApiClientExtraMethods(EntitySpec entity)
+    {
+        if (!entity.IsServerFiltering) return string.Empty;
+
+        var sb = new StringBuilder();
+        sb.AppendLine();
+        sb.AppendLine($"    public Task<Result<PagedResult<{entity.Name}>>> GetPagedAsync({entity.Name}Filter filter, CancellationToken ct) =>");
+        sb.Append($"        PostAsync<PagedResult<{entity.Name}>, {entity.Name}Filter>(\"api/{entity.Lower}/query\", filter, ct);");
         return sb.ToString();
     }
 }

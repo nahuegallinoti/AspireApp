@@ -36,6 +36,9 @@ internal sealed class PathResolver
     public string ApplicationModel(string entity) =>
         Combine("AspireApp.Application.Models", "App", $"{entity}.cs");
 
+    public string ApplicationFilter(string entity) =>
+        Combine("AspireApp.Application.Models", "App", $"{entity}Filter.cs");
+
     public string ApplicationContract(string entity) =>
         Combine("AspireApp.Application.Contracts", entity, $"I{entity}Service.cs");
 

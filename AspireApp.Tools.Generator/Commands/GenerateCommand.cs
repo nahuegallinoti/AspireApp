@@ -19,7 +19,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         public string? IdType { get; init; }
 
         [CommandOption("-p|--prop <PROPERTY>")]
-        [Description("Property in the form Name:type or Name:type:required. Repeatable.")]
+        [Description("Property in the form 'Name:type[:flag1[:flag2...]]'. Flags: required, filter|nofilter, hidden|list, sort|nosort. Repeatable.")]
         public string[]? Properties { get; init; }
 
         [CommandOption("--icon <ICON>")]
@@ -29,6 +29,14 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         [CommandOption("--accent <ACCENT>")]
         [Description("Override the Bootstrap accent (primary, success, info, warning, danger, secondary). Deterministic by default.")]
         public string? Accent { get; init; }
+
+        [CommandOption("--filter-mode <MODE>")]
+        [Description("Where filtering/sorting/paging happens: 'client' (default) loads everything and filters in browser. 'server' sends a filter DTO to the API, with paging.")]
+        public string? FilterMode { get; init; }
+
+        [CommandOption("--page-size <N>")]
+        [Description("Default page size for server-mode pagination (ignored for client mode). Defaults to 25.")]
+        public int? PageSize { get; init; }
 
         [CommandOption("--no-ui")]
         [Description("Do not generate a Blazor page.")]
@@ -313,6 +321,8 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
             _ => throw new ArgumentException($"Unsupported Id type '{idType}'. Use long, int or Guid.")
         };
 
+        var interactive = !settings.Yes;
+
         var properties = new List<PropertySpec>();
 
         if (settings.Properties is { Length: > 0 })
@@ -320,7 +330,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
             foreach (var raw in settings.Properties)
                 properties.Add(PropertySpec.Parse(raw));
         }
-        else if (!settings.Yes)
+        else if (interactive)
         {
             AnsiConsole.MarkupLine("[grey]✎ Agregá propiedades (nombre vacío para terminar).[/]");
             while (true)
@@ -339,7 +349,17 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
                         .AddChoices("string", "int", "long", "decimal", "double", "bool", "DateTime", "Guid"));
 
                 var required = AnsiConsole.Confirm($"    [grey]¿Es[/] [yellow]{propName}[/] [grey]requerido?[/]", defaultValue: true);
-                properties.Add(new PropertySpec(Capitalize(propName), propType, required));
+                var filterable = AnsiConsole.Confirm(
+                    $"    [grey]¿Filtrar por[/] [yellow]{propName}[/] [grey]en el Index?[/]",
+                    defaultValue: PropertySpec.DefaultFilterableFor(propType));
+                var showInTable = AnsiConsole.Confirm(
+                    $"    [grey]¿Mostrar[/] [yellow]{propName}[/] [grey]en la tabla del index?[/]",
+                    defaultValue: true);
+                var sortable = showInTable && AnsiConsole.Confirm(
+                    $"    [grey]¿Ordenar la tabla por[/] [yellow]{propName}[/]?",
+                    defaultValue: true);
+
+                properties.Add(new PropertySpec(Capitalize(propName), propType, required, filterable, showInTable, sortable));
             }
         }
 
@@ -347,8 +367,6 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         {
             AnsiConsole.MarkupLine("[yellow]→ No se especificaron propiedades. Se generará con el body vacío (podés agregarlas después).[/]");
         }
-
-        var interactive = !settings.Yes;
 
         bool generateBlazor;
         if (settings.NoUi)
@@ -382,6 +400,9 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         else
             useEventBus = false;
 
+        var filterMode = ResolveFilterMode(settings, interactive, properties);
+        var pageSize = ResolvePageSize(settings, interactive, filterMode);
+
         var icon = settings.Icon?.Trim();
         if (!string.IsNullOrEmpty(icon) && icon.StartsWith("bi-", StringComparison.OrdinalIgnoreCase))
             icon = icon[3..];
@@ -398,8 +419,57 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
             registerNav,
             requireAuth,
             useEventBus,
+            filterMode,
+            pageSize,
             string.IsNullOrEmpty(icon) ? null : icon,
             string.IsNullOrEmpty(accent) ? null : accent);
+    }
+
+    private static FilterMode ResolveFilterMode(Settings settings, bool interactive, IReadOnlyList<PropertySpec> properties)
+    {
+        var raw = settings.FilterMode?.Trim().ToLowerInvariant();
+        if (!string.IsNullOrEmpty(raw))
+        {
+            return raw switch
+            {
+                "client" or "cli" => FilterMode.Client,
+                "server" or "srv" or "api" => FilterMode.Server,
+                _ => throw new ArgumentException($"Unsupported filter mode '{settings.FilterMode}'. Use 'client' or 'server'."),
+            };
+        }
+
+        if (!interactive)
+            return FilterMode.Client;
+
+        var hasFilterable = properties.Any(p => p.Filterable);
+        var description = hasFilterable
+            ? "[grey](algunos campos son filtrables)[/]"
+            : "[grey](sin campos filtrables; igual podés elegir server para tener paginación)[/]";
+
+        var choice = AnsiConsole.Prompt(new SelectionPrompt<string>()
+            .Title($"[bold mediumpurple1]❯[/] Modo de filtrado/paginación del Index {description}")
+            .HighlightStyle(Style.Parse("aqua"))
+            .AddChoices(
+                "client  (carga todo y filtra en el navegador)",
+                "server  (manda filtro a la API + paginación)"));
+
+        return choice.StartsWith("server", StringComparison.Ordinal) ? FilterMode.Server : FilterMode.Client;
+    }
+
+    private static int ResolvePageSize(Settings settings, bool interactive, FilterMode mode)
+    {
+        if (settings.PageSize is > 0)
+            return settings.PageSize.Value;
+
+        if (mode == FilterMode.Client || !interactive)
+            return 25;
+
+        return AnsiConsole.Prompt(new TextPrompt<int>("[bold mediumpurple1]❯[/] Tamaño de página por defecto")
+            .DefaultValue(25)
+            .ShowDefaultValue()
+            .Validate(static n => n is > 0 and <= 500
+                ? ValidationResult.Success()
+                : ValidationResult.Error("Debe ser entre 1 y 500")));
     }
 
     private static string Capitalize(string s) =>
@@ -426,6 +496,9 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         headerGrid.AddRow("[grey]▸ NavMenu[/]", entity.GenerateBlazorPage && entity.RegisterInNavMenu ? "[green]✔ sí[/]" : "[grey]✘ no[/]");
         headerGrid.AddRow("[grey]★ Authorize[/]", entity.RequireAuth ? "[green]✔ sí[/]" : "[grey]✘ no[/]");
         headerGrid.AddRow("[grey]✉ Event bus[/]", entity.UseEventBus ? "[green]✔ sí (publica al crear)[/]" : "[grey]✘ no[/]");
+        headerGrid.AddRow("[grey]⛃ Filtrado[/]", entity.IsServerFiltering
+            ? $"[aqua]server[/] [grey](pageSize {entity.PageSize})[/]"
+            : "[white]client[/] [grey](carga todo, filtra en browser)[/]");
 
         AnsiConsole.Write(new Panel(headerGrid)
         {
@@ -444,7 +517,10 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
                 .AddColumn("[grey]#[/]")
                 .AddColumn("[bold]Nombre[/]")
                 .AddColumn("[bold]Tipo[/]")
-                .AddColumn("[bold]Req[/]");
+                .AddColumn("[bold]Req[/]")
+                .AddColumn("[bold]Filtra[/]")
+                .AddColumn("[bold]Lista[/]")
+                .AddColumn("[bold]Ordena[/]");
 
             for (var i = 0; i < entity.Properties.Count; i++)
             {
@@ -453,7 +529,10 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
                     $"[grey]{i + 1}[/]",
                     $"[white]{p.Name.EscapeMarkup()}[/]",
                     $"[aqua]{p.Type.EscapeMarkup()}[/]",
-                    p.Required ? "[bold red]✔[/]" : "[grey]·[/]");
+                    p.Required ? "[bold red]✔[/]" : "[grey]·[/]",
+                    p.Filterable ? "[green]✔[/]" : "[grey]·[/]",
+                    p.ShowInList ? "[green]✔[/]" : "[grey]·[/]",
+                    p.ShowInList && p.Sortable ? "[green]✔[/]" : "[grey]·[/]");
             }
             AnsiConsole.Write(table);
         }

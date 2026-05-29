@@ -1,4 +1,6 @@
+using AspireApp.Application.Models.App;
 using AspireApp.Client.ApiClients;
+using AspireApp.Domain.Paging;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using {{ENTITY}}Model = AspireApp.Application.Models.App.{{ENTITY}};
@@ -7,30 +9,39 @@ namespace AspireApp.Client.Components.Pages;
 
 public partial class {{ENTITY}}Index : ComponentBase
 {
+    private const int DefaultPageSize = {{PAGE_SIZE}};
+
     [Inject] public {{ENTITY}}ApiClient {{ENTITY}}Api { get; set; } = null!;
     [Inject] public NavigationManager Nav { get; set; } = null!;
     [Inject] public IJSRuntime JS { get; set; } = null!;
 
-    private List<{{ENTITY}}Model> all = [];
-    private List<{{ENTITY}}Model> filtered = [];
+    private {{ENTITY}}Filter filter = new() { PageSize = DefaultPageSize };
+    private PagedResult<{{ENTITY}}Model> paged = new([], 0, 1, DefaultPageSize);
+
     private string errorMessage = string.Empty;
     private bool loading = true;
 
-    private string? sortBy;
-    private bool sortDesc;
-
-{{PROPS_FILTER_STATE}}
+    private int PageSizeChoice
+    {
+        get => filter.PageSize;
+        set
+        {
+            if (value == filter.PageSize) return;
+            filter.PageSize = value;
+            filter.Page = 1;
+            _ = LoadAsync();
+        }
+    }
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
     private async Task LoadAsync()
     {
         loading = true;
-        var result = await {{ENTITY}}Api.GetAllAsync(CancellationToken.None);
+        var result = await {{ENTITY}}Api.GetPagedAsync(filter, CancellationToken.None);
         if (result.Success)
         {
-            all = [.. result.Value];
-            ApplyFilter();
+            paged = result.Value;
             errorMessage = string.Empty;
         }
         else
@@ -40,52 +51,44 @@ public partial class {{ENTITY}}Index : ComponentBase
         loading = false;
     }
 
-    private void ApplyFilter()
+    private async Task OnSearch()
     {
-        IEnumerable<{{ENTITY}}Model> q = all;
-{{PROPS_FILTER_LOGIC}}
-        q = ApplySort(q);
-        filtered = [.. q];
+        filter.Page = 1;
+        await LoadAsync();
     }
 
-    private IEnumerable<{{ENTITY}}Model> ApplySort(IEnumerable<{{ENTITY}}Model> q)
+    private async Task OnReset()
     {
-        if (string.IsNullOrEmpty(sortBy)) return q;
-        return sortBy switch
-        {
-{{PROPS_SORT_CASES}}
-            _ => q,
-        };
+        filter = new {{ENTITY}}Filter { PageSize = filter.PageSize };
+        await LoadAsync();
     }
 
-    private void OnSort(string column)
+    private async Task GoToPage(int targetPage)
     {
-        if (sortBy == column)
+        if (targetPage < 1 || targetPage > Math.Max(paged.TotalPages, 1)) return;
+        filter.Page = targetPage;
+        await LoadAsync();
+    }
+
+    private async Task OnSort(string column)
+    {
+        if (string.Equals(filter.SortBy, column, StringComparison.Ordinal))
         {
-            sortDesc = !sortDesc;
+            filter.SortDir = filter.SortDir == SortDirection.Asc ? SortDirection.Desc : SortDirection.Asc;
         }
         else
         {
-            sortBy = column;
-            sortDesc = false;
+            filter.SortBy = column;
+            filter.SortDir = SortDirection.Asc;
         }
-        ApplyFilter();
+        filter.Page = 1;
+        await LoadAsync();
     }
 
     private string SortIcon(string column) =>
-        sortBy != column ? "bi-arrow-down-up text-muted opacity-50"
-        : sortDesc ? "bi-arrow-down text-{{ACCENT}}"
+        !string.Equals(filter.SortBy, column, StringComparison.Ordinal) ? "bi-arrow-down-up text-muted opacity-50"
+        : filter.SortDir == SortDirection.Desc ? "bi-arrow-down text-{{ACCENT}}"
         : "bi-arrow-up text-{{ACCENT}}";
-
-    private void OnSearch() => ApplyFilter();
-
-    private void OnReset()
-    {
-{{PROPS_RESET_LOGIC}}
-        sortBy = null;
-        sortDesc = false;
-        ApplyFilter();
-    }
 
     private void OnNew() => Nav.NavigateTo($"/{{entity}}/new");
 
@@ -99,9 +102,7 @@ public partial class {{ENTITY}}Index : ComponentBase
         var result = await {{ENTITY}}Api.DeleteAsync(item.Id, CancellationToken.None);
         if (result.Success)
         {
-            all.Remove(item);
-            ApplyFilter();
-            errorMessage = string.Empty;
+            await LoadAsync();
         }
         else
         {

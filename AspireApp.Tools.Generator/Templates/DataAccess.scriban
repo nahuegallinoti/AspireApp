@@ -1,7 +1,7 @@
-using AspireApp.Application.Persistence;
+{{DA_USINGS}}using AspireApp.Application.Persistence;
 using AspireApp.DataAccess.Implementations.Base;
 using AspireApp.Domain.Entities;
 
 namespace AspireApp.DataAccess.Implementations;
 
-public sealed class {{ENTITY}}DA(AppDbContext context) : BaseDA<{{ENTITY}}, {{ID_TYPE}}>(context), I{{ENTITY}}DA;
+public sealed class {{ENTITY}}DA(AppDbContext context) : BaseDA<{{ENTITY}}, {{ID_TYPE}}>(context), I{{ENTITY}}DA{{DA_BODY}}

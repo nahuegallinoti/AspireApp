@@ -24,10 +24,18 @@ internal sealed class GenerationPlan
             new(paths.ApiClient(entity.Name), "Client.ApiClient.scriban", "Client.ApiClient"),
         };
 
+        if (entity.IsServerFiltering)
+        {
+            creations.Add(new(paths.ApplicationFilter(entity.Name), "Application.Filter.scriban", "Application.Filter"));
+        }
+
         if (entity.GenerateBlazorPage)
         {
-            creations.Add(new(paths.BlazorIndexRazor(entity.Name), "Client.Index.razor.scriban", "Client.Index.razor"));
-            creations.Add(new(paths.BlazorIndexCs(entity.Name), "Client.Index.razor.cs.scriban", "Client.Index.razor.cs"));
+            var indexRazor = entity.IsServerFiltering ? "Client.IndexServer.razor.scriban" : "Client.Index.razor.scriban";
+            var indexCs = entity.IsServerFiltering ? "Client.IndexServer.razor.cs.scriban" : "Client.Index.razor.cs.scriban";
+
+            creations.Add(new(paths.BlazorIndexRazor(entity.Name), indexRazor, "Client.Index.razor"));
+            creations.Add(new(paths.BlazorIndexCs(entity.Name), indexCs, "Client.Index.razor.cs"));
             creations.Add(new(paths.BlazorEditRazor(entity.Name), "Client.Edit.razor.scriban", "Client.Edit.razor"));
             creations.Add(new(paths.BlazorEditCs(entity.Name), "Client.Edit.razor.cs.scriban", "Client.Edit.razor.cs"));
         }

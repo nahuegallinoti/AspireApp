@@ -1,4 +1,4 @@
-using AspireApp.Application.Contracts.{{ENTITY}};
+{{SERVICE_USINGS}}using AspireApp.Application.Contracts.{{ENTITY}};
 using AspireApp.Application.Implementations.Base;
 using AspireApp.Application.Mappers;
 using AspireApp.Application.Persistence;
@@ -9,4 +9,4 @@ using {{ENTITY}}Model = AspireApp.Application.Models.App.{{ENTITY}};
 namespace AspireApp.Application.Implementations.{{ENTITY}};
 
 internal sealed class {{ENTITY}}Service(I{{ENTITY}}DA {{ENTITY_CAMEL}}DA, {{ENTITY}}Mapper mapper, HybridCache hybridCache)
-    : BaseService<{{ENTITY}}Entity, {{ENTITY}}Model, {{ID_TYPE}}>({{ENTITY_CAMEL}}DA, mapper, hybridCache), I{{ENTITY}}Service;
+    : BaseService<{{ENTITY}}Entity, {{ENTITY}}Model, {{ID_TYPE}}>({{ENTITY_CAMEL}}DA, mapper, hybridCache), I{{ENTITY}}Service{{SERVICE_BODY}}

@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspireApp.Domain.ROP\AspireApp.Domain.ROP.csproj" />
+    <ProjectReference Include="..\AspireApp.Domain.Paging\AspireApp.Domain.Paging.csproj" />
     <ProjectReference Include="..\AspireApp.Domain.Entities\AspireApp.Domain.Entities.csproj" />
   </ItemGroup>
 
