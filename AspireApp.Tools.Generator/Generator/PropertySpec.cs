@@ -50,6 +50,9 @@ internal sealed record PropertySpec(
             throw new ArgumentException($"Invalid property '{raw}'. Expected format 'Name:type[:flags]'.");
 
         var name = parts[0];
+        if (!Naming.IsValidIdentifier(name))
+            throw new ArgumentException($"Invalid property name '{name}'. Use letters, digits or '_', starting with a letter or '_'.");
+
         var type = NormalizeType(parts[1]);
 
         var required = false;
@@ -97,16 +100,13 @@ internal sealed record PropertySpec(
         }
 
         return new PropertySpec(
-            Capitalize(name),
+            Naming.Capitalize(name),
             type,
             required,
             filterable ?? DefaultFilterableFor(type),
             showInList ?? true,
             sortable ?? true);
     }
-
-    private static string Capitalize(string s) =>
-        string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + s[1..];
 
     private static string NormalizeType(string type) => type.ToLowerInvariant() switch
     {

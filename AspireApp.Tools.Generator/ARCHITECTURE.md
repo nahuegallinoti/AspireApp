@@ -75,7 +75,7 @@ O totalmente interactivo (Spectre prompts) o totalmente manejado por flags de CL
 
 - `ResolveFilterMode` — `client` (default) o `server`. Define si el Index filtra in-browser o habla con un endpoint paginado.
 - `ResolvePageSize` — sólo server-mode; default 25.
-- `PropertySpec.Parse` para la forma `--prop`, o prompts por campo (Required, Filterable, ShowInList, Sortable) en modo interactivo.
+- Las propiedades vienen de `PropertySpec.Parse` (forma `--prop`) o, en modo interactivo, de `CollectPropertiesInteractive` — un editor con tabla en vivo y menú **Agregar / Editar / Quitar / Listo**. Cada campo se arma en `PromptForProperty` (nombre + tipo + multi-select de flags Required/Filterable/ShowInList/Sortable), así que un error se corrige editando la fila, sin reiniciar. Los nombres pasan por `Naming.IsValidIdentifier` y se normalizan con `Naming.Capitalize`.
 
 ### 4. Construir el plan — `GenerationPlan.Build(entity, paths)`
 Función pura. Devuelve un record con dos listas:
@@ -91,7 +91,7 @@ Todo Spectre. Dos paneles (resumen de la entidad + árbol del plan agrupado por 
 ### 6. Ejecución — `ExecutePlanAsync`
 Dos pasadas:
 
-- **Creations**: para cada uno, `renderer.Render(templateName, entity)` → si el archivo existe, saltea. Si no, crea directorios y escribe. En `--dry-run`, imprime el path pero no escribe.
+- **Creations**: el mapa de tokens se construye **una sola vez** con `TemplateRenderer.BuildTokens(entity)` y se reusa para todos los archivos. Para cada uno, `renderer.Render(templateName, tokens)` → si el archivo existe, saltea. Si no, crea directorios y escribe. En `--dry-run`, imprime el path pero no escribe.
 - **Mutators**: para cada uno, lee source → `mutator.Mutate(source, entity)` → si `Changed`, escribe. Si no encuentra su ancla, surface un error y continúa con el resto (cuenta en `totals.Failed`).
 
 ### 7. Summary — `RenderResult`
@@ -107,7 +107,7 @@ Conteo de creados / mutados / saltados / fallidos en un panel, más un pie de "p
 | `PropertySpec` | Un campo. `Name`, `Type` (normalizado), `Required`, `Filterable`, `ShowInList`, `Sortable`. Conoce su bucket de tipo vía `IsString` / `IsBool` / `IsNumeric` / `IsDateTime` / `IsGuid` y su componente Razor (`InputText`, `InputNumber`, etc.). `Parse(raw)` maneja la forma `--prop "Name:type:flag:flag"` de la CLI. |
 | `PathResolver` | Dueño único de "¿dónde va el archivo X para la entidad Y?". `Combine(...)` es el único lugar que une segmentos relativos a la solución. Acá agregás destinos nuevos. |
 | `GenerationPlan` | Devuelto por `Build(entity, paths)`. Tiene `Creations` + `Mutators`. Los condicionales (extras de server-mode, Blazor on/off, NavMenu on/off) viven acá. |
-| `TemplateRenderer` | Lee un archivo `.scriban` una vez por llamada a render, construye el mapa de tokens para la entidad, corre `StringBuilder.Replace("{{KEY}}", value)` secuencial. |
+| `TemplateRenderer` | `BuildTokens(entity)` arma el mapa `{{KEY}} → value` una vez por corrida (estático, sin IO). `Render(templateFileName, tokens)` lee el `.scriban` y corre `StringBuilder.Replace("{{KEY}}", value)` secuencial con ese mapa. |
 | `IFileMutator` / `MutationResult` | Contrato chiquito para parches de archivos compartidos. Mutate es **puro** (string entra, string sale) — la escritura real pasa en `GenerateCommand`. |
 
 ---
@@ -223,7 +223,7 @@ Para client mode, droppeás `Application.Filter` e intercambiás la variante de 
 4. Corré el generator con `--dry-run` para confirmar que aparezca en el árbol del plan.
 
 ### Quiero agregar un token nuevo
-1. `TemplateRenderer.BuildTokenMap` — agregá `["MI_TOKEN"] = BuildMiToken(entity)`.
+1. `TemplateRenderer.BuildTokens` — agregá `["MI_TOKEN"] = BuildMiToken(entity)`.
 2. Implementá `BuildMiToken(EntitySpec entity)` — devolvé un `string`. Usá `StringBuilder` si es multi-línea.
 3. Agregá `{{MI_TOKEN}}` al template que lo necesite. Rebuild.
 

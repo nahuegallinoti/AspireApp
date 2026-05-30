@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Globalization;
 using AspireApp.Tools.Generator.Generator;
 using AspireApp.Tools.Generator.Generator.Mutators;
 using Spectre.Console;
@@ -80,7 +81,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         EntitySpec entity;
         try
         {
-            entity = BuildEntitySpec(settings);
+            entity = BuildEntitySpec(settings, paths);
         }
         catch (Exception ex)
         {
@@ -150,6 +151,9 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
     {
         var totals = new Totals();
 
+        // Token values are constant for the entity, so build them once and reuse for every file.
+        var tokens = TemplateRenderer.BuildTokens(entity);
+
         AnsiConsole.WriteLine();
         AnsiConsole.Write(new Rule("[bold mediumpurple1]✦ Generando[/]").RuleStyle("grey39").LeftJustified());
         AnsiConsole.WriteLine();
@@ -165,14 +169,14 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
                     ctx.Status($"[{layer.Color}]{layer.Icon} {layer.Name}[/] [grey]·[/] {creation.FriendlyLabel.EscapeMarkup()}");
                     ctx.Refresh();
 
-                    var rendered = renderer.Render(creation.TemplateName, entity);
-
                     if (File.Exists(creation.TargetPath))
                     {
                         AnsiConsole.MarkupLine($"  [yellow]○[/] [{layer.Color}]{layer.Icon} {layer.Tag}[/] [grey]{Rel(creation.TargetPath, paths)}[/]  [yellow](existe, omitido)[/]");
                         totals.Skipped++;
                         continue;
                     }
+
+                    var rendered = renderer.Render(creation.TemplateName, tokens);
 
                     if (settings.DryRun)
                     {
@@ -280,136 +284,31 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         AnsiConsole.Write(new Padder(next).Padding(2, 1, 0, 1));
     }
 
-    private static EntitySpec BuildEntitySpec(Settings settings)
+    // ----------------------------------------------------------------------------------
+    // Spec building — one resolver per decision so the flow reads top-to-bottom.
+    // ----------------------------------------------------------------------------------
+
+    private static EntitySpec BuildEntitySpec(Settings settings, PathResolver paths)
     {
-        var name = settings.EntityName;
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            AnsiConsole.WriteLine();
-            AnsiConsole.Write(new Rule("[bold mediumpurple1]✦ Definición de la entidad[/]").RuleStyle("grey39").LeftJustified());
-            AnsiConsole.WriteLine();
-            name = AnsiConsole.Prompt(
-                new TextPrompt<string>("[bold mediumpurple1]❯[/] Nombre de la entidad [grey](PascalCase, singular)[/]")
-                    .PromptStyle("aqua")
-                    .Validate(static s => string.IsNullOrWhiteSpace(s)
-                        ? ValidationResult.Error("Requerido")
-                        : char.IsLower(s[0])
-                            ? ValidationResult.Error("Debe empezar con mayúscula")
-                            : ValidationResult.Success()));
-        }
-
-        name = name.Trim();
-        if (char.IsLower(name[0]))
-            throw new ArgumentException("Entity name must be PascalCase (start with uppercase).");
-
-        var idType = settings.IdType?.Trim();
-        if (string.IsNullOrWhiteSpace(idType))
-        {
-            idType = settings.Yes
-                ? "long"
-                : AnsiConsole.Prompt(new SelectionPrompt<string>()
-                    .Title("[bold mediumpurple1]❯[/] Tipo del Id")
-                    .HighlightStyle(Style.Parse("aqua"))
-                    .AddChoices("long", "int", "Guid"));
-        }
-
-        idType = idType.ToLowerInvariant() switch
-        {
-            "long" or "int64" => "long",
-            "int" or "int32" => "int",
-            "guid" => "Guid",
-            _ => throw new ArgumentException($"Unsupported Id type '{idType}'. Use long, int or Guid.")
-        };
-
         var interactive = !settings.Yes;
 
-        var properties = new List<PropertySpec>();
+        // Resolve flag-only values first so a bad --icon/--accent fails fast, before any prompt.
+        var icon = ResolveIcon(settings);
+        var accent = ResolveAccent(settings);
 
-        if (settings.Properties is { Length: > 0 })
-        {
-            foreach (var raw in settings.Properties)
-                properties.Add(PropertySpec.Parse(raw));
-        }
-        else if (interactive)
-        {
-            AnsiConsole.MarkupLine("[grey]✎ Agregá propiedades (nombre vacío para terminar).[/]");
-            while (true)
-            {
-                var propName = AnsiConsole.Prompt(
-                    new TextPrompt<string>("  [grey]·[/] Nombre de la propiedad [grey](vacío = terminar)[/]")
-                        .PromptStyle("white")
-                        .AllowEmpty());
-
-                if (string.IsNullOrWhiteSpace(propName)) break;
-
-                var propType = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title($"    [grey]Tipo para[/] [yellow]{propName}[/]")
-                        .HighlightStyle(Style.Parse("aqua"))
-                        .AddChoices("string", "int", "long", "decimal", "double", "bool", "DateTime", "Guid"));
-
-                var required = AnsiConsole.Confirm($"    [grey]¿Es[/] [yellow]{propName}[/] [grey]requerido?[/]", defaultValue: true);
-                var filterable = AnsiConsole.Confirm(
-                    $"    [grey]¿Filtrar por[/] [yellow]{propName}[/] [grey]en el Index?[/]",
-                    defaultValue: PropertySpec.DefaultFilterableFor(propType));
-                var showInTable = AnsiConsole.Confirm(
-                    $"    [grey]¿Mostrar[/] [yellow]{propName}[/] [grey]en la tabla del index?[/]",
-                    defaultValue: true);
-                var sortable = showInTable && AnsiConsole.Confirm(
-                    $"    [grey]¿Ordenar la tabla por[/] [yellow]{propName}[/]?",
-                    defaultValue: true);
-
-                properties.Add(new PropertySpec(Capitalize(propName), propType, required, filterable, showInTable, sortable));
-            }
-        }
+        var name = ResolveEntityName(settings, paths, interactive);
+        var idType = ResolveIdType(settings, interactive);
+        var properties = ResolveProperties(settings, interactive);
 
         if (properties.Count == 0)
-        {
-            AnsiConsole.MarkupLine("[yellow]→ No se especificaron propiedades. Se generará con el body vacío (podés agregarlas después).[/]");
-        }
+            AnsiConsole.MarkupLine("[yellow]→ Sin propiedades. Se generará con el body vacío (podés agregarlas después).[/]");
 
-        bool generateBlazor;
-        if (settings.NoUi)
-            generateBlazor = false;
-        else if (interactive)
-            generateBlazor = AnsiConsole.Confirm(
-                "[bold mediumpurple1]❯[/] ¿Generar [bold]pantallas Blazor[/] [grey](Index + Edit)[/]?",
-                defaultValue: true);
-        else
-            generateBlazor = true;
-
-        bool registerNav;
-        if (settings.NoNav || !generateBlazor)
-            registerNav = false;
-        else if (interactive)
-            registerNav = AnsiConsole.Confirm(
-                "[bold mediumpurple1]❯[/] ¿Agregar un [bold]NavLink[/] en NavMenu.razor?",
-                defaultValue: true);
-        else
-            registerNav = true;
-
+        var generateBlazor = ResolveBlazor(settings, interactive);
+        var registerNav = ResolveNav(settings, interactive, generateBlazor);
         var requireAuth = !settings.NoAuth;
-
-        bool useEventBus;
-        if (settings.EventBus)
-            useEventBus = true;
-        else if (interactive)
-            useEventBus = AnsiConsole.Confirm(
-                "[bold mediumpurple1]❯[/] ¿Publicar un evento al [bold]event bus[/] cuando se cree una nueva instancia?",
-                defaultValue: false);
-        else
-            useEventBus = false;
-
+        var useEventBus = ResolveEventBus(settings, interactive);
         var filterMode = ResolveFilterMode(settings, interactive, properties);
         var pageSize = ResolvePageSize(settings, interactive, filterMode);
-
-        var icon = settings.Icon?.Trim();
-        if (!string.IsNullOrEmpty(icon) && icon.StartsWith("bi-", StringComparison.OrdinalIgnoreCase))
-            icon = icon[3..];
-
-        var accent = settings.Accent?.Trim().ToLowerInvariant();
-        if (!string.IsNullOrEmpty(accent) && accent is not ("primary" or "success" or "info" or "warning" or "danger" or "secondary"))
-            throw new ArgumentException($"Unsupported accent '{accent}'. Use primary, success, info, warning, danger or secondary.");
 
         return new EntitySpec(
             name,
@@ -421,9 +320,291 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
             useEventBus,
             filterMode,
             pageSize,
-            string.IsNullOrEmpty(icon) ? null : icon,
-            string.IsNullOrEmpty(accent) ? null : accent);
+            icon,
+            accent);
     }
+
+    private static string ResolveEntityName(Settings settings, PathResolver paths, bool interactive)
+    {
+        var name = settings.EntityName?.Trim();
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            if (!interactive)
+                throw new ArgumentException("Falta el nombre de la entidad. Pasalo como argumento (ej: 'generate Order') o no uses --yes.");
+
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(new Rule("[bold mediumpurple1]✦ Definición de la entidad[/]").RuleStyle("grey39").LeftJustified());
+            AnsiConsole.WriteLine();
+
+            name = AnsiConsole.Prompt(
+                new TextPrompt<string>("[bold mediumpurple1]❯[/] Nombre de la entidad [grey](PascalCase, singular)[/]")
+                    .PromptStyle("aqua")
+                    .Validate(static raw => Naming.IsValidIdentifier(raw?.Trim())
+                        ? ValidationResult.Success()
+                        : ValidationResult.Error("Sólo letras, dígitos o '_', empezando con letra o '_'")));
+        }
+        else if (!Naming.IsValidIdentifier(name))
+        {
+            throw new ArgumentException($"Nombre de entidad inválido '{name}'. Usá sólo letras, dígitos o '_', empezando con letra o '_'.");
+        }
+
+        name = Naming.Capitalize(name.Trim());
+
+        // Heads-up if the slice already exists. Existing files are skipped and shared files are
+        // not duplicated, so this is informational — but better to know before generating.
+        if (interactive && File.Exists(paths.DomainEntity(name)))
+            AnsiConsole.MarkupLine($"  [yellow]○[/] [grey]Ya existe[/] [white]{name.EscapeMarkup()}[/][grey]: los archivos existentes se omiten y los compartidos no se duplican.[/]");
+
+        return name;
+    }
+
+    private static string ResolveIdType(Settings settings, bool interactive)
+    {
+        var idType = settings.IdType?.Trim();
+        if (string.IsNullOrWhiteSpace(idType))
+        {
+            idType = interactive
+                ? AnsiConsole.Prompt(new SelectionPrompt<string>()
+                    .Title("[bold mediumpurple1]❯[/] Tipo del Id")
+                    .HighlightStyle(Style.Parse("aqua"))
+                    .AddChoices("long", "int", "Guid"))
+                : "long";
+        }
+
+        return idType.ToLowerInvariant() switch
+        {
+            "long" or "int64" => "long",
+            "int" or "int32" => "int",
+            "guid" => "Guid",
+            _ => throw new ArgumentException($"Tipo de Id no soportado '{idType}'. Usá long, int o Guid.")
+        };
+    }
+
+    private static List<PropertySpec> ResolveProperties(Settings settings, bool interactive)
+    {
+        if (settings.Properties is { Length: > 0 })
+            return [.. settings.Properties.Select(PropertySpec.Parse)];
+
+        return interactive ? CollectPropertiesInteractive() : [];
+    }
+
+    private static bool ResolveBlazor(Settings settings, bool interactive)
+    {
+        if (settings.NoUi) return false;
+        if (!interactive) return true;
+        return AnsiConsole.Confirm("[bold mediumpurple1]❯[/] ¿Generar [bold]pantallas Blazor[/] [grey](Index + Edit)[/]?", true);
+    }
+
+    private static bool ResolveNav(Settings settings, bool interactive, bool generateBlazor)
+    {
+        if (settings.NoNav || !generateBlazor) return false;
+        if (!interactive) return true;
+        return AnsiConsole.Confirm("[bold mediumpurple1]❯[/] ¿Agregar un [bold]NavLink[/] en NavMenu.razor?", true);
+    }
+
+    private static bool ResolveEventBus(Settings settings, bool interactive)
+    {
+        if (settings.EventBus) return true;
+        if (!interactive) return false;
+        return AnsiConsole.Confirm("[bold mediumpurple1]❯[/] ¿Publicar un evento al [bold]event bus[/] cuando se cree una nueva instancia?", false);
+    }
+
+    private static string? ResolveIcon(Settings settings)
+    {
+        var icon = settings.Icon?.Trim();
+        if (string.IsNullOrEmpty(icon)) return null;
+        if (icon.StartsWith("bi-", StringComparison.OrdinalIgnoreCase)) icon = icon[3..];
+        return string.IsNullOrEmpty(icon) ? null : icon;
+    }
+
+    private static string? ResolveAccent(Settings settings)
+    {
+        var accent = settings.Accent?.Trim().ToLowerInvariant();
+        if (string.IsNullOrEmpty(accent)) return null;
+        if (accent is not ("primary" or "success" or "info" or "warning" or "danger" or "secondary"))
+            throw new ArgumentException($"Acento no soportado '{accent}'. Usá primary, success, info, warning, danger o secondary.");
+        return accent;
+    }
+
+    // ----------------------------------------------------------------------------------
+    // Interactive property editor — add / edit / remove with a live table, so a wrong
+    // answer (required, filter, …) is fixed by editing the row, not by restarting.
+    // ----------------------------------------------------------------------------------
+
+    private static readonly string[] PropertyTypes =
+        ["string", "int", "long", "decimal", "double", "bool", "DateTime", "Guid"];
+
+    private const string FlagRequired = "Requerido";
+    private const string FlagFilter = "Filtrable en el Index";
+    private const string FlagList = "Mostrar en la tabla";
+    private const string FlagSort = "Columna ordenable";
+
+    private enum PropertyAction { Add, Edit, Remove, Done }
+
+    private static List<PropertySpec> CollectPropertiesInteractive()
+    {
+        var properties = new List<PropertySpec>();
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Rule("[bold mediumpurple1]✎ Propiedades[/]").RuleStyle("grey39").LeftJustified());
+        AnsiConsole.MarkupLine("[grey]Agregá, editá o quitá campos. La tabla refleja el estado actual.[/]");
+        AnsiConsole.WriteLine();
+
+        while (true)
+        {
+            RenderPropertiesTable(properties);
+
+            var action = AnsiConsole.Prompt(new SelectionPrompt<PropertyAction>()
+                .Title("[grey]¿Qué querés hacer?[/]")
+                .HighlightStyle(Style.Parse("aqua"))
+                .UseConverter(a => a switch
+                {
+                    PropertyAction.Add => "✚  Agregar propiedad",
+                    PropertyAction.Edit => "✎  Editar una propiedad",
+                    PropertyAction.Remove => "−  Quitar una propiedad",
+                    _ => "❯  Listo, continuar",
+                })
+                .AddChoices(BuildActionChoices(properties.Count)));
+
+            switch (action)
+            {
+                case PropertyAction.Add:
+                    properties.Add(PromptForProperty(existing: null, siblings: properties));
+                    break;
+
+                case PropertyAction.Edit:
+                    var toEdit = ChooseProperty(properties, "editar");
+                    if (toEdit is not null)
+                    {
+                        var idx = properties.IndexOf(toEdit);
+                        properties[idx] = PromptForProperty(existing: toEdit, siblings: properties);
+                    }
+                    break;
+
+                case PropertyAction.Remove:
+                    var toRemove = ChooseProperty(properties, "quitar");
+                    if (toRemove is not null)
+                        properties.Remove(toRemove);
+                    break;
+
+                default:
+                    return properties;
+            }
+        }
+    }
+
+    private static PropertyAction[] BuildActionChoices(int count) =>
+        count > 0
+            ? [PropertyAction.Add, PropertyAction.Edit, PropertyAction.Remove, PropertyAction.Done]
+            : [PropertyAction.Add, PropertyAction.Done];
+
+    private static PropertySpec? ChooseProperty(IReadOnlyList<PropertySpec> properties, string verb)
+    {
+        // -1 is the "go back" sentinel.
+        var choices = Enumerable.Range(0, properties.Count).Append(-1);
+
+        var idx = AnsiConsole.Prompt(new SelectionPrompt<int>()
+            .Title($"[grey]¿Cuál querés {verb}?[/]")
+            .HighlightStyle(Style.Parse("aqua"))
+            .UseConverter(i => i < 0
+                ? "↩  Volver"
+                : $"{i + 1}. {properties[i].Name} ({properties[i].Type})")
+            .AddChoices(choices));
+
+        return idx < 0 ? null : properties[idx];
+    }
+
+    private static PropertySpec PromptForProperty(PropertySpec? existing, IReadOnlyList<PropertySpec> siblings)
+    {
+        var isEdit = existing is not null;
+
+        var namePrompt = new TextPrompt<string>(isEdit
+                ? "  [grey]·[/] Nombre [grey](Enter mantiene el actual)[/]"
+                : "  [grey]·[/] Nombre de la propiedad")
+            .PromptStyle("white")
+            .Validate(candidate => ValidatePropertyName(candidate, existing, siblings));
+
+        if (isEdit)
+            namePrompt.DefaultValue(existing!.Name).ShowDefaultValue();
+
+        var name = Naming.Capitalize(AnsiConsole.Prompt(namePrompt).Trim());
+
+        var type = AnsiConsole.Prompt(new SelectionPrompt<string>()
+            .Title($"    [grey]Tipo para[/] [yellow]{name.EscapeMarkup()}[/]")
+            .HighlightStyle(Style.Parse("aqua"))
+            .AddChoices(TypeChoices(existing?.Type)));
+
+        var flags = BuildFlagPrompt(name, existing, type);
+        var selected = AnsiConsole.Prompt(flags);
+
+        var showInList = selected.Contains(FlagList);
+        return new PropertySpec(
+            Name: name,
+            Type: type,
+            Required: selected.Contains(FlagRequired),
+            Filterable: selected.Contains(FlagFilter),
+            ShowInList: showInList,
+            Sortable: showInList && selected.Contains(FlagSort));
+    }
+
+    /// <summary>Type list with the current type (when editing) floated to the top so the cursor starts on it.</summary>
+    private static IEnumerable<string> TypeChoices(string? currentType)
+    {
+        if (string.IsNullOrEmpty(currentType))
+            return PropertyTypes;
+
+        return PropertyTypes.Contains(currentType)
+            ? PropertyTypes.OrderByDescending(t => t == currentType)
+            : PropertyTypes.Prepend(currentType);
+    }
+
+    private static MultiSelectionPrompt<string> BuildFlagPrompt(string name, PropertySpec? existing, string type)
+    {
+        var prompt = new MultiSelectionPrompt<string>()
+            .Title($"    [grey]Opciones para[/] [yellow]{name.EscapeMarkup()}[/]")
+            .NotRequired()
+            .HighlightStyle(Style.Parse("aqua"))
+            .InstructionsText("[grey](espacio = marcar · Enter = confirmar)[/]")
+            .AddChoices(FlagRequired, FlagFilter, FlagList, FlagSort);
+
+        // Pre-select sensible defaults for new props, or the current values when editing.
+        var required = existing?.Required ?? false;
+        var filterable = existing?.Filterable ?? PropertySpec.DefaultFilterableFor(type);
+        var showInList = existing?.ShowInList ?? true;
+        var sortable = existing is null || (existing.ShowInList && existing.Sortable);
+
+        if (required) prompt.Select(FlagRequired);
+        if (filterable) prompt.Select(FlagFilter);
+        if (showInList) prompt.Select(FlagList);
+        if (sortable) prompt.Select(FlagSort);
+
+        return prompt;
+    }
+
+    private static ValidationResult ValidatePropertyName(string raw, PropertySpec? existing, IReadOnlyList<PropertySpec> siblings)
+    {
+        var name = raw?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(name))
+            return ValidationResult.Error("El nombre es obligatorio");
+
+        if (!Naming.IsValidIdentifier(name))
+            return ValidationResult.Error("Sólo letras, dígitos o '_', empezando con letra o '_'");
+
+        var capitalized = Naming.Capitalize(name);
+        var duplicate = siblings.Any(p =>
+            !ReferenceEquals(p, existing) &&
+            string.Equals(p.Name, capitalized, StringComparison.OrdinalIgnoreCase));
+
+        return duplicate
+            ? ValidationResult.Error($"Ya existe una propiedad '{capitalized}'")
+            : ValidationResult.Success();
+    }
+
+    // ----------------------------------------------------------------------------------
+    // Filter mode / page size
+    // ----------------------------------------------------------------------------------
 
     private static FilterMode ResolveFilterMode(Settings settings, bool interactive, IReadOnlyList<PropertySpec> properties)
     {
@@ -434,7 +615,7 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
             {
                 "client" or "cli" => FilterMode.Client,
                 "server" or "srv" or "api" => FilterMode.Server,
-                _ => throw new ArgumentException($"Unsupported filter mode '{settings.FilterMode}'. Use 'client' or 'server'."),
+                _ => throw new ArgumentException($"Modo de filtrado no soportado '{settings.FilterMode}'. Usá 'client' o 'server'."),
             };
         }
 
@@ -472,8 +653,9 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
                 : ValidationResult.Error("Debe ser entre 1 y 500")));
     }
 
-    private static string Capitalize(string s) =>
-        string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + s[1..];
+    // ----------------------------------------------------------------------------------
+    // Preview rendering
+    // ----------------------------------------------------------------------------------
 
     private static void RenderEntitySummary(EntitySpec entity)
     {
@@ -509,40 +691,60 @@ internal sealed class GenerateCommand : AsyncCommand<GenerateCommand.Settings>
         });
 
         if (entity.Properties.Count > 0)
-        {
-            var table = new Table()
-                .Border(TableBorder.Rounded)
-                .BorderColor(Color.Grey39)
-                .Title("[bold]✎ Propiedades[/]")
-                .AddColumn("[grey]#[/]")
-                .AddColumn("[bold]Nombre[/]")
-                .AddColumn("[bold]Tipo[/]")
-                .AddColumn("[bold]Req[/]")
-                .AddColumn("[bold]Filtra[/]")
-                .AddColumn("[bold]Lista[/]")
-                .AddColumn("[bold]Ordena[/]");
-
-            for (var i = 0; i < entity.Properties.Count; i++)
-            {
-                var p = entity.Properties[i];
-                table.AddRow(
-                    $"[grey]{i + 1}[/]",
-                    $"[white]{p.Name.EscapeMarkup()}[/]",
-                    $"[aqua]{p.Type.EscapeMarkup()}[/]",
-                    p.Required ? "[bold red]✔[/]" : "[grey]·[/]",
-                    p.Filterable ? "[green]✔[/]" : "[grey]·[/]",
-                    p.ShowInList ? "[green]✔[/]" : "[grey]·[/]",
-                    p.ShowInList && p.Sortable ? "[green]✔[/]" : "[grey]·[/]");
-            }
-            AnsiConsole.Write(table);
-        }
+            AnsiConsole.Write(BuildPropertiesTable(entity.Properties, "[bold]✎ Propiedades[/]"));
         else
-        {
             AnsiConsole.MarkupLine("[grey](sin propiedades)[/]");
-        }
 
         AnsiConsole.WriteLine();
     }
+
+    private static void RenderPropertiesTable(IReadOnlyList<PropertySpec> properties)
+    {
+        if (properties.Count == 0)
+        {
+            AnsiConsole.MarkupLine("  [grey]· Todavía no agregaste propiedades.[/]");
+            AnsiConsole.WriteLine();
+            return;
+        }
+
+        AnsiConsole.Write(BuildPropertiesTable(properties, title: null));
+        AnsiConsole.WriteLine();
+    }
+
+    /// <summary>Single source of truth for the property table, used by the live editor and the final preview.</summary>
+    private static Table BuildPropertiesTable(IReadOnlyList<PropertySpec> properties, string? title)
+    {
+        var table = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Grey39)
+            .AddColumn("[grey]#[/]")
+            .AddColumn("[bold]Nombre[/]")
+            .AddColumn("[bold]Tipo[/]")
+            .AddColumn("[bold]Req[/]")
+            .AddColumn("[bold]Filtra[/]")
+            .AddColumn("[bold]Lista[/]")
+            .AddColumn("[bold]Ordena[/]");
+
+        if (title is not null)
+            table.Title(title);
+
+        for (var i = 0; i < properties.Count; i++)
+        {
+            var p = properties[i];
+            table.AddRow(
+                $"[grey]{i + 1}[/]",
+                $"[white]{p.Name.EscapeMarkup()}[/]",
+                $"[aqua]{p.Type.EscapeMarkup()}[/]",
+                Check(p.Required),
+                Check(p.Filterable),
+                Check(p.ShowInList),
+                Check(p.ShowInList && p.Sortable));
+        }
+
+        return table;
+    }
+
+    private static string Check(bool on) => on ? "[green]✔[/]" : "[grey]·[/]";
 
     private static string MapAccentToSpectre(string accent) => accent switch
     {

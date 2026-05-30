@@ -15,28 +15,29 @@ internal sealed class TemplateRenderer
         _templatesRoot = Path.Combine(assemblyDir, "Templates");
     }
 
-    public string Render(string templateFileName, EntitySpec entity)
+    /// <summary>
+    /// Renders a template against a pre-built token map. The map is constant for a given
+    /// entity, so callers build it once (see <see cref="BuildTokens"/>) and reuse it for
+    /// every template in the run instead of rebuilding it per file.
+    /// </summary>
+    public string Render(string templateFileName, IReadOnlyDictionary<string, string> tokens)
     {
         var path = Path.Combine(_templatesRoot, templateFileName);
         if (!File.Exists(path))
             throw new FileNotFoundException($"Template not found: {path}");
 
-        var content = File.ReadAllText(path);
-        return Replace(content, entity);
-    }
-
-    private static string Replace(string content, EntitySpec entity)
-    {
-        var tokens = BuildTokenMap(entity);
-
-        var sb = new StringBuilder(content);
+        var sb = new StringBuilder(File.ReadAllText(path));
         foreach (var (key, value) in tokens)
             sb.Replace("{{" + key + "}}", value);
 
         return sb.ToString();
     }
 
-    private static Dictionary<string, string> BuildTokenMap(EntitySpec entity) => new(StringComparer.Ordinal)
+    /// <summary>
+    /// Builds the full <c>{{TOKEN}} → value</c> map for an entity. Every value is derived
+    /// purely from <paramref name="entity"/>, so this is computed once per generation run.
+    /// </summary>
+    public static IReadOnlyDictionary<string, string> BuildTokens(EntitySpec entity) => new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["ENTITY"] = entity.Name,
         ["entity"] = entity.Lower,

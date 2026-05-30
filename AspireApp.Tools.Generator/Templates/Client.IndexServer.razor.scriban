@@ -114,7 +114,7 @@ else
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
         <div class="d-flex align-items-center gap-2 small text-muted">
-            <span>Por página</span>
+            <label for="pageSize" class="mb-0">Por página</label>
             <select class="form-select form-select-sm w-auto" @bind="PageSizeChoice">
                 <option value="10">10</option>
                 <option value="25">25</option>

@@ -10,11 +10,15 @@ CLI for scaffolding entities in the AspireApp solution. Generates every layer (D
 
 ### Interactive mode
 
-Without arguments it walks you through every choice (per field: required? filterable? show in table? sortable column? and finally client vs server filter mode):
+Without arguments it walks you through every choice:
 
 ```pwsh
 dotnet run --project AspireApp.Tools.Generator
 ```
+
+- **Name and Id type** first (the name is normalized to PascalCase automatically, e.g. `customer` → `Customer`).
+- **Property editor** with a live table and an **Add / Edit / Remove / Done** menu: you add fields, and if you got something wrong (type, required, filter, …) you **edit that row** instead of starting over. Per field you pick a name, a type and — in a single multi-select — the **Required / Filterable / Show in table / Sortable** options (with sensible defaults pre-checked based on the type).
+- Then: Blazor pages, NavLink, event bus and **client/server** filter mode (plus page size in server mode).
 
 ### Non-interactive mode
 
@@ -61,7 +65,7 @@ dotnet run --project AspireApp.Tools.Generator -- generate Order `
 | `sort` / `sortable`                  | Click-to-sort column header in the table (default).                                     |
 | `nosort`                             | Column is not sortable.                                                                 |
 
-Defaults: `required=false`, `filterable=true` only for strings, `showInList=true`, `sortable=true`. Interactive mode asks about each per field (with sensible defaults pre-selected).
+Defaults: `required=false`, `filterable=true` only for strings, `showInList=true`, `sortable=true`. In interactive mode these are toggled per field in a multi-select (with those defaults pre-checked) and remain editable afterwards from the property menu.
 
 ### Supported property types
 

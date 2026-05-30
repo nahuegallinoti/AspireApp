@@ -4,12 +4,18 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>AspireApp.Tools.Generator</RootNamespace>
     <AssemblyName>AspireApp.Tools.Generator</AssemblyName>
-    <NoWarn>CA1848;CA1303;CA1031</NoWarn>
+    <!-- CA1859: prefer concrete collection types — irrelevant for a one-shot CLI, and the
+         presentation helpers intentionally accept IReadOnlyList to stay caller-agnostic. -->
+    <NoWarn>CA1848;CA1303;CA1031;CA1859</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Spectre.Console" />
     <PackageReference Include="Spectre.Console.Cli" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="AspireApp.Tools.Generator.Tests" />
   </ItemGroup>
 
   <ItemGroup>

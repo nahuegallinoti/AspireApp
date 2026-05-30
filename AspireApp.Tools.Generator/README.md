@@ -10,11 +10,15 @@ CLI para scaffolding de entidades en la solución AspireApp. Genera todos los ar
 
 ### Modo interactivo
 
-Sin argumentos te pregunta paso a paso (incluye, por cada campo, si es filtrable, si se muestra en la tabla y si la columna es ordenable; al final, modo de filtrado client/server):
+Sin argumentos te guía paso a paso:
 
 ```pwsh
 dotnet run --project AspireApp.Tools.Generator
 ```
+
+- **Nombre y tipo de Id** primero (el nombre se normaliza a PascalCase automáticamente, p. ej. `cliente` → `Cliente`).
+- **Editor de propiedades** con una tabla en vivo y un menú **Agregar / Editar / Quitar / Listo**: agregás campos, y si te equivocaste en algo (tipo, requerido, filtro, etc.) **editás esa fila** en vez de reiniciar. Por cada campo elegís nombre, tipo y, en un único multi-select, las opciones **Requerido / Filtrable / Mostrar en la tabla / Ordenable** (con defaults sensatos pre-marcados según el tipo).
+- Luego: pantallas Blazor, NavLink, event bus y modo de filtrado **client/server** (y tamaño de página en server).
 
 ### Modo no-interactivo
 
@@ -61,7 +65,7 @@ dotnet run --project AspireApp.Tools.Generator -- generate Order `
 | `sort` / `sortable`                  | Columna ordenable click-to-sort en la tabla (default).                                  |
 | `nosort`                             | Columna no ordenable.                                                                   |
 
-Defaults: `required=false`, `filterable=true` sólo para strings, `showInList=true`, `sortable=true`. En modo interactivo se preguntan estas opciones por cada campo (defaults sensatos pre-seleccionados).
+Defaults: `required=false`, `filterable=true` sólo para strings, `showInList=true`, `sortable=true`. En modo interactivo estas opciones se eligen por campo en un multi-select (con esos defaults pre-marcados) y son editables después desde el menú de propiedades.
 
 ### Tipos de propiedad soportados
 

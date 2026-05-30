@@ -74,7 +74,7 @@ Either fully interactive (Spectre prompts) or fully driven by CLI flags. The out
 
 - `ResolveFilterMode` — `client` (default) or `server`. Determines whether the Index does in-browser filtering or talks to a paged endpoint.
 - `ResolvePageSize` — server-mode only; defaults to 25.
-- `PropertySpec.Parse` for the `--prop` form, or per-field prompts (Required, Filterable, ShowInList, Sortable) interactively.
+- Properties come from `PropertySpec.Parse` (the `--prop` form) or, interactively, from `CollectPropertiesInteractive` — a live-table editor with an **Add / Edit / Remove / Done** menu. Each field is built in `PromptForProperty` (name + type + a multi-select of the Required/Filterable/ShowInList/Sortable flags), so a wrong answer is fixed by editing the row, not restarting. Names go through `Naming.IsValidIdentifier` and are normalized with `Naming.Capitalize`.
 
 ### 4. Build the plan — `GenerationPlan.Build(entity, paths)`
 Pure function. Returns a record with two lists:
@@ -90,7 +90,7 @@ All Spectre. Two panels (entity summary + plan tree grouped by layer). If not `-
 ### 6. Execute — `ExecutePlanAsync`
 Two passes:
 
-- **Creations**: for each, `renderer.Render(templateName, entity)` → if file exists, skip. Otherwise create dirs and write. In `--dry-run`, prints the path but doesn't write.
+- **Creations**: the token map is built **once** via `TemplateRenderer.BuildTokens(entity)` and reused for every file. For each, `renderer.Render(templateName, tokens)` → if file exists, skip. Otherwise create dirs and write. In `--dry-run`, prints the path but doesn't write.
 - **Mutators**: for each, read source → `mutator.Mutate(source, entity)` → if `Changed`, write back. If it can't find its anchor, it surfaces an error and continues with the rest (counted in `totals.Failed`).
 
 ### 7. Summary — `RenderResult`
@@ -106,7 +106,7 @@ Counts of created / mutated / skipped / failed in a panel, plus a "next steps" f
 | `PropertySpec` | One field. `Name`, `Type` (normalized), `Required`, `Filterable`, `ShowInList`, `Sortable`. Knows its type bucket via `IsString` / `IsBool` / `IsNumeric` / `IsDateTime` / `IsGuid` and its Razor input component (`InputText`, `InputNumber`, etc.). `Parse(raw)` handles the `--prop "Name:type:flag:flag"` CLI shape. |
 | `PathResolver` | Single owner of "where does file X go for entity Y?". `Combine(...)` is the only place that joins solution-relative path segments. Add new file destinations here. |
 | `GenerationPlan` | Returned by `Build(entity, paths)`. Holds `Creations` + `Mutators`. Conditionals (server-mode extras, Blazor on/off, NavMenu on/off) live here. |
-| `TemplateRenderer` | Reads a `.scriban` file once per render call, builds the token map for the entity, runs sequential `StringBuilder.Replace("{{KEY}}", value)`. |
+| `TemplateRenderer` | `BuildTokens(entity)` builds the `{{KEY}} → value` map once per run (static, no IO). `Render(templateFileName, tokens)` reads the `.scriban` and runs sequential `StringBuilder.Replace("{{KEY}}", value)` with that map. |
 | `IFileMutator` / `MutationResult` | Tiny contract for shared-file patches. Mutate is **pure** (string in, string out) — actual write happens in `GenerateCommand`. |
 
 ---
@@ -150,7 +150,7 @@ public interface I{{ENTITY}}DA : IBaseDA<{{ENTITY}}, {{ID_TYPE}}>
 
 ### Token map cheat sheet
 
-Defined in `TemplateRenderer.BuildTokenMap`. Naming convention:
+Defined in `TemplateRenderer.BuildTokens`. Naming convention:
 
 - `ENTITY`, `ID_TYPE`, etc. — scalar identity tokens.
 - `PROPS_*` — per-property lists (entity props, model props, table head, filter fields, etc.).
@@ -158,7 +158,7 @@ Defined in `TemplateRenderer.BuildTokenMap`. Naming convention:
 - `*_BODY` — the main body content of the file (empty `;\n` for client mode, full implementation for server mode).
 - `AUTHORIZE_*`, `EVENT_BUS_*` — conditional fragments toggled by entity flags.
 
-If a token doesn't appear in the map, `{{IT}}` is left **literally in the output**. Always wire a token in `BuildTokenMap` before using it in a template.
+If a token doesn't appear in the map, `{{IT}}` is left **literally in the output**. Always wire a token in `BuildTokens` before using it in a template.
 
 ---
 
@@ -219,7 +219,7 @@ For client mode, drop `Application.Filter` and swap the Index variant.
 4. Run the generator with `--dry-run` to confirm it appears in the plan tree.
 
 ### I want to add a new token
-1. `TemplateRenderer.BuildTokenMap` — add `["MY_TOKEN"] = BuildMyToken(entity)`.
+1. `TemplateRenderer.BuildTokens` — add `["MY_TOKEN"] = BuildMyToken(entity)`.
 2. Implement `BuildMyToken(EntitySpec entity)` — return a `string`. Use a `StringBuilder` if multi-line.
 3. Add `{{MY_TOKEN}}` to whichever template needs it. Rebuild.
 
