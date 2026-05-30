@@ -29,6 +29,14 @@ internal sealed class GenerationPlan
             creations.Add(new(paths.ApplicationFilter(entity.Name), "Application.Filter.scriban", "Application.Filter"));
         }
 
+        var refMutators = new List<IFileMutator>();
+        if (entity.IsServerFiltering)
+        {
+            refMutators.Add(new CsprojReferenceMutator(
+                paths.ApplicationModelsCsproj,
+                @"..\AspireApp.Domain.Paging\AspireApp.Domain.Paging.csproj"));
+        }
+
         if (entity.GenerateBlazorPage)
         {
             var indexRazor = entity.IsServerFiltering ? "Client.IndexServer.razor.scriban" : "Client.Index.razor.scriban";
@@ -75,7 +83,7 @@ internal sealed class GenerationPlan
         return new GenerationPlan
         {
             Creations = creations,
-            Mutators = mutators,
+            Mutators = [.. refMutators, .. mutators],
         };
     }
 }

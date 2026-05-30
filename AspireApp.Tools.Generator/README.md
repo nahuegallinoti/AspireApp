@@ -208,7 +208,7 @@ Para que el port de persistencia **no dependa de la capa de modelos** (Clean Arc
 
 - `AspireApp.Domain.Paging/PagedResult.cs` — envelope inmutable `Items / Total / Page / PageSize` + helpers (`TotalPages`, `HasPrevious`, `HasNext`).
 - `AspireApp.Domain.Paging/PagedQuery.cs` — base con `Page`, `PageSize`, `SortBy`, `SortDir` (`SortDirection.Asc|Desc`) y `Normalize()`.
-- `AspireApp.Application.Models` referencia `AspireApp.Domain.Paging` para que el `{Entity}Filter` generado pueda heredar `PagedQuery`. Si todavía no hay ninguna entidad en server-mode, este ref puede no estar — el primer entity generado en server-mode necesita que añadas `<ProjectReference Include="..\AspireApp.Domain.Paging\AspireApp.Domain.Paging.csproj" />` a `AspireApp.Application.Models.csproj`.
+- `AspireApp.Application.Models` referencia `AspireApp.Domain.Paging` para que el `{Entity}Filter` generado pueda heredar `PagedQuery`. La primera vez que generás una entidad en server-mode, el generator agrega esa `<ProjectReference>` a `AspireApp.Application.Models.csproj` automáticamente (idempotente — corridas siguientes la detectan y la saltean). El resto de los proyectos (`Client.ApiClients`, `Client`, `Application.Implementations`, `DataAccess.Implementations`) ven `Domain.Paging` transitivamente vía esa referencia.
 - `AspireApp.Domain.ROP` queda dedicado únicamente a Railway-Oriented Programming (`Result<T>`, `Unit`).
 
 ### Flujo server-mode (de UI a DB)

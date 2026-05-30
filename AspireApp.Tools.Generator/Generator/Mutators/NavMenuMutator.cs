@@ -1,9 +1,10 @@
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AspireApp.Tools.Generator.Generator.Mutators;
 
-internal sealed class NavMenuMutator(string targetPath) : IFileMutator
+internal sealed partial class NavMenuMutator(string targetPath) : IFileMutator
 {
     public string TargetPath { get; } = targetPath;
 
@@ -14,28 +15,57 @@ internal sealed class NavMenuMutator(string targetPath) : IFileMutator
             return new MutationResult(source, false, "already up to date");
 
         var newline = source.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
-        var navItem = BuildNavItem(entity, newline);
 
-        var anchorIdx = source.LastIndexOf("</nav>", StringComparison.Ordinal);
+        var anchorIdx = -1;
+        if (entity.RequireAuth)
+        {
+            var outerAuthMatch = OuterAuthorizedCloseRegex().Match(source);
+            if (outerAuthMatch.Success)
+                anchorIdx = outerAuthMatch.Index;
+        }
+
         if (anchorIdx < 0)
-            throw new InvalidOperationException("Could not find </nav> in NavMenu.razor.");
+            anchorIdx = source.LastIndexOf("</nav>", StringComparison.Ordinal);
 
-        // Walk back to start of the line that contains </nav>
+        if (anchorIdx < 0)
+            throw new InvalidOperationException("Could not find anchor in NavMenu.razor.");
+
         var lineStart = source.LastIndexOf('\n', anchorIdx) + 1;
+        var anchorIndent = ExtractIndent(source, lineStart);
+        var navItem = BuildNavItem(entity, newline, anchorIndent + "    ");
+
         var insertion = navItem + newline + newline;
         var updated = source[..lineStart] + insertion + source[lineStart..];
 
         return new MutationResult(updated, true, "+ NavLink");
     }
 
-    private static string BuildNavItem(EntitySpec entity, string newline)
+    private static string ExtractIndent(string source, int lineStart)
     {
         var sb = new StringBuilder();
-        sb.Append("        <div class=\"nav-item px-3\">").Append(newline);
-        sb.Append(CultureInfo.InvariantCulture, $"            <NavLink class=\"nav-link\" href=\"{entity.Lower}\">").Append(newline);
-        sb.Append(CultureInfo.InvariantCulture, $"                <span class=\"bi bi-{entity.Icon}\" aria-hidden=\"true\"></span> {entity.Plural}").Append(newline);
-        sb.Append("            </NavLink>").Append(newline);
-        sb.Append("        </div>");
+        for (var i = lineStart; i < source.Length; i++)
+        {
+            var c = source[i];
+            if (c == ' ' || c == '\t') sb.Append(c);
+            else break;
+        }
         return sb.ToString();
     }
+
+    private static string BuildNavItem(EntitySpec entity, string newline, string divIndent)
+    {
+        var inner = divIndent + "    ";
+        var deep = inner + "    ";
+
+        var sb = new StringBuilder();
+        sb.Append(divIndent).Append("<div class=\"nav-item px-3\">").Append(newline);
+        sb.Append(inner).Append(CultureInfo.InvariantCulture, $"<NavLink class=\"nav-link\" href=\"{entity.Lower}\">").Append(newline);
+        sb.Append(deep).Append(CultureInfo.InvariantCulture, $"<span class=\"bi bi-{entity.Icon}\" aria-hidden=\"true\"></span> {entity.Plural}").Append(newline);
+        sb.Append(inner).Append("</NavLink>").Append(newline);
+        sb.Append(divIndent).Append("</div>");
+        return sb.ToString();
+    }
+
+    [GeneratedRegex(@"</Authorized>\s*<NotAuthorized>")]
+    private static partial Regex OuterAuthorizedCloseRegex();
 }

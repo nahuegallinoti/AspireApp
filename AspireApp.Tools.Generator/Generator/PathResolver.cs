@@ -72,6 +72,9 @@ internal sealed class PathResolver
     public string BlazorEditCs(string entity) =>
         Combine("AspireApp.Client", "Components", "Pages", $"{entity}Edit.razor.cs");
 
+    public string ApplicationModelsCsproj =>
+        Combine("AspireApp.Application.Models", "AspireApp.Application.Models.csproj");
+
     public string AppDbContext =>
         Combine("AspireApp.DataAccess.Implementations", "AppDbContext.cs");
 

@@ -37,7 +37,8 @@ AspireApp.Tools.Generator/
 │       ├── IFileMutator.cs          ← interface: TargetPath + Mutate(source, entity) → MutationResult
 │       ├── DiRegistrationMutator.cs ← inserta líneas using + AddScoped/AddSingleton después de un marcador
 │       ├── DbContextMutator.cs      ← inserta DbSet<> + config modelBuilder.Entity<>() en AppDbContext
-│       └── NavMenuMutator.cs        ← inserta un bloque NavLink antes de </nav>
+│       ├── NavMenuMutator.cs        ← inserta un bloque NavLink dentro de <Authorized> o antes de </nav>
+│       └── CsprojReferenceMutator.cs ← agrega <ProjectReference> a un .csproj (server-mode)
 └── Templates/                       ← archivos *.scriban de texto; **NO** es Scriban real, sólo sustitución {{TOKEN}}
     ├── Domain.Entity.scriban
     ├── Application.Model.scriban
@@ -166,7 +167,7 @@ Si un token no aparece en el mapa, `{{ESO}}` queda **literalmente en el output**
 
 `IFileMutator` existe porque algunos archivos están **compartidos entre entidades** — contenedores de DI, el DbContext, NavMenu — y una escritura fresca clobberaría las entidades existentes. Así que en vez de templatear, los leemos, los parcheamos, los escribimos.
 
-Tres implementaciones cubren todo:
+Cuatro implementaciones cubren todo:
 
 ### `DiRegistrationMutator`
 Genérico: toma una lista de `usingLines`, una `registrationLine` (e.g. `services.AddScoped<IOrderService, OrderService>();`), y un `markerForLastRegistration` (un substring como `"services.AddScoped<I"`). Idempotente — si la línea de registración ya existe, no-op.
@@ -178,9 +179,12 @@ Dónde se cablea: `GenerationPlan.Build` construye **uno por archivo de DI** (Da
 - Si la entidad tiene propiedades string, también inserta un bloque `modelBuilder.Entity<X>(entity => { ... });` antes de la llave de cierre de `OnModelCreating`. Usa un contador de profundidad de llaves para encontrar la llave de cierre que matchea.
 
 ### `NavMenuMutator`
-Busca `href="entityname"` para detectar entradas existentes (idempotente), si no inserta un bloque `<div class="nav-item">…<NavLink>…` justo antes de `</nav>`.
+Busca `href="entityname"` para detectar entradas existentes (idempotente). Si la entidad tiene `RequireAuth`, inserta el bloque `<div class="nav-item">…<NavLink>…` antes del `</Authorized>` del `AuthorizeView` externo (detectado por el patrón `</Authorized>\s*<NotAuthorized>`); si no, lo inserta antes de `</nav>`. La indentación se detecta automáticamente desde la línea del ancla.
 
-Los tres son **anchor-based**: fallan ruidosos si su ancla falta, en vez de droppear el cambio silenciosamente.
+### `CsprojReferenceMutator`
+Agrega un `<ProjectReference Include="...">` a un `.csproj` (idempotente — chequea por el atributo `Include`). Copia la indentación de un `<ProjectReference>` existente, o si no hay ninguno, inserta un `<ItemGroup>` nuevo antes de `</Project>`. Se usa en server-mode para asegurar que `AspireApp.Application.Models.csproj` referencie `AspireApp.Domain.Paging` (necesario porque el `{Entity}Filter` generado hereda `PagedQuery`).
+
+Los cuatro son **anchor-based**: fallan ruidosos si su ancla falta, en vez de droppear el cambio silenciosamente.
 
 ---
 
