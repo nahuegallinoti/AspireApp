@@ -6,9 +6,13 @@ var redis = builder.AddRedis("redis")
     .WithRedisInsight()
     .WithDataVolume(isReadOnly: false);
 
+// RabbitMQ: usuario/clave fijos (guest/guest) para dev, así no se desincronizan con el data volume.
+var rabbitUser = builder.AddParameter("messaging-username", "guest");
+var rabbitPassword = builder.AddParameter("messaging-password", "guest", secret: true);
+
 IResourceBuilder<IResourceWithConnectionString> messaging = provider.Equals("Kafka", StringComparison.OrdinalIgnoreCase)
     ? builder.AddKafka("messaging").WithKafkaUI()
-    : builder.AddRabbitMQ("messaging", port: 5672)
+    : builder.AddRabbitMQ("messaging", rabbitUser, rabbitPassword, port: 5672)
         .WithManagementPlugin()
         .WithDataVolume();
 

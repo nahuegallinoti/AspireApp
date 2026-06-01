@@ -13,6 +13,8 @@
   </Folder>
   <Folder Name="/2.Infrastructure/">
     <Project Path="AspireApp.DataAccess.Implementations/AspireApp.DataAccess.Implementations.csproj" />
+    <Project Path="AspireApp.Infrastructure.Identity/AspireApp.Infrastructure.Identity.csproj" />
+    <Project Path="AspireApp.Infrastructure.Messaging/AspireApp.Infrastructure.Messaging.csproj" />
   </Folder>
   <Folder Name="/3.Presentation/">
     <Project Path="AspireApp.Api/AspireApp.Api.csproj" />

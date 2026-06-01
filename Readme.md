@@ -30,6 +30,8 @@ Package versions are centralized in [Directory.Packages.props](Directory.Package
 
 ## Project layout
 
+> 📊 Diagramas visuales (grafo de dependencias, topología Aspire y flujo de una request) en **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
+
 ```
 AspireApp/
 ├── AspireApp.AppHost                          Aspire orchestration: Redis, RabbitMQ/Kafka, API, Web.
@@ -42,9 +44,11 @@ AspireApp/
 ├── AspireApp.Application.Models               DTOs + request/response shapes.
 ├── AspireApp.Application.Mappers              Manual Entity ↔ Model mappers.
 ├── AspireApp.Application.Persistence          Persistence interfaces consumed by Application.
-├── AspireApp.Application.Implementations      Business logic: Auth, Users, Roles, Product, Show, EventBus.
+├── AspireApp.Application.Implementations      Use-cases / business logic: Auth, Users, Roles, Product, Show.
 │
 ├── AspireApp.DataAccess.Implementations       EF Core: AppDbContext, DAs, seeding.
+├── AspireApp.Infrastructure.Identity          Identity adapters: PBKDF2 hasher, JWT issuer, Google OIDC validator.
+├── AspireApp.Infrastructure.Messaging         Message-bus adapters: RabbitMQ / Kafka implementations of IMessageBus.
 │
 ├── AspireApp.Api                              HTTP layer: controllers, JWT auth, OpenAPI/Scalar, global error handler.
 │
@@ -58,10 +62,13 @@ AspireApp/
 Architectural rule of thumb:
 
 ```
-Domain   ← no dependencies
-Application   → Domain
-Application.Persistence (contracts)   →   DataAccess.Implementations (EF Core)
-Api      → Application (composition root for the backend)
+Domain         ← no dependencies
+Application    → Domain   (depends only on contracts/abstractions, never on infrastructure)
+Infrastructure → implements Application contracts:
+                 · DataAccess.Implementations → IxxxDA            (EF Core)
+                 · Infrastructure.Identity     → IAuthTokenService / IPasswordHasher / IExternalIdentityValidator
+                 · Infrastructure.Messaging    → IMessageBus      (RabbitMQ / Kafka)
+Api      → Application + Infrastructure (composition root for the backend)
 Client   → Api (over HTTP) + Application.Models (shared DTOs)
 AppHost  →   orchestrates Api + Client + Redis + broker
 ```
@@ -200,6 +207,7 @@ builder.Services.AddAuthorizationPolicies();
 builder.AddCaching();
 builder.Services.AddDataAccess();
 builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddIdentityInfrastructure(builder.Configuration);
 builder.AddMessageBus();
 ```
 

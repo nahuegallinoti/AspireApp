@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UserEntity = AspireApp.Domain.Entities.User;
 
-namespace AspireApp.Application.Implementations.Auth;
+namespace AspireApp.Infrastructure.Identity;
 
 internal sealed class AuthTokenService(IOptions<JwtOptions> jwtOptions, TimeProvider timeProvider) : IAuthTokenService
 {

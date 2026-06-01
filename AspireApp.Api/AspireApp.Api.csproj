@@ -22,6 +22,8 @@
     <ProjectReference Include="..\AspireApp.Application.Persistence\AspireApp.Application.Persistence.csproj" />
     <ProjectReference Include="..\AspireApp.Application.Mappers\AspireApp.Application.Mappers.csproj" />
     <ProjectReference Include="..\AspireApp.DataAccess.Implementations\AspireApp.DataAccess.Implementations.csproj" />
+    <ProjectReference Include="..\AspireApp.Infrastructure.Identity\AspireApp.Infrastructure.Identity.csproj" />
+    <ProjectReference Include="..\AspireApp.Infrastructure.Messaging\AspireApp.Infrastructure.Messaging.csproj" />
     <ProjectReference Include="..\AspireApp.ServiceDefaults\AspireApp.ServiceDefaults.csproj" />
   </ItemGroup>
 

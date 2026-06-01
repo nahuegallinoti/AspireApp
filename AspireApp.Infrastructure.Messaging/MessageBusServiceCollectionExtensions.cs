@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace AspireApp.Application.Implementations.EventBus;
+namespace AspireApp.Infrastructure.Messaging;
 
 public static class MessageBusServiceCollectionExtensions
 {

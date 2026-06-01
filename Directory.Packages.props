@@ -53,7 +53,9 @@
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="$(ExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="$(ExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(NetVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="$(NetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(NetVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(NetVersion)" />
   </ItemGroup>
   <ItemGroup Label="OpenTelemetry">
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="$(OpenTelemetryVersion)" />

@@ -1,7 +1,8 @@
 using AspireApp.Api.Infrastructure;
 using AspireApp.Application.Implementations;
-using AspireApp.Application.Implementations.EventBus;
 using AspireApp.DataAccess.Implementations;
+using AspireApp.Infrastructure.Identity;
+using AspireApp.Infrastructure.Messaging;
 using AspireApp.ServiceDefaults;
 using Scalar.AspNetCore;
 
@@ -19,6 +20,7 @@ builder.AddCaching();
 
 builder.Services.AddDataAccess();
 builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddIdentityInfrastructure(builder.Configuration);
 builder.AddMessageBus();
 
 builder.Services.AddCors(options =>

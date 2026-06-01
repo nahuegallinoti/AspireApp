@@ -24,6 +24,7 @@
     <ProjectReference Include="..\AspireApp.Api\AspireApp.Api.csproj" />
     <ProjectReference Include="..\AspireApp.Client.ApiClients\AspireApp.Client.ApiClients.csproj" />
     <ProjectReference Include="..\AspireApp.DataAccess.Implementations\AspireApp.DataAccess.Implementations.csproj" />
+    <ProjectReference Include="..\AspireApp.Infrastructure.Identity\AspireApp.Infrastructure.Identity.csproj" />
   </ItemGroup>
 
   <ItemGroup>

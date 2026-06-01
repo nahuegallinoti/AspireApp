@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>AspireApp.Infrastructure.Messaging</RootNamespace>
+    <AssemblyName>AspireApp.Infrastructure.Messaging</AssemblyName>
+    <NoWarn>CA1848;CA1873</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Confluent.Kafka" />
+    <PackageReference Include="Aspire.RabbitMQ.Client" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AspireApp.Application.Contracts\AspireApp.Application.Contracts.csproj" />
+    <ProjectReference Include="..\AspireApp.Domain.ROP\AspireApp.Domain.ROP.csproj" />
+  </ItemGroup>
+
+</Project>

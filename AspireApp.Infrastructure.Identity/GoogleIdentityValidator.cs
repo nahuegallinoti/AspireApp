@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AspireApp.Application.Implementations.Auth;
+namespace AspireApp.Infrastructure.Identity;
 
 /// <summary>
 /// Validates Google tokens via OIDC id_token (preferred) or OAuth access_token + UserInfo.

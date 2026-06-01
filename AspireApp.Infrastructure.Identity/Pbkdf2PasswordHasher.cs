@@ -3,7 +3,7 @@ using System.Text;
 using AspireApp.Application.Contracts.Auth;
 using Microsoft.Extensions.Options;
 
-namespace AspireApp.Application.Implementations.Auth;
+namespace AspireApp.Infrastructure.Identity;
 
 internal sealed class Pbkdf2PasswordHasher(IOptions<IdentityOptions> options) : IPasswordHasher
 {

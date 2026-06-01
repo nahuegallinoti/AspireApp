@@ -1,6 +1,6 @@
 using AspireApp.Application.Contracts.Auth;
-using AspireApp.Application.Implementations.Auth;
 using AspireApp.Domain.Entities;
+using AspireApp.Infrastructure.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

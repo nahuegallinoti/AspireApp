@@ -6,6 +6,7 @@ using AspireApp.Application.Models.Auth;
 using AspireApp.Application.Models.Auth.User;
 using AspireApp.DataAccess.Implementations;
 using AspireApp.Domain.Entities;
+using AspireApp.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;

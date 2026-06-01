@@ -4,7 +4,7 @@ using AspireApp.Domain.ROP;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 
-namespace AspireApp.Application.Implementations.EventBus;
+namespace AspireApp.Infrastructure.Messaging;
 
 /// <summary>
 /// Kafka implementation of <see cref="IMessageBus"/>.

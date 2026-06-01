@@ -22,33 +22,15 @@ public static class DependencyInjection
         services.TryAddTimeProvider();
 
         services
-            .AddOptions<JwtOptions>()
-            .Bind(configuration.GetSection(JwtOptions.SectionName))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        services
             .AddOptions<IdentityOptions>()
             .Bind(configuration.GetSection(IdentityOptions.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services
-            .AddOptions<SsoOptions>()
-            .Bind(configuration.GetSection(SsoOptions.SectionName))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        services.AddScoped<IPasswordHasher, Pbkdf2PasswordHasher>();
-        services.AddSingleton<IAuthTokenService, AuthTokenService>();
-
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IExternalAuthService, ExternalAuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoleService, RoleService>();
-
-        services.AddHttpClient(nameof(GoogleIdentityValidator));
-        services.AddSingleton<IExternalIdentityValidator, GoogleIdentityValidator>();
 
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IShowService, ShowService>();

@@ -7,16 +7,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Aspire.Confluent.Kafka" />
-		<PackageReference Include="Aspire.RabbitMQ.Client" />
-		<PackageReference Include="FluentValidation" />
-		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
 	</ItemGroup>
 
 	<ItemGroup>

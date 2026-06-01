@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace AspireApp.Application.Implementations.EventBus;
+namespace AspireApp.Infrastructure.Messaging;
 
 /// <summary>
 /// RabbitMQ implementation of <see cref="IMessageBus"/>.
