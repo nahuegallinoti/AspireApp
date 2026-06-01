@@ -21,19 +21,13 @@ public partial class {{ENTITY}}Index : ComponentBase
     private string errorMessage = string.Empty;
     private bool loading = true;
 
-    private int PageSizeChoice
-    {
-        get => filter.PageSize;
-        set
-        {
-            if (value == filter.PageSize) return;
-            filter.PageSize = value;
-            filter.Page = 1;
-            _ = LoadAsync();
-        }
-    }
-
     protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task OnPageSizeChanged()
+    {
+        filter.Page = 1;
+        await LoadAsync();
+    }
 
     private async Task LoadAsync()
     {
