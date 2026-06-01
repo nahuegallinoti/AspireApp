@@ -9,15 +9,14 @@
     <OpenTelemetryVersion>1.15.3</OpenTelemetryVersion>
   </PropertyGroup>
   <ItemGroup Label="Aspire Hosting (AppHost)">
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="$(AspireHostingVersion)" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="$(AspireHostingVersion)" />
-    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="$(AspireHostingVersion)" />
-    <PackageVersion Include="Aspire.Hosting.Kafka" Version="$(AspireHostingVersion)" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.4.0" />
+    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.4.0" />
+    <PackageVersion Include="Aspire.Hosting.Kafka" Version="13.4.0" />
   </ItemGroup>
   <ItemGroup Label="Aspire Client Integrations">
-    <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="$(AspireIntegrationVersion)" />
-    <PackageVersion Include="Aspire.RabbitMQ.Client" Version="$(AspireIntegrationVersion)" />
-    <PackageVersion Include="Aspire.Confluent.Kafka" Version="$(AspireIntegrationVersion)" />
+    <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.4.0" />
+    <PackageVersion Include="Aspire.RabbitMQ.Client" Version="13.4.0" />
+    <PackageVersion Include="Aspire.Confluent.Kafka" Version="13.4.0" />
   </ItemGroup>
   <ItemGroup Label="ASP.NET Core / Auth">
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(NetVersion)" />
