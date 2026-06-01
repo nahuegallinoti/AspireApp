@@ -5,4 +5,8 @@
     <AssemblyName>AspireApp.Application.Models</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AspireApp.Domain.Paging\AspireApp.Domain.Paging.csproj" />
+  </ItemGroup>
+
 </Project>
