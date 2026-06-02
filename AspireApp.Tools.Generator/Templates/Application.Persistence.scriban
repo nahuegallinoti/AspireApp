@@ -1,9 +1,0 @@
-{{PERSISTENCE_USINGS}}using AspireApp.Application.Persistence.Base;
-using AspireApp.Domain.Entities;
-
-namespace AspireApp.Application.Persistence;
-
-public interface I{{ENTITY}}DA : IBaseDA<{{ENTITY}}, {{ID_TYPE}}>
-{
-{{PERSISTENCE_BODY}}
-}
