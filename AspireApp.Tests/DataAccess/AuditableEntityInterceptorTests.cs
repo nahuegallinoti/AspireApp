@@ -12,9 +12,9 @@ public class AuditableEntityInterceptorTests
         public override DateTimeOffset GetUtcNow() => now;
     }
 
-    private static AppDbContext CreateContext(DateTimeOffset now) => new(
+    private static AppDbContext CreateContext(DateTimeOffset now, string? databaseName = null) => new(
         new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase($"audit-{Guid.NewGuid():N}")
+            .UseInMemoryDatabase(databaseName ?? $"audit-{Guid.NewGuid():N}")
             .AddInterceptors(new AuditableEntityInterceptor(new FixedTimeProvider(now)))
             .Options);
 
@@ -42,14 +42,23 @@ public class AuditableEntityInterceptorTests
     {
         var created = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var now = new DateTimeOffset(2026, 6, 20, 8, 0, 0, TimeSpan.Zero);
-        await using var context = CreateContext(now);
-        var role = new Role
+        var databaseName = $"audit-{Guid.NewGuid():N}";
+        var roleId = Guid.NewGuid();
+
+        await using (var seedContext = CreateContext(created, databaseName))
         {
-            Id = Guid.NewGuid(), Name = "Admin", NormalizedName = "ADMIN", CreatedUtc = created
-        };
-        context.Attach(role);
+            seedContext.Add(new Role
+            {
+                Id = roleId, Name = "Admin", NormalizedName = "ADMIN"
+            });
+            await seedContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        await using var context = CreateContext(now, databaseName);
+        var role = await context.Roles.SingleAsync(
+            entity => entity.Id == roleId,
+            TestContext.Current.CancellationToken);
         role.Description = "Updated";
-        context.Entry(role).State = EntityState.Modified;
 
         await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
