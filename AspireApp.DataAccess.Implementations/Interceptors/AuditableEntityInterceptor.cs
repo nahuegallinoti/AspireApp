@@ -9,10 +9,10 @@ public sealed class AuditableEntityInterceptor(TimeProvider timeProvider) : Save
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         Stamp(eventData.Context);
-        return base.SavingChangesAsync(eventData, result, ct);
+        return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
     public override InterceptionResult<int> SavingChanges(
