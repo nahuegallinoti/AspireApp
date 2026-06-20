@@ -8,7 +8,7 @@ using RoleEntity = AspireApp.Domain.Entities.Role;
 
 namespace AspireApp.Application.Implementations.Roles;
 
-internal sealed class RoleService(IRoleDA roleDA, RoleMapper mapper, TimeProvider timeProvider) : IRoleService
+internal sealed class RoleService(IRoleDA roleDA, RoleMapper mapper) : IRoleService
 {
     public async Task<IReadOnlyList<RoleDto>> GetAllAsync(CancellationToken ct)
     {
@@ -37,8 +37,7 @@ internal sealed class RoleService(IRoleDA roleDA, RoleMapper mapper, TimeProvide
             Name = request.Name.Trim(),
             NormalizedName = request.Name.Trim().ToUpperInvariant(),
             Description = request.Description,
-            IsSystem = false,
-            CreatedUtc = timeProvider.GetUtcNow()
+            IsSystem = false
         };
 
         await roleDA.AddAsync(entity, ct);
@@ -56,7 +55,6 @@ internal sealed class RoleService(IRoleDA roleDA, RoleMapper mapper, TimeProvide
             return Result.Failure<RoleDto>("System roles cannot be modified.", System.Net.HttpStatusCode.Conflict);
 
         role.Description = request.Description;
-        role.UpdatedUtc = timeProvider.GetUtcNow();
         roleDA.Update(role);
         await roleDA.SaveChangesAsync(ct);
         return mapper.ToModel(role).Success();

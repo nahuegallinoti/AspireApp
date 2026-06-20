@@ -2,7 +2,7 @@ using AspireApp.Domain.Entities.Base;
 
 namespace AspireApp.Domain.Entities;
 
-public class User : BaseEntity<Guid>
+public class User : AuditableEntity<Guid>
 {
     public string Email { get; set; } = string.Empty;
     public string NormalizedEmail { get; set; } = string.Empty;
@@ -22,8 +22,6 @@ public class User : BaseEntity<Guid>
     public int AccessFailedCount { get; set; }
     public DateTimeOffset? LockoutEndUtc { get; set; }
 
-    public DateTimeOffset CreatedUtc { get; set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset? UpdatedUtc { get; set; }
     public DateTimeOffset? LastLoginUtc { get; set; }
 
     public ICollection<UserRole> UserRoles { get; set; } = [];

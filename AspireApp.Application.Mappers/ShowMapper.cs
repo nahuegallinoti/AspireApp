@@ -18,4 +18,10 @@ public sealed class ShowMapper : BaseMapper<ShowModel, ShowEntity>
         Name = model.Name,
         Description = model.Description
     };
+
+    public override void UpdateEntity(ShowEntity entity, ShowModel model)
+    {
+        entity.Name = model.Name;
+        entity.Description = model.Description;
+    }
 }

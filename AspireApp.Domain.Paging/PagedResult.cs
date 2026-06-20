@@ -11,6 +11,6 @@ public sealed record PagedResult<T>(
     int PageSize)
 {
     public int TotalPages => PageSize <= 0 ? 0 : (int)Math.Ceiling((double)Total / PageSize);
-    public bool HasPrevious => Page > 1;
+    public bool HasPrevious => Total > 0 && Page > 1;
     public bool HasNext => Page < TotalPages;
 }

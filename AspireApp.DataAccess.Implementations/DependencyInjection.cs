@@ -1,6 +1,8 @@
 using AspireApp.Application.Persistence;
+using AspireApp.DataAccess.Implementations.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AspireApp.DataAccess.Implementations;
 
@@ -12,7 +14,11 @@ public static class DependencyInjection
     /// </summary>
     public static IServiceCollection AddDataAccess(this IServiceCollection services, string inMemoryDatabaseName = "AspireAppDb")
     {
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(inMemoryDatabaseName));
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<AuditableEntityInterceptor>();
+        services.AddDbContext<AppDbContext>((serviceProvider, options) => options
+            .UseInMemoryDatabase(inMemoryDatabaseName)
+            .AddInterceptors(serviceProvider.GetRequiredService<AuditableEntityInterceptor>()));
 
         services.AddScoped<IUserDA, UserDA>();
         services.AddScoped<IRoleDA, RoleDA>();

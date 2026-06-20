@@ -18,4 +18,10 @@ public sealed class ProductMapper : BaseMapper<ProductModel, ProductEntity>
         Name = model.Name,
         Description = model.Description
     };
+
+    public override void UpdateEntity(ProductEntity entity, ProductModel model)
+    {
+        entity.Name = model.Name;
+        entity.Description = model.Description;
+    }
 }

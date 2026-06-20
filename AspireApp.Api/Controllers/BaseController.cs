@@ -3,6 +3,7 @@ using AspireApp.Application.Contracts.Base;
 using AspireApp.Application.Contracts.EventBus;
 using AspireApp.Application.Models;
 using AspireApp.Application.Models.EventBus;
+using AspireApp.Application.Models.Paging;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AspireApp.Api.Controllers;
@@ -34,6 +35,10 @@ public abstract class BaseController<TModel, TID, TService>(
     public async Task<IActionResult> GetAll(CancellationToken ct) =>
         Ok(await Service.GetAllAsync(ct));
 
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetPaged([FromQuery] PagedQueryRequest query, CancellationToken ct) =>
+        Ok(await Service.GetPagedAsync(query, ct));
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(TID id, CancellationToken ct)
     {
@@ -58,7 +63,8 @@ public abstract class BaseController<TModel, TID, TService>(
         if (!id.Equals(model.Id))
             return BadRequest("Route id does not match payload id.");
 
-        Service.Update(model);
+        if (!await Service.UpdateAsync(model, ct))
+            return NotFound();
         await Service.SaveChangesAsync(ct);
         return NoContent();
     }
